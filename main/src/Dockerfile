@@ -13,6 +13,8 @@ RUN chmod +x /build/entrypoint.sh /build/prestop.sh /build/konstrainer
 FROM python:3.9-bullseye
 WORKDIR /
 
+RUN mkdir pems app
+
 COPY --from=builder /build/konstrainer /pem-init.exe
 COPY --from=builder /build/entrypoint.sh /entrypoint.sh
 COPY --from=builder /build/prestop.sh /prestop.sh
