@@ -1,3 +1,9 @@
+FROM python:3.9-bullseye as base
+RUN apt update && apt upgrade -y && \
+    apt install curl nano && \
+    apt clean
+RUN pip3 install kubernetes flask
+
 FROM golang:1.17 as builder
 WORKDIR /build
 
@@ -10,7 +16,7 @@ COPY ./entrypoint.sh /build/entrypoint.sh
 COPY ./prestop.sh /build/prestop.sh
 RUN chmod +x /build/entrypoint.sh /build/prestop.sh /build/konstrainer
 
-FROM python:3.9-bullseye
+FROM base
 WORKDIR /
 
 RUN mkdir pems app
