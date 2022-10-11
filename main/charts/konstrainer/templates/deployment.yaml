@@ -17,7 +17,6 @@ spec:
       serviceAccountName: konstrainer
       containers:
         - name: konstrainer
-          command: ["sleep", "7200"]
           image: tiegris/konstrainer:dev
           imagePullPolicy: Always
           env:

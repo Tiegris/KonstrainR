@@ -2,7 +2,7 @@ FROM python:3.9-bullseye as base
 RUN apt update && apt upgrade -y && \
     apt install curl nano && \
     apt clean
-RUN pip3 install kubernetes flask
+RUN pip3 install kubernetes flask pycryptodome
 
 FROM golang:1.17 as builder
 WORKDIR /build
