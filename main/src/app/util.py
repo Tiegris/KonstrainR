@@ -1,15 +1,13 @@
 from Crypto.PublicKey import RSA
+from Crypto.PublicKey.RSA import RsaKey
 
-def read_pem(fname: str) -> str:
+def read_pem(fname: str) -> RsaKey:
     with open(fname, 'r') as f:
         data = f.read()
     return RSA.import_key(data)
 
-def main():
+def read_pems() -> tuple[RsaKey, RsaKey, RsaKey]:
     pem_ca = read_pem('/pems/ca.pem')
     pem_cert = read_pem('/pems/cert.pem')
     pem_certKey = read_pem('/pems/certKey.pem')
-
-
-if __name__ == "__main__":
-    main()
+    return pem_ca, pem_cert, pem_certKey

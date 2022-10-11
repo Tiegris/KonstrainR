@@ -19,10 +19,11 @@ RUN chmod +x /build/entrypoint.sh /build/prestop.sh /build/konstrainer
 FROM base
 WORKDIR /
 
-RUN mkdir pems app
+RUN mkdir pems
 
 COPY --from=builder /build/konstrainer /pem-init.exe
 COPY --from=builder /build/entrypoint.sh /entrypoint.sh
 COPY --from=builder /build/prestop.sh /prestop.sh
+COPY ./app /app
 
 ENTRYPOINT ["/entrypoint.sh"]
