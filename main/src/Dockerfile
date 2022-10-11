@@ -1,6 +1,6 @@
 FROM python:3.9-bullseye as base
 RUN apt update && apt upgrade -y && \
-    apt install curl nano && \
+    apt install -y curl nano && \
     apt clean
 RUN pip3 install kubernetes flask pycryptodome
 
