@@ -24,7 +24,7 @@ func main() {
 	}
 	commonName := webhookServiceName + "." + webhookNamespace + ".svc"
 
-	org := "btieger"
+	org := "tiegris"
 	caPEM, certPEM, certKeyPEM, err := generateCert([]string{org}, dnsNames, commonName)
 	if err != nil {
 		errorLogger.Fatalf("Failed to generate ca and certificate key pair: %v", err)
