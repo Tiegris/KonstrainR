@@ -1,55 +1,55 @@
 package dsl
 
 class WhConfBuilder {
-    var _operations: Array<out Type> by setOnce()
-    var _apiGroups: Array<out Type> by setOnce()
-    var _apiVersions: Array<out Type> by setOnce()
-    var _resources: Array<out Type> by setOnce()
-    var _scope: Type by setOnce(ANY)
-    var _namespaceSelector: NamespaceSelector by setOnce()
-    var _failurePolicy: FailurePolicy by setOnce(FAIL)
+    private var _operations: Array<out Type> by setOnce()
+    private var _apiGroups: Array<out Type> by setOnce()
+    private var _apiVersions: Array<out Type> by setOnce()
+    private var _resources: Array<out Type> by setOnce()
+    private var _scope: Type by setOnce(ANY)
+    private var _namespaceSelector: NamespaceSelector by setOnce()
+    private var _failurePolicy: FailurePolicy by setOnce(FAIL)
 
-    @DslMarkerVerb
+    @DslMarkerVerb5
     fun operations(vararg args: Operation) {
         _operations = args
     }
-    @DslMarkerVerb
+    @DslMarkerVerb5
     fun operations(args: ANY) {
         _operations = arrayOf(ANY)
     }
 
-    @DslMarkerVerb
+    @DslMarkerVerb5
     fun apiGroups(vararg args: ApiGroups) {
         _apiGroups = args
     }
-    @DslMarkerVerb
+    @DslMarkerVerb5
     fun apiGroups(args: ANY) {
         _apiGroups = arrayOf(ANY)
     }
 
-    @DslMarkerVerb
+    @DslMarkerVerb5
     fun apiVersions(vararg args: ApiVersions) {
         _apiVersions = args
     }
-    @DslMarkerVerb
+    @DslMarkerVerb5
     fun apiVersions(args: ANY) {
         _apiVersions = arrayOf(ANY)
     }
 
-    @DslMarkerVerb
+    @DslMarkerVerb5
     fun resources(vararg args: Resources) {
         _resources = args
     }
-    @DslMarkerVerb
+    @DslMarkerVerb5
     fun resources(args: ANY) {
         _resources = arrayOf(ANY)
     }
 
-    @DslMarkerVerb
+    @DslMarkerVerb5
     fun scope(scope: Scope) {
         _scope = scope
     }
-    @DslMarkerVerb
+    @DslMarkerVerb5
     fun scope(scope: ANY) {
         _scope = ANY
     }
@@ -61,7 +61,7 @@ class WhConfBuilder {
         _namespaceSelector = builder.build()
     }
 
-    @DslMarkerVerb
+    @DslMarkerVerb5
     fun failurePolicy(failurePolicy: FailurePolicy) {
         _failurePolicy = failurePolicy
     }

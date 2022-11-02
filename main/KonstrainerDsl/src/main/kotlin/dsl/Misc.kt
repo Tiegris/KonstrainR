@@ -8,7 +8,7 @@ annotation class DslMarkerBlock
 @DslMarker
 annotation class DslMarkerConstant
 @DslMarker
-annotation class DslMarkerVerb
+annotation class DslMarkerVerb5
 
 
 abstract class DslException(message: String) : Exception(message)

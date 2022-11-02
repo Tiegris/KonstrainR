@@ -2,7 +2,7 @@ package dsl
 
 class NamespaceSelectorBuilder {
 
-    var _selctorRule: MatchLabel by setOnce()
+    private var _selctorRule: MatchLabel by setOnce()
 
     @DslMarkerBlock
     fun matchLabels(setup: MatchLabelBuilder.() -> Unit) {
@@ -22,7 +22,7 @@ class MatchLabelBuilder {
 
     val _rules = mutableMapOf<String, String>()
 
-    @DslMarkerVerb
+    @DslMarkerVerb5
     infix fun String.eq(value: String) {
         _rules[this] = value
     }

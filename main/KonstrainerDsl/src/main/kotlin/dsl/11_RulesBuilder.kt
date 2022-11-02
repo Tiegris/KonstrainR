@@ -11,7 +11,7 @@ object validation
 
 class RulesBuilder {
 
-    val _rules = mutableListOf<Rule>()
+    private val _rules = mutableListOf<Rule>()
 
     @DslMarkerBlock
     infix fun mutating.rule(setup: MutatingRuleBuilder.() -> Unit) {
