@@ -43,7 +43,7 @@ architecture {
                 has permission to create k8s resources
                 stores rules in litesql
                 monolith architecture: embedded UI with tymeleaf
-                has jdk and kotlin-cli installed in docker image -> can compile 
+                build infra installed in docker image -> can compile 
             }
     }
     rules server framework {
