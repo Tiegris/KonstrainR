@@ -3,11 +3,12 @@ package rules
 val ruleServer = server {
     whconf {
         // string will be added as constants
-        operations("CREATE", "UPDATE", "DELETE", "CONNECT", "*")
-        apiGroups("*")
-        apiVersions("*")
-        resources("pods", "services", "deplyoments")
-        scope("Cluster", "Namespaced", "*")
+        operations = [CREATE, UPDATE]
+        operations(CREATE, UPDATE, DELETE, CONNECT, ANY)
+        apiGroups(ANY)
+        apiVersions(ANY)
+        resources(PODS, SERVICES, DEPLOYMENTS)
+        scope(CLUSTERS, NAMESPACED, ANY)
         namespaceSelector {
             // for now only support MatchLabels
             matchLabels {
@@ -15,7 +16,7 @@ val ruleServer = server {
                 "" eq ""
             }
         }
-        failurePolicy = fail
+        failurePolicy(FAIL)
     }
     rules {
         mutating rule("ruleName") {

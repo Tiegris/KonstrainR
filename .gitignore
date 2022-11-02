@@ -24,3 +24,6 @@ hs_err_pid*
 
 __pycache__
 .vscode
+.idea
+build
+.gradle
