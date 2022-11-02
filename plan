@@ -1,0 +1,43 @@
+experimental setup {
+    python
+    in container debug
+    record json requests
+}
+
+prod setup {
+    postman setup from recorded jsons
+    kotlin + ktor
+}
+
+architecture {
+    dsl package {
+        kotlin package with the language elements
+    }
+    kompozer {
+        single ktor server
+        provisions rules
+        has permission to create k8s resources
+    }
+    kompozer compiler {
+        compiles dsl instances to docker images
+        uses {
+            dsl package
+            dsl instance
+            rules server framework
+        }
+    }
+    kompozer ui {
+        upload, list, apply, stop, inspect dsl instances
+    }
+    rules server framework {
+        ktor server configured as webhook
+        can load compiled dsl 
+    }
+}
+
+terms {
+    dsl compilation {
+        
+    }
+}
+

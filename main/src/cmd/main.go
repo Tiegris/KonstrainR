@@ -8,10 +8,12 @@ import (
 
 var (
 	errorLogger   *log.Logger
+	infoLogger   *log.Logger
 	webhookNamespace, webhookServiceName string
 )
 
 func init() {
+	infoLogger = log.New(os.Stderr, "INFO: ", log.Ldate|log.Ltime|log.Lshortfile)
 	errorLogger = log.New(os.Stderr, "ERROR: ", log.Ldate|log.Ltime|log.Lshortfile)
 	webhookNamespace = os.Getenv("POD_NAMESPACE")
 	webhookServiceName = os.Getenv("SERVICE_NAME")
@@ -31,9 +33,14 @@ func main() {
 		errorLogger.Fatalf("Failed to generate ca and certificate key pair: %v", err)
 	}
 
-	savePem("/pems/ca.pem", caPEM)
 	savePem("/pems/cert.pem", certPEM)
 	savePem("/pems/certKey.pem", certKeyPEM)
+
+	err = createOrUpdateMutatingWebhookConfiguration(caPEM, webhookServiceName, webhookNamespace)
+	if err != nil {
+		errorLogger.Fatalf("Failed to create or update the mutating webhook configuration: %v", err)
+	}
+
 }
 
 

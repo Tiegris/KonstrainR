@@ -31,6 +31,8 @@ spec:
               exec:
                 command: ["/bin/sh", "-c", "/prestop.sh"]
           resources:
+          ports:
+          - containerPort: 8443
       volumes:
         - name: webhook-config
           configMap:

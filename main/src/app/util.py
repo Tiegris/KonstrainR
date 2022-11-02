@@ -7,7 +7,6 @@ def read_pem(fname: str) -> RsaKey:
     return RSA.import_key(data)
 
 def read_pems() -> tuple[RsaKey, RsaKey, RsaKey]:
-    pem_ca = read_pem('/pems/ca.pem')
     pem_cert = read_pem('/pems/cert.pem')
     pem_certKey = read_pem('/pems/certKey.pem')
-    return pem_ca, pem_cert, pem_certKey
+    return pem_cert, pem_certKey
