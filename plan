@@ -12,10 +12,11 @@ prod setup {
 architecture {
     dsl package {
         kotlin package with the language elements
+        uploaded somewhere as maven package
     }
     KonstrainR {
         overengineered:
-            KonstrainR-Core {
+            KonstrainR-Core { // rest api that handles files and k8s resources
                 single ktor server
                 provisions rules
                 has permission to create k8s resources
@@ -43,7 +44,7 @@ architecture {
                 has permission to create k8s resources
                 stores rules in litesql
                 monolith architecture: embedded UI with tymeleaf
-                build infra installed in docker image -> can compile 
+                build infra installed in docker image -> can compile
             }
     }
     rules server framework {
@@ -57,5 +58,22 @@ terms {
         kotlin cli -> run dsl-instance.kts -> dsl-instance.json
         dsl-instance.json is sent to
     }
+}
+
+roadmap {
+    learn ktor+exposed: 0.5d
+    manage files api: 0.5d
+    design & implement language: 2d
+    create language compiler: 1d
+    ui: 1d
+    launch k8s resources {
+        find out how to deploy any resource: 0.5d
+        webhook configuration {
+            first iteration: rules server manages its own lifecycle -> parameterize initializer go code: 0.5d
+            second iteration: KonstrainR-Core manages the wh lifecycles
+        }
+        implement wh management, deploy, remove: 2d
+    }
+    helm chart for entire stuff: 1d
 }
 
