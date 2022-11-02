@@ -13,21 +13,38 @@ architecture {
     dsl package {
         kotlin package with the language elements
     }
-    kompozer {
-        single ktor server
-        provisions rules
-        has permission to create k8s resources
-    }
-    kompozer compiler {
-        compiles dsl instances to docker images
-        uses {
-            dsl package
-            dsl instance
-            rules server framework
-        }
-    }
-    kompozer ui {
-        upload, list, apply, stop, inspect dsl instances
+    KonstrainR {
+        overengineered:
+            KonstrainR-Core {
+                single ktor server
+                provisions rules
+                has permission to create k8s resources
+            }
+            KonstrainR-Ui {
+                upload, list, apply, stop, inspect dsl instances
+            }
+            KonstrainR-Db {
+                stores rules kotlin sources, and compiled versions as cache
+            }
+            KonstrainR-Compiler {
+                k8s job, KonstrainR-Core starts it {
+                    compiles dsl instances
+                    sends back the compiled json to KonstrainR-Core
+                }
+                uses {
+                    dsl package: pre installed
+                    dsl instance: gets it from KonstrainR-Core
+                }
+            }
+        simplified:
+            KonstrainR {
+                single ktor server
+                provisions rules
+                has permission to create k8s resources
+                stores rules in litesql
+                monolith architecture: embedded UI with tymeleaf
+                has jdk and kotlin-cli installed in docker image -> can compile 
+            }
     }
     rules server framework {
         ktor server configured as webhook
@@ -37,7 +54,8 @@ architecture {
 
 terms {
     dsl compilation {
-        
+        kotlin cli -> run dsl-instance.kts -> dsl-instance.json
+        dsl-instance.json is sent to
     }
 }
 
