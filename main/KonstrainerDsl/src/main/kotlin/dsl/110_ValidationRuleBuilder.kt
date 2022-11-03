@@ -1,15 +1,17 @@
 package dsl
 
-class MutatingRuleBuilder {
+import kotlinx.serialization.json.JsonObject
+
+open class ValidationRuleBuilder {
     @DslMarkerVerb5
     var name: String by setOnce()
     @DslMarkerVerb5
     var path: String by setOnce()
 
-    private var _script: ((Map<String, Any>) -> Boolean) by setOnce { true }
+    private var _script: ((JsonObject) -> Boolean) by setOnce { true }
 
     @DslMarkerBlock
-    fun allowed(script: (Map<String, Any>) -> Boolean) {
+    fun allowed(script: (JsonObject) -> Boolean) {
         _script = script
     }
 
@@ -25,8 +27,8 @@ class MutatingRuleBuilder {
         builder.setup()
     }
 
-    internal fun build(): MutatingRule {
-        return MutatingRule()
+    internal open fun build(): Rule {
+        return ValidationRule()
     }
 }
 

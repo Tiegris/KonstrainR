@@ -1,5 +1,7 @@
 package dsl
 
+import kotlinx.serialization.json.JsonObject
+
 @DslMarkerBlock
 fun server(setup: ServerBuilder.() -> Unit): Server {
     val builder = ServerBuilder()
@@ -8,8 +10,12 @@ fun server(setup: ServerBuilder.() -> Unit): Server {
 }
 
 class ServerBuilder {
-    private var _rules: Rules by setOnce()
+    private var _rules: List<Rule> by setOnce()
     private var _whconf: WhConf by setOnce()
+
+    @DslMarkerConstant
+    val context: JsonObject
+        get() = null!!
 
     @DslMarkerBlock
     fun whconf(setup: WhConfBuilder.() -> Unit) {
@@ -31,4 +37,8 @@ class ServerBuilder {
     }
 }
 
-class Server(val rules: Rules, val whConf: WhConf)
+class Server(val rules: List<Rule>, val whConf: WhConf) {
+
+
+
+}

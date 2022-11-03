@@ -1,6 +1,5 @@
 package dsl
 
-
 @Suppress("ClassName")
 @DslMarkerBlock
 object mutating
@@ -20,18 +19,10 @@ class RulesBuilder {
         _rules += builder.build()
     }
 
-    @DslMarkerBlock
-    infix fun validation.rule(setup: MutatingRuleBuilder.() -> Unit) {
-        val builder = MutatingRuleBuilder()
-        builder.setup()
-        _rules += builder.build()
-    }
-
-    internal fun build(): Rules {
-        return Rules()
+    internal fun build(): List<Rule> {
+        return _rules
     }
 
 }
 
-class Rules
 interface Rule

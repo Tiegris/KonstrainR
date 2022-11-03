@@ -5,7 +5,7 @@ import dsl.*
 val server = server {
     whconf {
         // I will probalby change the syntax to an assignment like
-        // operations = CREATE + UPDATE + DELETE
+        //boperations = CREATE + UPDATE + DELETE
         operations(CREATE, UPDATE, DELETE, CONNECT)
         apiGroups(CORE)
         apiVersions(ANY)
@@ -28,7 +28,7 @@ val server = server {
             allowed { // Optional, default: True
                 /* Any Kotlin code, request can be accesed with the `it` keyword */
                 //it["metadata"]["labels"]["custom_label"] == "apples" // last expression will evaluated
-                true
+                context == ""
             }
             warnings { // limited to total of 4096 char
                 warning {
@@ -38,7 +38,7 @@ val server = server {
                     }
                     message = "app label not set" // limited to 256 char
                 }
-                warning("app label not set") given {
+                warning("app label not set") condition {
                     it["metadata"]["labels"]["app"].isNullOrEmpty()
                 }
             }
@@ -48,6 +48,8 @@ val server = server {
                 message = "You cannot do this because it is Tuesday and your name starts with A"
             }
             patch {
+                // payload should be accesible here
+
                 // value can be object too
                 add("path", "value")
                 add new "value" at "path"
