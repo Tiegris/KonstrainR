@@ -7,8 +7,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class IdDto(val id: Int)
 
-val Int.dto: IdDto
+inline val Int.dto: IdDto
     get() = IdDto(this)
 
-val ApplicationCall.id: Int
+inline val ApplicationCall.id: Int
     get() = this.parameters.getOrFail<Int>("id").toInt()

@@ -11,13 +11,19 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import kotlin.test.*
 import io.ktor.server.testing.*
+import me.btieger.controllers.dslController
+import me.btieger.controllers.echoController
+import me.btieger.persistance.DatabaseFactory
 import me.btieger.plugins.*
 
 class ApplicationTest {
     @Test
     fun testRoot() = testApplication {
         application {
-            configureRouting()
+            configureSerialization()
+            echoController()
+            dslController()
+            DatabaseFactory.init()
         }
         client.get("/").apply {
             assertEquals(HttpStatusCode.OK, status)

@@ -1,7 +1,7 @@
-package me.btieger.dal
+package me.btieger.persistance
 
 import kotlinx.coroutines.Dispatchers
-import me.btieger.dal.tables.*
+import me.btieger.persistance.tables.*
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction

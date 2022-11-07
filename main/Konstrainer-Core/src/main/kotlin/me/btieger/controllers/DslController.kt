@@ -6,30 +6,28 @@ import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import io.ktor.server.util.*
-import me.btieger.dal.dslDao
-import me.btieger.dal.tables.Dsl
-import me.btieger.dto
-import me.btieger.id
-import java.io.File
+import io.ktor.util.pipeline.*
+import me.btieger.*
+import me.btieger.persistance.tables.Dsl
+import me.btieger.persistance.tables.dto
+import me.btieger.persistance.services.dslService
 
 fun Application.dslController() {
     routing {
         route("/dsl") {
             get {
-                val res = dslDao.all()
-                call.respond(res)
+                val res = dslService.all()
+                ok(res)
             }
             get("/{id}") {
                 val id = call.id
-                val res = dslDao.read(id, Dsl::responseDto) ?: return@get call.respond(HttpStatusCode.NotFound, "No dsl with given Id")
-                call.respond(res)
+                val res = dslService.read(id, Dsl::dto) ?: notFound()
+                ok(res)
             }
             get("/{id}/file") {
                 val id = call.id
-                val res = dslDao.read(id, Dsl::parse) ?: return@get call.respond(HttpStatusCode.NotFound, "No dsl with given Id")
-                val file = String(res.file)
-                call.respond(file)
+                val file = dslService.read(id) { String(file.bytes) } ?: return@get notFound()
+                ok(file)
             }
             post {
                 val multipartData = call.receiveMultipart()
@@ -37,11 +35,11 @@ fun Application.dslController() {
                     when (part) {
                         is PartData.FileItem -> {
                             val filename = part.originalFileName
-                                ?: return@forEachPart call.respond(HttpStatusCode.BadRequest, "No file name")
+                                ?: return@forEachPart badRequest( "No file name")
                             val fileBytes = part.streamProvider().readBytes()
-                            val result = dslDao.create(filename, fileBytes)
-                                ?: return@forEachPart call.respond(HttpStatusCode.InternalServerError, "Could not upload file")
-                            call.respond(HttpStatusCode.Created, result.dto)
+                            val result = dslService.create(filename, fileBytes)
+                                ?: return@forEachPart internalServerError("Could not upload file")
+                            created(result)
                         }
                         else -> {}
                     }
@@ -54,13 +52,13 @@ fun Application.dslController() {
                     when (part) {
                         is PartData.FileItem -> {
                             val filename = part.originalFileName
-                                ?: return@forEachPart call.respond(HttpStatusCode.BadRequest, "No file name")
+                                ?: return@forEachPart badRequest( "No file name")
                             val fileBytes = part.streamProvider().readBytes()
-                            val result = dslDao.update(id, filename, fileBytes)
+                            val result = dslService.update(id, filename, fileBytes)
                             if (result)
-                                call.respond(HttpStatusCode.OK, id.dto)
+                                created(id.dto)
                             else
-                                call.respond(HttpStatusCode.InternalServerError, "Could not upload file")
+                                internalServerError("Could not upload file")
                         }
                         else -> {}
                     }
@@ -68,11 +66,11 @@ fun Application.dslController() {
             }
             delete("/{id}")  {
                 val id = call.id
-                val result = dslDao.delete(id)
+                val result = dslService.delete(id)
                 if (result)
-                    call.respond(HttpStatusCode.OK)
+                    ok()
                 else
-                    call.respond(HttpStatusCode.NotFound)
+                    notFound()
             }
         }
 
