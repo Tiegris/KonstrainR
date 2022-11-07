@@ -3,6 +3,8 @@ val kotlin_version: String by project
 val logback_version: String by project
 val exposed_version: String by project
 val h2_version: String by project
+val kubernetes_dsl_version: String by project
+val kubernetes_client_version: String by project
 
 plugins {
     application
@@ -22,9 +24,12 @@ application {
 
 repositories {
     mavenCentral()
+    maven { url = uri("https://jitpack.io") }
 }
 
 dependencies {
+    implementation("com.github.fkorotkov:k8s-kotlin-dsl:${kubernetes_dsl_version}")
+    implementation("io.fabric8:kubernetes-client:${kubernetes_client_version}")
     implementation("io.ktor:ktor-server-core-jvm:$ktor_version")
     implementation("io.ktor:ktor-server-content-negotiation-jvm:$ktor_version")
     implementation("io.ktor:ktor-serialization-kotlinx-json-jvm:$ktor_version")
