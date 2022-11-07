@@ -3,6 +3,7 @@ package me.btieger
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
+import me.btieger.controllers.dslController
 import me.btieger.plugins.*
 
 fun main() {
@@ -12,5 +13,5 @@ fun main() {
 
 fun Application.module() {
     configureSerialization()
-    configureRouting()
+    dslController()
 }
