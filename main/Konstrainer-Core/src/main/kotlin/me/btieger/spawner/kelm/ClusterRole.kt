@@ -5,14 +5,14 @@ import com.fkorotkov.kubernetes.newAPIGroup
 import com.fkorotkov.openshift.newPolicyRule
 import io.fabric8.openshift.api.model.ClusterRole
 
-fun ClusterRole.clusterRole(serviceName: String) =
+fun ClusterRole.clusterRole(values: Values) =
     ClusterRole().apply {
-        metadata(serviceName)
+        metadata(values)
         rules = listOf(
             newPolicyRule {
                 apiGroups = listOf("admissionregistration.k8s.io")
                 resources = listOf("mutatingwebhookconfigurations")
-                verbs = listOf("create", "get", "delete", "list", "patch", "update", "watch")
+                verbs = listOf("create", "get", "delete", "list", "patch", "update")
             }
         )
     }

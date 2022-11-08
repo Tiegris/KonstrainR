@@ -1,8 +1,23 @@
 package me.btieger.spawner.kelm
 
-import io.fabric8.openshift.api.model.ClusterRoleBinding
+import com.fkorotkov.kubernetes.rbac.newSubject
+import com.fkorotkov.kubernetes.rbac.roleRef
+import io.fabric8.kubernetes.api.model.rbac.ClusterRoleBinding
 
-fun ClusterRoleBinding.clusterRoleBinding(serviceName: String) =
+
+fun ClusterRoleBinding.clusterRoleBinding(values: Values) =
     ClusterRoleBinding().apply {
-        metadata(serviceName)
+        metadata(values)
+        roleRef {
+            kind = "ClusterRole"
+            name = values.name
+            apiGroup = "rbac.authorization.k8s.io"
+        }
+        subjects = listOf(
+            newSubject {
+                kind = "ServiceAccount"
+                name = values.name
+                namespace = "konstrainer"
+            }
+        )
     }

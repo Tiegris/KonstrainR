@@ -8,12 +8,16 @@ val konstrainerLabels = arrayOf(
     "" to ""
 )
 
-fun HasMetadata.metadata(serviceName: String) = apply {
+fun ObjectMeta.labels(values: Values) = apply {
+    labels = mapOf (
+        "app" to values.name,
+        *konstrainerLabels
+    )
+}
+
+fun HasMetadata.metadata(values: Values) = apply {
     metadata = ObjectMeta().apply {
-        name = serviceName
-        labels = mapOf (
-            "app" to serviceName,
-            *konstrainerLabels
-        )
+        name = values.name
+        labels(values)
     }
 }

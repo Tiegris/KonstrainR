@@ -5,64 +5,46 @@ import com.fkorotkov.kubernetes.apps.*
 import io.fabric8.kubernetes.api.model.IntOrString
 import io.fabric8.kubernetes.api.model.apps.Deployment
 
-fun Deployment.deployment(serviceName: String) =
+fun Deployment.deployment(values: Values) =
     Deployment().apply {
-        metadata(serviceName)
+        metadata(values)
         spec {
             replicas = 1
             template {
                 metadata {
-                    labels = mapOf(
-                        "app" to serviceName,
-                        "tier" to "backend"
-                    )
+                    labels(values)
                 }
                 spec {
                     containers = listOf(
                         newContainer {
-                            name = "$serviceName-service"
-                            image = "gcr.io/fkorotkov/$serviceName-service:latest"
-                            volumeMounts = listOf(
-                                newVolumeMount {
-                                    name = "gcp-credentials"
-                                    mountPath = "/etc/credentials"
-                                    readOnly = true
-                                }
-                            )
+                            name = values.name
+                            image = values.image
                             env = listOf(
                                 newEnvVar {
-                                    name = "GOOGLE_APPLICATION_CREDENTIALS"
-                                    value = "/etc/credentials/service-account-credentials.json"
-                                }
+                                    name = "SERVICE_NAME"
+                                    value = values.name
+                                },
+                                newEnvVar {
+                                    name = "POD_NAMESPACE"
+                                    valueFrom {
+                                        fieldRef {
+                                            fieldPath = "metadata.namespace"
+                                        }
+                                    }
+                                },
                             )
+                            lifecycle {
+                                preStop {
+                                    exec {
+                                        command = listOf("/bin/sh", "-c", "/prestop.sh")
+                                    }
+                                }
+                            }
                             ports = listOf(
                                 newContainerPort {
-                                    containerPort = 8080
+                                    containerPort = 8443
                                 }
                             )
-                            livenessProbe {
-                                httpGet {
-                                    path = "/healthz"
-                                    port = IntOrString(8080)
-                                }
-                                periodSeconds = 60
-                            }
-                            readinessProbe {
-                                httpGet {
-                                    path = "/healthz"
-                                    port = IntOrString(8080)
-                                }
-                                initialDelaySeconds = 10
-                                periodSeconds = 60
-                            }
-                        }
-                    )
-                    volumes = listOf(
-                        newVolume {
-                            name = "gcp-credentials"
-                            secret {
-                                secretName = "gcp-credentials"
-                            }
                         }
                     )
                 }
