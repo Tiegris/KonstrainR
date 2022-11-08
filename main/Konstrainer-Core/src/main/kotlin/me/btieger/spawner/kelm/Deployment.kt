@@ -1,4 +1,4 @@
-package me.btieger.spawner.resources
+package me.btieger.spawner.kelm
 
 import com.fkorotkov.kubernetes.*
 import com.fkorotkov.kubernetes.apps.*
@@ -7,13 +7,7 @@ import io.fabric8.kubernetes.api.model.apps.Deployment
 
 fun Deployment.deployment(serviceName: String) =
     Deployment().apply {
-        metadata {
-            name = "$serviceName-service-deployment"
-            labels = mapOf(
-                "app" to serviceName,
-                "tier" to "backend"
-            )
-        }
+        metadata(serviceName)
         spec {
             replicas = 1
             template {
