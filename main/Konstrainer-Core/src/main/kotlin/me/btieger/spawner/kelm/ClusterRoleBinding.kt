@@ -2,10 +2,11 @@ package me.btieger.spawner.kelm
 
 import com.fkorotkov.kubernetes.rbac.newSubject
 import com.fkorotkov.kubernetes.rbac.roleRef
+
 import io.fabric8.kubernetes.api.model.rbac.ClusterRoleBinding
 
 
-fun ClusterRoleBinding.clusterRoleBinding(values: Values) =
+fun clusterRoleBinding(values: Values) =
     ClusterRoleBinding().apply {
         metadata(values)
         roleRef {
@@ -17,7 +18,7 @@ fun ClusterRoleBinding.clusterRoleBinding(values: Values) =
             newSubject {
                 kind = "ServiceAccount"
                 name = values.name
-                namespace = "konstrainer"
+                namespace = agentNamespace
             }
         )
     }

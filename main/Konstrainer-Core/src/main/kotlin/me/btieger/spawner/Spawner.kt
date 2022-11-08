@@ -1,16 +1,17 @@
 package me.btieger.spawner
 
-import io.fabric8.kubernetes.api.model.apps.Deployment
 import io.fabric8.kubernetes.client.KubernetesClientBuilder
-import com.fkorotkov.kubernetes.*
-import com.fkorotkov.kubernetes.apps.*
+import me.btieger.spawner.kelm.*
 
 val client = KubernetesClientBuilder().build()
 
-fun spawn() {
-    val dep = Deployment(
-
-
+fun spawn(values: Values) {
+    val resources = listOf(
+        clusterRole(values),
+        clusterRoleBinding(values),
+        deployment(values),
+        service(values),
+        serviceAccount(values),
     )
 }
 

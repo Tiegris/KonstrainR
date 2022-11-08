@@ -5,7 +5,7 @@ import com.fkorotkov.kubernetes.spec
 import io.fabric8.kubernetes.api.model.IntOrString
 import io.fabric8.kubernetes.api.model.Service
 
-fun Service.service(values: Values) =
+fun service(values: Values) =
     Service().apply {
         metadata(values)
         spec {

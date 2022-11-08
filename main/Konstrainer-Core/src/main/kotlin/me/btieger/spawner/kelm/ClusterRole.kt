@@ -1,11 +1,9 @@
 package me.btieger.spawner.kelm
 
-import com.fkorotkov.kubernetes.admissionregistration.v1.newRule
-import com.fkorotkov.kubernetes.newAPIGroup
 import com.fkorotkov.openshift.newPolicyRule
 import io.fabric8.openshift.api.model.ClusterRole
 
-fun ClusterRole.clusterRole(values: Values) =
+fun clusterRole(values: Values) =
     ClusterRole().apply {
         metadata(values)
         rules = listOf(

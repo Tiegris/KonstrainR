@@ -1,17 +1,18 @@
 package me.btieger.spawner.kelm
 
 import com.fkorotkov.kubernetes.*
-import com.fkorotkov.kubernetes.apps.*
-import io.fabric8.kubernetes.api.model.IntOrString
+import com.fkorotkov.kubernetes.apps.spec
+import com.fkorotkov.kubernetes.apps.template
 import io.fabric8.kubernetes.api.model.apps.Deployment
 
-fun Deployment.deployment(values: Values) =
+fun deployment(values: Values) =
     Deployment().apply {
         metadata(values)
         spec {
             replicas = 1
             template {
                 metadata {
+                    namespace = agentNamespace
                     labels(values)
                 }
                 spec {
@@ -26,11 +27,7 @@ fun Deployment.deployment(values: Values) =
                                 },
                                 newEnvVar {
                                     name = "POD_NAMESPACE"
-                                    valueFrom {
-                                        fieldRef {
-                                            fieldPath = "metadata.namespace"
-                                        }
-                                    }
+                                    value = agentNamespace
                                 },
                             )
                             lifecycle {
