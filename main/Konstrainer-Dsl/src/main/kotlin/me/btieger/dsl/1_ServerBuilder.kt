@@ -1,4 +1,4 @@
-package dsl
+package me.btieger.dsl
 
 import kotlinx.serialization.json.JsonObject
 
@@ -12,6 +12,12 @@ fun server(setup: ServerBuilder.() -> Unit): Server {
 class ServerBuilder {
     private var _rules: List<Rule> by setOnce()
     private var _whconf: WhConf by setOnce()
+
+    @DslMarkerBlock
+    var whName: String by setOnce()
+
+    @DslMarkerBlock
+    var serverBaseImage: String by setOnce()
 
     @DslMarkerConstant
     val context: JsonObject
@@ -33,12 +39,8 @@ class ServerBuilder {
 
     internal fun build(): Server {
         // assert no null
-        return Server(_rules, _whconf)
+        return Server(whName, serverBaseImage, _rules, _whconf)
     }
 }
 
-class Server(val rules: List<Rule>, val whConf: WhConf) {
-
-
-
-}
+class Server(val whName: String, val serverBaseImage: String, val rules: List<Rule>, val whConf: WhConf)

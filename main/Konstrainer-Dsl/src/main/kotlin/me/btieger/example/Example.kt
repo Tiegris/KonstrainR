@@ -1,8 +1,10 @@
-package example
+package me.btieger.example
 
-import dsl.*
+import me.btieger.dsl.*
 
 val server = server {
+    whName = "example"
+    serverBaseImage = ""
     whconf {
         // I will probalby change the syntax to an assignment like
         //boperations = CREATE + UPDATE + DELETE
@@ -21,6 +23,7 @@ val server = server {
         }
         failurePolicy(FAIL)
     }
+/*
     rules {
         mutating rule {
             name = "valami" // Optional, default: deterministic random generated
@@ -74,4 +77,6 @@ val server = server {
             // same as mutating rule, but no mutation
         }
     }
+
+*/
 }

@@ -1,4 +1,4 @@
-package dsl
+package me.btieger.dsl
 
 import io.github.serpro69.kfaker.faker
 

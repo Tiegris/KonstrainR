@@ -1,24 +1,19 @@
 package me.btieger.spawner
 
+import me.btieger.dsl.*
 import io.fabric8.kubernetes.client.KubernetesClientBuilder
 import me.btieger.spawner.kelm.*
 
-val client = KubernetesClientBuilder().build()
+private val client = KubernetesClientBuilder().build()
 
-fun spawn(values: Values) {
-    val resources = listOf(
-        clusterRole(values),
-        clusterRoleBinding(values),
-        deployment(values),
-        service(values),
-        serviceAccount(values),
-    )
+fun spawn(server: Server) {
+    client.resource(mutatingWebhookConfiguration(server)).createOrReplace()
+    client.resource(service(server)).createOrReplace()
+    client.resource(deployment(server)).createOrReplace()
 }
 
-fun compile() {
-
-}
-
-fun getFile(id: Int) {
-
+fun delete(server: Server) {
+    client.resource(mutatingWebhookConfiguration(server)).delete()
+    client.resource(service(server)).delete()
+    client.resource(deployment(server)).delete()
 }

@@ -1,7 +1,7 @@
-package runner
+package me.btieger.runner
 
 import com.lordcodes.turtle.shellRun
-import dsl.Server
+import me.btieger.dsl.Server
 import kotlinx.serialization.json.JsonObject
 
 fun Server.runSetup() {

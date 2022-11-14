@@ -4,13 +4,23 @@ plugins {
     kotlin("jvm") version "1.7.20"
     application
     kotlin("plugin.serialization") version "1.7.20"
+    `maven-publish`
 }
 
 group = "me.btieger"
-version = "1.0-SNAPSHOT"
+version = "0.0.1-SNAPSHOT"
 
 repositories {
     mavenCentral()
+}
+
+// gradle build publishToMavenLocal
+publishing {
+    publications {
+        register("mavenJava", MavenPublication::class) {
+            from(components["java"])
+        }
+    }
 }
 
 dependencies {
@@ -25,7 +35,7 @@ tasks.test {
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "11"
+    kotlinOptions.jvmTarget = "17"
 }
 
 application {

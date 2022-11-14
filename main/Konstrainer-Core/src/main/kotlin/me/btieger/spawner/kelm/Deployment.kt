@@ -3,49 +3,53 @@ package me.btieger.spawner.kelm
 import com.fkorotkov.kubernetes.*
 import com.fkorotkov.kubernetes.apps.spec
 import com.fkorotkov.kubernetes.apps.template
+import me.btieger.dsl.*
 import io.fabric8.kubernetes.api.model.apps.Deployment
 
-fun deployment(values: Values) =
+fun deployment(server: Server) =
     Deployment().apply {
-        metadata(values)
+        metadata(server.whName)
         spec {
             replicas = 1
             template {
                 metadata {
                     namespace = agentNamespace
-                    labels(values)
+                    labels(server.whName)
                 }
                 spec {
                     containers = listOf(
                         newContainer {
-                            name = values.name
-                            image = values.image
-                            env = listOf(
-                                newEnvVar {
-                                    name = "SERVICE_NAME"
-                                    value = values.name
-                                },
-                                newEnvVar {
-                                    name = "POD_NAMESPACE"
-                                    value = agentNamespace
-                                },
-                            )
-                            lifecycle {
-                                preStop {
-                                    exec {
-                                        command = listOf("/bin/sh", "-c", "/prestop.sh")
-                                    }
-                                }
-                            }
+                            name = "wh-server"
+                            image = server.serverBaseImage
                             ports = listOf(
                                 newContainerPort {
                                     containerPort = 8443
                                 }
                             )
+                            volumeMounts = listOf(
+                                newVolumeMount {
+                                    name = "config"
+                                    mountPath = "/conf"
+                                    readOnly = true
+                                }
+                            )
+                        }
+                    )
+                    volumes = listOf(
+                        newVolume {
+                            name = "config"
+                            configMap {
+                                name = "${server.whName}-cm"
+                                items = listOf(
+                                    newKeyToPath {
+                                        key = "keystore.jks"
+                                        path = "keystore.jks"
+                                    }
+                                )
+                            }
                         }
                     )
                 }
             }
         }
     }
-

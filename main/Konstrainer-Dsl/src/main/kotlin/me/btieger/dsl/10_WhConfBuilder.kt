@@ -1,4 +1,4 @@
-package dsl
+package me.btieger.dsl
 
 class WhConfBuilder {
     private var _operations: Array<out Type> by setOnce()
@@ -76,7 +76,8 @@ class WhConfBuilder {
         val failurePolicy = _failurePolicy
 
         return WhConf(
-            operations, apiGroups, apiVersion, resources, scope, namespaceSelector, failurePolicy
+            operations, apiGroups, apiVersion, resources, scope,
+            namespaceSelector.selectorRule.rules, failurePolicy.string
         )
     }
 }
@@ -85,33 +86,49 @@ class WhConfBuilder {
 abstract class Type(val string: String)
 
 abstract class Operation(string: String) : Type(string)
-@DslMarkerConstant object CREATE : Operation("CREATE")
-@DslMarkerConstant object UPDATE : Operation("UPDATE")
-@DslMarkerConstant object DELETE : Operation("DELETE")
-@DslMarkerConstant object CONNECT : Operation("CONNECT")
+@DslMarkerConstant
+object CREATE : Operation("CREATE")
+@DslMarkerConstant
+object UPDATE : Operation("UPDATE")
+@DslMarkerConstant
+object DELETE : Operation("DELETE")
+@DslMarkerConstant
+object CONNECT : Operation("CONNECT")
 
 abstract class ApiGroups(string: String) : Type(string)
-@DslMarkerConstant object CORE : ApiGroups("")
+@DslMarkerConstant
+object CORE : ApiGroups("")
 
 abstract class ApiVersions(string: String) : Type(string)
-@DslMarkerConstant object V1: ApiVersions("v1")
-@DslMarkerConstant object V1BETA1: ApiVersions("v1beta1")
+@DslMarkerConstant
+object V1: ApiVersions("v1")
+@DslMarkerConstant
+object V1BETA1: ApiVersions("v1beta1")
 
 abstract class Resources(string: String) : Type(string)
-@DslMarkerConstant object DEPLOYMENTS: Resources("deployments")
-@DslMarkerConstant object PODS: Resources("pods")
-@DslMarkerConstant object REPLICASETS: Resources("replicasets")
+@DslMarkerConstant
+object DEPLOYMENTS: Resources("deployments")
+@DslMarkerConstant
+object PODS: Resources("pods")
+@DslMarkerConstant
+object REPLICASETS: Resources("replicasets")
 
 abstract class Scope(string: String) : Type(string)
-@DslMarkerConstant object CLUSTER: Scope("Clustered")
-@DslMarkerConstant object NAMESPACED: Scope("Namespaced")
+@DslMarkerConstant
+object CLUSTER: Scope("Clustered")
+@DslMarkerConstant
+object NAMESPACED: Scope("Namespaced")
 
 abstract class FailurePolicy(string: String) : Type(string)
-@DslMarkerConstant object IGNORE : FailurePolicy("Ignore")
-@DslMarkerConstant object FAIL : FailurePolicy("Fail")
+@DslMarkerConstant
+object IGNORE : FailurePolicy("Ignore")
+@DslMarkerConstant
+object FAIL : FailurePolicy("Fail")
 
-@DslMarkerConstant object ANY : Type("*")
-@DslMarkerConstant class CUSTOM(string: String) : Type(string)
+@DslMarkerConstant
+object ANY : Type("*")
+@DslMarkerConstant
+class CUSTOM(string: String) : Type(string)
 
 class WhConf(
     val operations: List<String>,
@@ -119,6 +136,6 @@ class WhConf(
     val apiVersion: List<String>,
     val resources: List<String>,
     val scope: String,
-    val namespaceSelector: NamespaceSelector,
-    val failurePolicy: FailurePolicy,
+    val namespaceSelector: Map<String, String>,
+    val failurePolicy: String,
 )

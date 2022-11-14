@@ -1,3 +1,3 @@
 package me.btieger.spawner.kelm
 
-class Values(val name: String, val image: String)
+class Values(val serviceName: String, val image: String)

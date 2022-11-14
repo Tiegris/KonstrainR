@@ -1,4 +1,4 @@
-package dsl
+package me.btieger.dsl
 
 @Suppress("ClassName")
 @DslMarkerBlock

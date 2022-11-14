@@ -1,4 +1,4 @@
-package dsl
+package me.btieger.dsl
 
 class MutatingRuleBuilder : ValidationRuleBuilder() {
 

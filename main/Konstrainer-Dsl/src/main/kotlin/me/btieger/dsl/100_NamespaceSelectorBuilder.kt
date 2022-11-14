@@ -1,4 +1,4 @@
-package dsl
+package me.btieger.dsl
 
 class NamespaceSelectorBuilder {
 
@@ -32,4 +32,4 @@ class MatchLabelBuilder {
     }
 }
 
-class MatchLabel(rules: Map<String, String>)
+class MatchLabel(val rules: Map<String, String>)

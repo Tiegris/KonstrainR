@@ -24,11 +24,22 @@ application {
 
 repositories {
     mavenCentral()
+    mavenLocal()
     maven { url = uri("https://jitpack.io") }
 }
 
 dependencies {
     implementation("com.github.fkorotkov:k8s-kotlin-dsl:${kubernetes_dsl_version}")
+
+    implementation("me.btieger:KonstrainerDsl:0.0.1-SNAPSHOT")
+
+
+    implementation("io.ktor:ktor-network-tls-certificates:$ktor_version")
+    implementation("com.lordcodes.turtle:turtle:0.8.0")
+
+    implementation("io.ktor:ktor-client-core:$ktor_version")
+    implementation("io.ktor:ktor-client-cio:$ktor_version")
+
     implementation("io.fabric8:kubernetes-client:${kubernetes_client_version}")
     implementation("io.ktor:ktor-server-core-jvm:$ktor_version")
     implementation("io.ktor:ktor-server-content-negotiation-jvm:$ktor_version")
@@ -42,4 +53,8 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-dao:$exposed_version")
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposed_version")
     implementation("com.h2database:h2:$h2_version")
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+    kotlinOptions.jvmTarget = "17"
 }

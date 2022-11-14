@@ -1,4 +1,4 @@
-package dsl
+package me.btieger.dsl
 
 import kotlinx.serialization.json.JsonObject
 

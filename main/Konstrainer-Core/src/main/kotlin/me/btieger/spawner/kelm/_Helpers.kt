@@ -10,17 +10,17 @@ val konstrainerLabels = arrayOf(
     "" to ""
 )
 
-fun ObjectMeta.labels(values: Values) = apply {
+fun ObjectMeta.labels(_name: String) = apply {
     labels = mapOf(
-        "app" to values.name,
+        "app" to _name,
         *konstrainerLabels
     )
 }
 
-fun HasMetadata.metadata(values: Values) = apply {
+fun HasMetadata.metadata(_name: String) = apply {
     metadata = ObjectMeta().apply {
-        name = values.name
+        name = _name
         namespace = agentNamespace
-        labels(values)
+        labels(_name)
     }
 }

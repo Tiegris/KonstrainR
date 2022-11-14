@@ -1,4 +1,4 @@
-package dsl
+package me.btieger.dsl
 
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
