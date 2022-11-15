@@ -9,7 +9,7 @@ import io.ktor.server.routing.*
 import io.ktor.util.pipeline.*
 import me.btieger.*
 import me.btieger.persistance.tables.Dsl
-import me.btieger.persistance.tables.dto
+import me.btieger.domain.dto
 import me.btieger.persistance.services.dslService
 
 fun Application.dslController() {

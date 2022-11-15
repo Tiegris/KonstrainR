@@ -1,10 +1,10 @@
 package me.btieger.persistance.services
 
 import me.btieger.IdDto
+import me.btieger.domain.DslDto
+import me.btieger.domain.dto
 import me.btieger.persistance.tables.Dsl
-import me.btieger.persistance.tables.DslDto
 import me.btieger.persistance.tables.Dsls
-import me.btieger.persistance.tables.dto
 import me.btieger.dto
 import me.btieger.persistance.DatabaseFactory
 import org.jetbrains.exposed.sql.deleteWhere

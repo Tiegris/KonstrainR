@@ -10,12 +10,10 @@ class Server(id: EntityID<Int>) : IntEntity(id) {
 
     var dsl by Dsl referencedOn Dsls.id
     var jar by Servers.jar
-    var running by Servers.running
 }
 
 object Servers : IntIdTable() {
     val dsl = reference("dsl", Dsls)
     val jar = blob("jar")
-    val running = bool("status")
 }
 
