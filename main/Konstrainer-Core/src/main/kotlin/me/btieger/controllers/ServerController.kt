@@ -8,6 +8,7 @@ import me.btieger.domain.dto
 import me.btieger.id
 import me.btieger.notFound
 import me.btieger.ok
+import me.btieger.persistance.services.dslService
 import me.btieger.persistance.services.serverService
 import me.btieger.persistance.tables.Server
 
@@ -31,14 +32,18 @@ fun Application.serverController() {
             post {
                 val body = call.receive<CreateServerDto>()
                 val result = serverService.create(body)
-                if (result != null)
-                    ok(result)
-                else
-                    notFound()
+
+                result?.let{
+                    ok(it)
+                } ?: notFound()
             }
             delete("/{id}") {
                 val id = call.id
-
+                val result = serverService.delete(id)
+                if (result)
+                    ok()
+                else
+                    notFound()
             }
         }
     }

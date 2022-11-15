@@ -6,7 +6,11 @@ import me.btieger.domain.dto
 import me.btieger.dto
 import me.btieger.persistance.DatabaseFactory
 import me.btieger.persistance.tables.Dsl
+import me.btieger.persistance.tables.Dsls
 import me.btieger.persistance.tables.Server
+import me.btieger.spawner.Kelm
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.deleteWhere
 
 interface ServerService {
     suspend fun all(): List<ServerDto>
@@ -33,8 +37,9 @@ class ServerServiceImpl : ServerService {
         x.dto
     }
 
-    override suspend fun delete(id: Int): Boolean {
-        TODO("Not yet implemented")
+    override suspend fun delete(id: Int) = DatabaseFactory.dbQuery {
+        val server = Server.findById(id) ?: return@dbQuery false
+        TODO()
     }
 
 }

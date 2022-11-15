@@ -11,9 +11,11 @@ class Dsl(id: EntityID<Int>) : Entity<Int>(id) {
 
     var name by Dsls.name
     var file by Dsls.file
+    var jar by Dsls.jar
 }
 
 object Dsls : IntIdTable() {
     val name = varchar("title", 128)
     val file = blob("file")
+    val jar = blob("jar")
 }

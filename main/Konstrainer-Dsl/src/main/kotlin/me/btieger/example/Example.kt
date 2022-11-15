@@ -23,18 +23,18 @@ val server = server {
         }
         failurePolicy(FAIL)
     }
-/*
+
     rules {
-        mutating rule {
+        rule {
             name = "valami" // Optional, default: deterministic random generated
             path = "/mutate" // Optional, default: generated from name
             allowed { // Optional, default: True
                 /* Any Kotlin code, request can be accesed with the `it` keyword */
                 //it["metadata"]["labels"]["custom_label"] == "apples" // last expression will evaluated
-                context == ""
+                true
             }
             warnings { // limited to total of 4096 char
-                warning {
+/*                warning {
                     condition {
                         // notFoundPolicy ???
                         it["metadata"]["labels"]["app"].isNullOrEmpty()
@@ -43,10 +43,10 @@ val server = server {
                 }
                 warning("app label not set") condition {
                     it["metadata"]["labels"]["app"].isNullOrEmpty()
-                }
+                }*/
             }
             status { // Optional, default: stock error message
-                // Can be used to display error when allowed == False
+                // Can be used to display error when (allowed == False)
                 code = 403
                 message = "You cannot do this because it is Tuesday and your name starts with A"
             }
@@ -55,28 +55,22 @@ val server = server {
 
                 // value can be object too
                 add("path", "value")
-                add new "value" at "path"
 
                 remove("path")
-                remove at "path"
 
                 replace("path", "value")
-                replace at "path" with "value"
 
                 copy("from", "to")
-                copy from "path_from" to "path_to"
 
                 move("from", "to")
-                move from "path_from" to "path_to"
 
                 test("path", "value")
-                test that "path" eq "value"
             }
         }
-        validation rule {
-            // same as mutating rule, but no mutation
+        rule {
+
         }
     }
 
-*/
+
 }

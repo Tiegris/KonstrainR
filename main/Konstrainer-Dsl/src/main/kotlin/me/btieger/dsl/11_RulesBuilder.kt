@@ -1,20 +1,12 @@
 package me.btieger.dsl
 
-@Suppress("ClassName")
-@DslMarkerBlock
-object mutating
-
-@Suppress("ClassName")
-@DslMarkerBlock
-object validation
-
 class RulesBuilder {
 
     private val _rules = mutableListOf<Rule>()
 
     @DslMarkerBlock
-    infix fun mutating.rule(setup: MutatingRuleBuilder.() -> Unit) {
-        val builder = MutatingRuleBuilder()
+    fun rule(setup: RuleBuilder.() -> Unit) {
+        val builder = RuleBuilder()
         builder.setup()
         _rules += builder.build()
     }
@@ -24,5 +16,3 @@ class RulesBuilder {
     }
 
 }
-
-interface Rule

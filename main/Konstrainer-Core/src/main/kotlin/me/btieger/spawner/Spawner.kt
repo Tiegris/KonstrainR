@@ -6,14 +6,18 @@ import me.btieger.spawner.kelm.*
 
 private val client = KubernetesClientBuilder().build()
 
-fun spawn(server: Server) {
-    client.resource(mutatingWebhookConfiguration(server)).createOrReplace()
-    client.resource(service(server)).createOrReplace()
-    client.resource(deployment(server)).createOrReplace()
-}
+object Kelm {
 
-fun delete(server: Server) {
-    client.resource(mutatingWebhookConfiguration(server)).delete()
-    client.resource(service(server)).delete()
-    client.resource(deployment(server)).delete()
+    fun install(server: Server) {
+        client.resource(mutatingWebhookConfiguration(server)).createOrReplace()
+        client.resource(service(server)).createOrReplace()
+        client.resource(deployment(server)).createOrReplace()
+    }
+
+    fun uninstall(server: Server) {
+        client.resource(mutatingWebhookConfiguration(server)).delete()
+        client.resource(service(server)).delete()
+        client.resource(deployment(server)).delete()
+    }
+
 }
