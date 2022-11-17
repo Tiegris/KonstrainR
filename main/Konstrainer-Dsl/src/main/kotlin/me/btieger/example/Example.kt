@@ -30,40 +30,26 @@ val server = server {
             name = "valami" // Optional, default: deterministic random generated
             path = "/mutate" // Optional, default: generated from name
 
-//            precondition {
-//
-//            }
-
-            allowed { // Optional, default: True
-                /* Any Kotlin code, request can be accesed with the `it` keyword */
-                //it["metadata"]["labels"]["custom_label"] == "apples" // last expression will evaluated
-true
-            }
-            warnings { // limited to total of 4096 char
-/*                warning {
-                    condition {
-                        // notFoundPolicy ???
-                        it["metadata"]["labels"]["app"].isNullOrEmpty()
-                    }
-                    message = "app label not set" // limited to 256 char
+            behaviour = fun (context) = withContext {
+                allowed { // Optional, default: True
+                    /* Any Kotlin code, request can be accesed with the `it` keyword */
+                    //it["metadata"]["labels"]["custom_label"] == "apples" // last expression will evaluated
+                    context["valami"]?.jsonPrimitive?.content == ""
                 }
-                warning("app label not set") condition {
-                    it["metadata"]["labels"]["app"].isNullOrEmpty()
-                }*/
-            }
-            status { // Optional, default: stock error message
-                // Can be used to display error when (allowed == False)
-                code = 403
-                message = "You cannot do this because it is Tuesday and your name starts with A"
-            }
-            patch {
+                status { // Optional, default: stock error message
+                    // Can be used to display error when (allowed == False)
+                    code = 403
+                    message = "You cannot do this because it is Tuesday and your name starts with A"
+                }
+                patch {
+                    add("/metadata/labels/alma", context["request"]?.jsonPrimitive?.content!!)
+                    // payload should be accesible here
 
-                // payload should be accesible here
+                    //context["apiVersion"]?.jsonPrimitive?.content
 
-                //context["apiVersion"]?.jsonPrimitive?.content
+                    // value can be object too
 
-                // value can be object too
-                add("path", "value")
+                    add("path", "value")
 
 
 //                remove("path")
@@ -71,7 +57,28 @@ true
 //                copy("from", "to")
 //                move("from", "to")
 //                test("path", "value")
+                }
             }
+
+//            precondition {
+//
+//            }
+
+
+//            warnings { // limited to total of 4096 char
+///*                warning {
+//                    condition {
+//                        // notFoundPolicy ???
+//                        it["metadata"]["labels"]["app"].isNullOrEmpty()
+//                    }
+//                    message = "app label not set" // limited to 256 char
+//                }
+//                warning("app label not set") condition {
+//                    it["metadata"]["labels"]["app"].isNullOrEmpty()
+//                }*/
+//            }
+
+
         }
 
 

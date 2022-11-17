@@ -9,45 +9,14 @@ open class RuleBuilder {
     @DslMarkerVerb5
     var path: String by setOnce()
 
-    private val _warnings = mutableListOf<Warning>()
-    private var _status: Status? = null
-
-    private var _patchProvider: JsonObject.() -> JsonArray by setOnce()
-    private var _allowedProvider: JsonObject.() -> Boolean by setOnce { true }
-
-    @DslMarkerBlock
-    fun allowed(script: JsonObject.() -> Boolean) {
-        _allowedProvider = script
-    }
-
-    @DslMarkerBlock
-    fun warnings(setup: WarningsBuilder.() -> Unit) {
-        val builder = WarningsBuilder()
-        builder.setup()
-    }
-
-    @DslMarkerBlock
-    fun patch(setup: PatchBuilder.() -> (JsonObject.() -> JsonArray)) {
-        val builder = PatchBuilder()
-        _patchProvider = builder.setup()
-    }
-
-    @DslMarkerBlock
-    fun status(setup: StatusBuilder.() -> Unit) {
-        val builder = StatusBuilder(validateName(name))
-        builder.setup()
-        if (_status != null)
-            throw MultipleSetException("Status can only be set once!")
-        _status = builder.build()
-    }
+    @DslMarkerVerb5
+    var behaviour: (JsonObject) -> RuleInstance by setOnce()
 
     internal open fun build(): Rule {
         name = validateName(name)
         path = validatePath(path)
 
-        return Rule(name, path,
-            RuleProvider()
-        )
+        return Rule(name, path, behaviour)
     }
 
     private fun validateName(name: String): String {
@@ -72,8 +41,47 @@ open class RuleBuilder {
     }
 }
 
-class Rule(val name: String, val path: String, val provider: RuleProvider)
-class RuleProvider(val allowed: JsonObject.() -> Boolean, val patch: JsonObject.() -> String)
+class Rule(val name: String, val path: String, val provider: (JsonObject) -> RuleInstance)
+
+class RuleInstance(val allowed: Boolean, val patch: JsonArray, val warnings: List<Warning>, val status: Status)
+class RuleProvider() {
+    private var _allowed: Boolean by setOnce(true)
+    private var _patch: JsonArray by setOnce()
+    private val _warnings = mutableListOf<Warning>()
+    private var _status: Status? = null
+
+    @DslMarkerBlock
+    fun allowed(script: () -> Boolean) {
+        _allowed = script()
+    }
+
+    @DslMarkerBlock
+    fun patch(setup: PatchBuilder.() -> Unit) {
+        val builder = PatchBuilder()
+        builder.setup()
+        builder.build()
+    }
+
+    @DslMarkerBlock
+    fun warnings(setup: WarningsBuilder.() -> Unit) {
+        val builder = WarningsBuilder()
+        builder.setup()
+    }
+
+
+    @DslMarkerBlock
+    fun status(setup: StatusBuilder.() -> Unit) {
+        val builder = StatusBuilder("")
+        builder.setup()
+        if (_status != null)
+            throw MultipleSetException("Status can only be set once!")
+        _status = builder.build()
+    }
+
+    fun build() = RuleInstance(_allowed,_patch,_warnings, _status!!)
+
+
+}
 
 class Warning
 class WarningsBuilder

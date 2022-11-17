@@ -8,10 +8,13 @@ import io.ktor.server.request.*
 import kotlinx.serialization.json.*
 
 import me.btieger.dsl.*
+import me.btieger.toBase64
 
 fun Application.configureRouting(model: Server) {
 
     routing {
+
+
         get("/") {
             call.respondText("OK")
         }
@@ -23,8 +26,7 @@ fun Application.configureRouting(model: Server) {
                 val kind = content["kind"]?.jsonPrimitive?.content!!
                 val request = content["request"]?.jsonObject!!
 
-                val ruleInstance = rule.provider.instance(content)
-                val allowed: Boolean = null!!
+                val provider = rule.provider.invoke(content)
 
                 val response = buildJsonObject {
                     this.put("apiVersion", apiVersion)
@@ -32,7 +34,17 @@ fun Application.configureRouting(model: Server) {
                     val uid = request["uid"]?.jsonPrimitive?.content!!
                     this.putJsonObject("response") {
                         put("uid", uid)
-                        put("allowed", allowed)
+                        put("allowed", provider.allowed)
+                        if (!provider.allowed) {
+                            putJsonObject("status") {
+                                put("code", provider.status.code)
+                                put("message", provider.status.message)
+                            }
+                        }
+                        if (provider.allowed) {
+                            put("patchType", "JSONPatch")
+                            put("patch", provider.patch.toBase64())
+                        }
                     }
                 }
 
