@@ -13,13 +13,23 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import kotlin.test.*
 import io.ktor.server.testing.*
+import me.btieger.dsl.Rule
+import me.btieger.dsl.Server
+import me.btieger.dsl.Status
+import me.btieger.dsl.WhConf
 import me.btieger.plugins.*
 
 class ApplicationTest {
     @Test
     fun testRoot() = testApplication {
+        val srv = Server("asd", "asd", listOf(
+            Rule("R1", "/a", Status(200,"OK"), listOf()),
+            Rule("R2", "/b", Status(200,"OK"), listOf()),
+        ), WhConf(listOf(), listOf(), listOf(), listOf(), "", mapOf(), "")
+        )
+
         application {
-            configureRouting()
+            configureRouting(srv)
         }
         client.get("/").apply {
             assertEquals(HttpStatusCode.OK, status)

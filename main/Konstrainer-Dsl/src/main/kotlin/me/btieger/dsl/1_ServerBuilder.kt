@@ -19,10 +19,6 @@ class ServerBuilder {
     @DslMarkerBlock
     var serverBaseImage: String by setOnce()
 
-    @DslMarkerConstant
-    val context: JsonObject
-        get() = null!!
-
     @DslMarkerBlock
     fun whconf(setup: WhConfBuilder.() -> Unit) {
         val builder = WhConfBuilder()

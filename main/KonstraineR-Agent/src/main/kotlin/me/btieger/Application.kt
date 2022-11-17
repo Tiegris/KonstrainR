@@ -6,6 +6,10 @@ import io.ktor.server.netty.*
 import me.btieger.plugins.*
 import java.io.File
 import io.ktor.network.tls.certificates.*
+import me.btieger.dsl.Rule
+import me.btieger.dsl.Server
+import me.btieger.dsl.Status
+import me.btieger.dsl.WhConf
 
 fun main() {
     //val keyStoreFile = File("pems/keystore.jks")
@@ -38,5 +42,9 @@ fun Application.module() {
     configureHTTP()
     configureSerialization()
     configureAdministration()
-    configureRouting()
+    val srv = Server("asd", "asd", listOf(
+        Rule("R1", "/a", Status(200,"OK"), listOf()),
+        Rule("R2", "/b", Status(200,"OK"), listOf()),
+    ), WhConf(listOf(), listOf(), listOf(), listOf(), "", mapOf(), ""))
+    configureRouting(srv)
 }

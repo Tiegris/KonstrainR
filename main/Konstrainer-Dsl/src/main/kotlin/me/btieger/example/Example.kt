@@ -1,5 +1,6 @@
 package me.btieger.example
 
+import kotlinx.serialization.json.jsonPrimitive
 import me.btieger.dsl.*
 
 val server = server {
@@ -28,10 +29,15 @@ val server = server {
         rule {
             name = "valami" // Optional, default: deterministic random generated
             path = "/mutate" // Optional, default: generated from name
+
+//            precondition {
+//
+//            }
+
             allowed { // Optional, default: True
                 /* Any Kotlin code, request can be accesed with the `it` keyword */
                 //it["metadata"]["labels"]["custom_label"] == "apples" // last expression will evaluated
-                true
+true
             }
             warnings { // limited to total of 4096 char
 /*                warning {
@@ -51,26 +57,24 @@ val server = server {
                 message = "You cannot do this because it is Tuesday and your name starts with A"
             }
             patch {
+
                 // payload should be accesible here
+
+                //context["apiVersion"]?.jsonPrimitive?.content
 
                 // value can be object too
                 add("path", "value")
 
-                remove("path")
 
-                replace("path", "value")
-
-                copy("from", "to")
-
-                move("from", "to")
-
-                test("path", "value")
+//                remove("path")
+//                replace("path", "value")
+//                copy("from", "to")
+//                move("from", "to")
+//                test("path", "value")
             }
         }
-        rule {
 
-        }
+
     }
-
 
 }

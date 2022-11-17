@@ -1,5 +1,6 @@
 package me.btieger.dsl
 
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 
 open class RuleBuilder {
@@ -11,11 +12,12 @@ open class RuleBuilder {
     private val _warnings = mutableListOf<Warning>()
     private var _status: Status? = null
 
-    private var _allowed: ((JsonObject) -> Boolean) by setOnce { true }
+    private var _patchProvider: JsonObject.() -> JsonArray by setOnce()
+    private var _allowedProvider: JsonObject.() -> Boolean by setOnce { true }
 
     @DslMarkerBlock
-    fun allowed(script: (JsonObject) -> Boolean) {
-        _allowed = script
+    fun allowed(script: JsonObject.() -> Boolean) {
+        _allowedProvider = script
     }
 
     @DslMarkerBlock
@@ -24,8 +26,10 @@ open class RuleBuilder {
         builder.setup()
     }
 
-    fun patch(setup: PatchBuilder.() -> Unit) {
-
+    @DslMarkerBlock
+    fun patch(setup: PatchBuilder.() -> (JsonObject.() -> JsonArray)) {
+        val builder = PatchBuilder()
+        _patchProvider = builder.setup()
     }
 
     @DslMarkerBlock
@@ -41,11 +45,8 @@ open class RuleBuilder {
         name = validateName(name)
         path = validatePath(path)
 
-
-
         return Rule(name, path,
-            _status ?: StatusBuilder(name).build(),
-            _warnings
+            RuleProvider()
         )
     }
 
@@ -71,7 +72,8 @@ open class RuleBuilder {
     }
 }
 
-class Rule(val name: String, val path: String, val status: Status, warnings: List<Warning>)
+class Rule(val name: String, val path: String, val provider: RuleProvider)
+class RuleProvider(val allowed: JsonObject.() -> Boolean, val patch: JsonObject.() -> String)
 
 class Warning
 class WarningsBuilder
