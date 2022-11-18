@@ -6,11 +6,6 @@ import io.ktor.server.netty.*
 import me.btieger.plugins.*
 import java.io.File
 import io.ktor.network.tls.certificates.*
-import me.btieger.dsl.Rule
-import me.btieger.dsl.Server
-import me.btieger.dsl.Status
-import me.btieger.dsl.WhConf
-import me.btieger.example.server
 
 fun main() {
     //val keyStoreFile = File("pems/keystore.jks")

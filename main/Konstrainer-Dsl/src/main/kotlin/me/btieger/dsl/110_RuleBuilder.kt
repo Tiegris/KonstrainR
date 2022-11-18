@@ -10,19 +10,20 @@ open class RuleBuilder {
     var path: String by setOnce()
 
     @DslMarkerVerb5
-    var behaviour: (JsonObject) -> RuleInstance by setOnce()
+    var behavior: (JsonObject) -> RuleInstance by setOnce()
 
     internal open fun build(): Rule {
-        name = validateName(name)
-        path = validatePath(path)
+        val _name = validateName(name)
+        val _path = validatePath(path)
 
-        return Rule(name, path, behaviour)
+        return Rule(_name, _path, behavior)
     }
 
     private fun validateName(name: String): String {
         val name = name.split(' ', '.').joinToString(separator = "-")
-        for (c in path) {
+        for (c in name) {
             if (!(c in 'A'..'Z' || c in 'a'..'z' || c == '-' || c == '_'))
+                // TODO
                 throw Exception()
         }
         return name
@@ -34,7 +35,7 @@ open class RuleBuilder {
             path = "/$path"
         path.trimEnd('/')
         for (c in path) {
-            if (c !in 'a'..'z' && c != '/')
+            if (c !in 'a'..'z' && c != '/')// TODO
                 throw Exception()
         }
         return path
@@ -59,13 +60,14 @@ class RuleProvider() {
     fun patch(setup: PatchBuilder.() -> Unit) {
         val builder = PatchBuilder()
         builder.setup()
-        builder.build()
+        _patch = builder.build()
     }
 
     @DslMarkerBlock
     fun warnings(setup: WarningsBuilder.() -> Unit) {
         val builder = WarningsBuilder()
         builder.setup()
+        TODO()
     }
 
 

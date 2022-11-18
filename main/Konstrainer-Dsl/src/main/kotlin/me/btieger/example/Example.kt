@@ -1,5 +1,6 @@
 package me.btieger.example
 
+import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import me.btieger.dsl.*
 
@@ -30,11 +31,11 @@ val server = server {
             name = "valami" // Optional, default: deterministic random generated
             path = "/mutate" // Optional, default: generated from name
 
-            behaviour = fun (context) = withContext {
+            behavior = fun (context) = withContext {
                 allowed { // Optional, default: True
                     /* Any Kotlin code, request can be accesed with the `it` keyword */
                     //it["metadata"]["labels"]["custom_label"] == "apples" // last expression will evaluated
-                    context["valami"]?.jsonPrimitive?.content == ""
+                    context["object"]?.jsonObject?.get("kind")?.jsonPrimitive?.content == ""
                 }
                 status { // Optional, default: stock error message
                     // Can be used to display error when (allowed == False)
@@ -42,16 +43,12 @@ val server = server {
                     message = "You cannot do this because it is Tuesday and your name starts with A"
                 }
                 patch {
-                    add("/metadata/labels/alma", context["request"]?.jsonPrimitive?.content!!)
+                    add("/metadata/labels/alma", context["object"]?.jsonObject?.get("kind")?.jsonPrimitive?.content ?: "nil")
                     // payload should be accesible here
 
                     //context["apiVersion"]?.jsonPrimitive?.content
 
                     // value can be object too
-
-                    add("path", "value")
-
-
 //                remove("path")
 //                replace("path", "value")
 //                copy("from", "to")

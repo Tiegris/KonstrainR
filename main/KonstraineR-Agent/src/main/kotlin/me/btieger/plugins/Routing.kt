@@ -13,26 +13,24 @@ import me.btieger.toBase64
 fun Application.configureRouting(model: Server) {
 
     routing {
-
-
         get("/") {
             call.respondText("OK")
         }
         model.rules.forEach {
             val rule = it
             post(rule.path) {
-                val content: JsonObject = call.receive()
-                val apiVersion = content["apiVersion"]?.jsonPrimitive?.content!!
-                val kind = content["kind"]?.jsonPrimitive?.content!!
-                val request = content["request"]?.jsonObject!!
+                val body: JsonObject = call.receive()
+                val apiVersion = body["apiVersion"]?.jsonPrimitive?.content!!
+                val kind = body["kind"]?.jsonPrimitive?.content!!
+                val request = body["request"]?.jsonObject!!
 
-                val provider = rule.provider.invoke(content)
+                val provider = rule.provider.invoke(request)
 
                 val response = buildJsonObject {
-                    this.put("apiVersion", apiVersion)
-                    this.put("kind", kind)
+                    put("apiVersion", apiVersion)
+                    put("kind", kind)
                     val uid = request["uid"]?.jsonPrimitive?.content!!
-                    this.putJsonObject("response") {
+                    putJsonObject("response") {
                         put("uid", uid)
                         put("allowed", provider.allowed)
                         if (!provider.allowed) {
