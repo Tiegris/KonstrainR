@@ -6,6 +6,7 @@ import io.ktor.server.netty.*
 import me.btieger.plugins.*
 import java.io.File
 import io.ktor.network.tls.certificates.*
+import org.slf4j.LoggerFactory
 
 fun main() {
     //val keyStoreFile = File("pems/keystore.jks")
@@ -14,20 +15,22 @@ fun main() {
     val keystore = generateCertificate(
         file = keyStoreFile,
         keyAlias = "sampleAlias",
-        keyPassword = "alma",
-        jksPassword = "alma"
+        keyPassword = "foobar",
+        jksPassword = "foobar"
     )
 
     val environment = applicationEngineEnvironment {
+        log = LoggerFactory.getLogger("ktor.application")
         connector {
             port = 8080
         }
         sslConnector(
             keyStore = keystore,
             keyAlias = "sampleAlias",
-            keyStorePassword = { "alma".toCharArray() },
-            privateKeyPassword = { "alma".toCharArray() }) {
+            keyStorePassword = { "foobar".toCharArray() },
+            privateKeyPassword = { "foobar".toCharArray() }) {
             port = 8443
+            keyStorePath = keyStoreFile
         }
         module(Application::module)
     }
