@@ -16,7 +16,7 @@ val server = server {
         namespaceSelector {
             matchLabels {
                 "managed" eq "true"
-                "istio-injectio" eq "false"
+                "istio-injection" eq "false"
             }
         }
         failurePolicy(FAIL)
@@ -25,21 +25,21 @@ val server = server {
     rules {
         rule {
             name = "valami"
-            path = "/mutate"
+            path = "/inject"
 
             behavior = fun (context) = withContext {
+                val kind = context["object"]?.jsonObject?.get("kind")?.jsonPrimitive?.content
                 allowed {
-                    context["object"]?.jsonObject?.get("kind")?.jsonPrimitive?.content == "Pod"
+                    kind == "Pod"
                 }
                 status {
                     code = 403
-                    message = "You cannot do this because it is Tuesday and your name starts with A"
+                    message = "You cannot do this because the type is '$kind', expected Pod."
                 }
                 patch {
-                    add("/metadata/labels/alma", context["object"]?.jsonObject?.get("kind")?.jsonPrimitive?.content ?: "nil")
+                    add("/metadata/labels/kindInjected", kind ?: "nil")
                 }
             }
-
 
         }
 

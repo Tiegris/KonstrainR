@@ -4,6 +4,10 @@ RUN apt update && apt upgrade -y && \
     apt clean
 RUN pip3 install kubernetes flask pycryptodome
 
+RUN apt update && \
+    apt install -y default-jre
+
+
 FROM golang:1.17 as builder
 WORKDIR /build
 
@@ -26,5 +30,7 @@ COPY --from=builder /build/konstrainer /pem-init.exe
 COPY --from=builder /build/entrypoint.sh /entrypoint.sh
 COPY --from=builder /build/prestop.sh /prestop.sh
 COPY ./app /app
+
+COPY ./agents /agents
 
 ENTRYPOINT ["/entrypoint.sh"]

@@ -2,4 +2,4 @@
 
 /pem-init.exe
 
-sleep 7200
+sleep infinity

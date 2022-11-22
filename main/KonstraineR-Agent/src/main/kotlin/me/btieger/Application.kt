@@ -14,8 +14,8 @@ fun main() {
     val keystore = generateCertificate(
         file = keyStoreFile,
         keyAlias = "sampleAlias",
-        keyPassword = "foobar",
-        jksPassword = "foobar"
+        keyPassword = "alma",
+        jksPassword = "alma"
     )
 
     val environment = applicationEngineEnvironment {
@@ -25,8 +25,8 @@ fun main() {
         sslConnector(
             keyStore = keystore,
             keyAlias = "sampleAlias",
-            keyStorePassword = { "foobar".toCharArray() },
-            privateKeyPassword = { "foobar".toCharArray() }) {
+            keyStorePassword = { "alma".toCharArray() },
+            privateKeyPassword = { "alma".toCharArray() }) {
             port = 8443
         }
         module(Application::module)
