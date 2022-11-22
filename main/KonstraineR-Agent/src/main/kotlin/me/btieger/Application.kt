@@ -31,6 +31,7 @@ fun main() {
             privateKeyPassword = { "foobar".toCharArray() }) {
             port = 8443
             keyStorePath = keyStoreFile
+            host = "0.0.0.0"
         }
         module(Application::module)
     }

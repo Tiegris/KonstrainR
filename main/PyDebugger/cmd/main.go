@@ -34,7 +34,7 @@ func main() {
 	}
 
 	savePem("/pems/cert.pem", certPEM)
-	savePem("/pems/certKey.pem", certKeyPEM)
+	savePem("/pems/key.pem", certKeyPEM)
 
 	err = createOrUpdateMutatingWebhookConfiguration(caPEM, webhookServiceName, webhookNamespace)
 	if err != nil {
