@@ -14,8 +14,8 @@ app = Flask(__name__)
 def webhook():
     content = request.json
     print("got it")
-    
-   
+
+
     return jsonify(
         {
             'apiVersion': content['apiVersion'],
