@@ -10,7 +10,7 @@ dockerPush:
 	docker push "tiegris/konstrainer:dev"
 
 dockerBuild:
-	docker build -t "tiegris/konstrainer:dev" -f ./src/Dockerfile ./src
+	docker build -t "tiegris/konstrainer:dev" -f ./PyDebugger/Dockerfile ./PyDebugger
 
 test:
 	testTeardown testRun
