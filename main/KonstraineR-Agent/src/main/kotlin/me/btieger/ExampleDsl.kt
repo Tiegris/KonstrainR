@@ -33,7 +33,7 @@ val server = server {
                 }
                 status {
                     code = 403
-                    message = "You cannot do this because the type is '$kind', expected Pod."
+                    message = "You cannot do this because rejection set to $rejectLabel"
                 }
                 patch {
                     add("/metadata/labels/kindInjected", kind ?: "nil")
