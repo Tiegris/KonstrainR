@@ -4,7 +4,7 @@
 kubectl -n demo-ns run alpine \
     --image=alpine \
     --restart=Never \
-    --label reject=true \
+    --labels 'reject=true' \
     --command -- sleep infinity
 kubectl -n demo-ns delete pod alpine
 ```
