@@ -27,7 +27,7 @@ val server = server {
 
             behavior = fun (context) = withContext {
                 val kind = context jqx "/object/kind" parseAs string
-                var rejectLabel = context jqx "metadata/labels/reject" parseAs bool
+                val rejectLabel = context jqx "metadata/labels/reject" parseAs bool
                 allowed {
                     rejectLabel != false
                 }
