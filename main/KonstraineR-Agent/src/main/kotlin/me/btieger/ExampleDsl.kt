@@ -47,7 +47,7 @@ val server = server {
                                 add("sleep")
                                 add("infinity")
                             }
-                        }.toJsonString()
+                        }
                     )
                 }
             }
