@@ -12,6 +12,13 @@ open class RuleBuilder {
     @DslMarkerVerb5
     var behavior: (JsonObject) -> RuleInstance by setOnce()
 
+    @DslMarkerBlock
+    fun withContext(setup: RuleBehaviorBuilder.()->Unit): RuleInstance {
+        val provider = RuleBehaviorBuilder()
+        provider.setup()
+        return provider.build()
+    }
+
     internal open fun build(): Rule {
         val _name = validateName(name)
         val _path = validatePath(path)
@@ -45,7 +52,7 @@ open class RuleBuilder {
 class Rule(val name: String, val path: String, val provider: (JsonObject) -> RuleInstance)
 
 class RuleInstance(val allowed: Boolean, val patch: JsonArray, val warnings: List<Warning>, val status: Status)
-class RuleProvider() {
+class RuleBehaviorBuilder() {
     private var _allowed: Boolean by setOnce(true)
     private var _patch: JsonArray by setOnce()
     private val _warnings = mutableListOf<Warning>()
@@ -81,7 +88,6 @@ class RuleProvider() {
     }
 
     fun build() = RuleInstance(_allowed,_patch,_warnings, _status!!)
-
 
 }
 

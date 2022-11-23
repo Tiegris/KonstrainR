@@ -5,13 +5,6 @@ class RulesBuilder {
     private val _rules = mutableListOf<Rule>()
 
     @DslMarkerBlock
-    fun withContext(setup: RuleProvider.()->Unit): RuleInstance {
-        val provider = RuleProvider()
-        provider.setup()
-        return provider.build()
-    }
-
-    @DslMarkerBlock
     fun rule(setup: RuleBuilder.() -> Unit) {
         val builder = RuleBuilder()
         builder.setup()
