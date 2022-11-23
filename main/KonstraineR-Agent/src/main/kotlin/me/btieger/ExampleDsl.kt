@@ -29,7 +29,7 @@ val server = server {
                 val kind = context jqx "/object/kind" parseAs string
                 var rejectLabel = context jqx "metadata/labels/reject" parseAs bool
                 allowed {
-                    rejectLabel == false
+                    rejectLabel != false
                 }
                 status {
                     code = 403
