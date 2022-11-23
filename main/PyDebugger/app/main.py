@@ -39,6 +39,5 @@ def webhook():
 
 
 if __name__ == "__main__":
-    cert, certKey = util.read_pems()
     config.load_incluster_config()
     app.run(host="0.0.0.0", ssl_context=('/pems/cert.pem', '/pems/key.pem'), port=8443)
