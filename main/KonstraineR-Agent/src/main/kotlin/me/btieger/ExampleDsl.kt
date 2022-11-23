@@ -1,7 +1,5 @@
 package me.btieger
 
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
 import me.btieger.dsl.*
 
 val server = server {
@@ -28,9 +26,10 @@ val server = server {
             path = "/inject"
 
             behavior = fun (context) = withContext {
-                val kind = context["object"]?.jsonObject?.get("kind")?.jsonPrimitive?.content
+                val kind = context jqx "/object/kind" parseAs string
+                var rejectLabel = context jqx "metadata/labels/reject" parseAs bool
                 allowed {
-                    kind == "Pod"
+                    rejectLabel == false
                 }
                 status {
                     code = 403
