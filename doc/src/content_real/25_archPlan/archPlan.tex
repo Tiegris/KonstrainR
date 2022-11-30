@@ -19,10 +19,31 @@ My first architecture design was a scalable, optimized complex architecture. The
     \label{fig:comp_arch}
 \end{figure}
 
-The main component in this setup is the KonstraineR-Core. This is an HTTP API server managing the whole application. It serves as a store for the uploaded and compiled DSL instances. It handles all tasks related to spawning, starting, configuring, and destroying agents. Most importantly it manages the TLS certificates and webhooks. 
+\subsection{KonstraineR-Core}
 
-In Kubernetes, webhooks need to communicate with the Kubernetes API on a secured connection. To achieve this, KonstraineR-Agent instances require a TLS certificate, and need to server request on the HTTPS protocol. This certificate can be self signed, but in the webhook creation request the CA Key of the certificate must be sent to the Kubernetes API for signing. After this, the Kubernetes API will trust the certificate of the webhook.
+The main component in this setup is the KonstraineR-Core. This is an HTTP API server managing the whole application. DSL instances can be uploaded to it, and serves as a store for the uploaded and compiled DSL instances. It handles all tasks related to spawning, starting, configuring, and destroying agents. Most importantly it manages the TLS certificates and webhooks, which are crucial parts of the agent lifecycle management.
+
+\subsubsection{Agent lifecycle}
+
+In Kubernetes, webhooks need to communicate with the Kubernetes API on a secured connection. To achieve this, KonstraineR-Agent instances require a TLS certificate, and need to serve request using the HTTPS protocol. This certificate can be self signed, but in the webhook creation request the CA Key of the certificate must be sent to the Kubernetes API for signing. After this, the Kubernetes API will trust the certificate of the webhook.
 
 The mutating or validation webhooks have their own Kubernetes resource. It is either a \emph{MutatingWebhookConfiguration} or a \emph{ValidatingWebhookConfiguration}. These need to be created in the cluster, so Kubernetes can send the object creation requests to the Pod implementing the webhook.
 
+After the webhook is configured and created in Kubernetes, the Agent can be spawned. Agents are spawned as \emph{deployment}s and they also require a \emph{service}. There are two complicated tasks with the creation of the deployment. First the a TLS certificate must be mounted to the Agent container. Second, the compiled DSL must be also mounted to the container. At this point I haven't decided what is the best way to achieve this. Automated Agent spawning is not the scope of this semester. For now, I styed with copying the required files to the Agent container by hand.
+
+When an Agent is deleted there is a cleanup job to do. All the created Kubernetes resources associated with the given Agent must be deleted alongside with the \emph{WebhookConfiguration}. The deletion of the \emph{deployment}, \emph{service} and \emph{WebhookConfiguration} must be atomic.
+
+\subsubsection{DSL store}
+
+Rules, constraints defined using the KonstraineR-Dsl can be uploaded to the Core component. To apply a ruleset, first it must be uploaded. The compilation of the rule will start right after the upload.
+
+It is simply a HTTP API with support for the CRUD operations. DSLs can be uploaded, listed, inspected, updated and deleted.
+
+\subsection{KonstraineR-Db}
+
+This is an SQL database, providing persistence for the KonstraineR-Core. It stores all the uploaded DSL instances, their statuses and the serves as a cache for the compiled DSLs.
+
+The status of the DSL instance represents the compilation state of the instance, whether it is being compiled, successfully compiled, or outdated and needs to be recompiled.
+
+Caching the compiled DSL instances is very important. 
 
