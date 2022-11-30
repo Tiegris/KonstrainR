@@ -1,0 +1,50 @@
+\pagenumbering{roman}
+\setcounter{page}{1}
+
+\selecthungarian
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.6em}
+
+%----------------------------------------------------------------------------
+% Abstract in Hungarian
+%----------------------------------------------------------------------------
+\chapter*{Kivonat}\addcontentsline{toc}{chapter}{Kivonat}
+
+Elosztott architektúrára építő rendszerek és alkalmazások tesztelése egy rendkívül összetett feladat, hiszen az egyszerűbb hagyományos tesztelési módszerek, mint például az egységtesztelés és az integrációs tesztelés, csak egyetlen komponenst képesek tesztelni, a rendszer egészét és integrációját nem. A rendszer interakciójának teszteléséhez egészen más módszerekhez kell folyamodni.
+
+Formális módszerek esetén elkészítik a rendszer modelljét és a modell alapján validálják azt. Ezzel lehetőség nyílik matematikailag bizonyítani, hogy a rendszer teljesíti a követelményeket. Ennek problémája, hogy a modell nem egy valós implementáció, abból programkódot és felkonfigurált telepítéseket létrehozni sok emberi munka, amibe hibák kerülhetnek. Ezáltal akár egy matematikailag bizonyítottan helyes rendszer manuálisan elkészített implementációjában, vagy akár telepítésében is lehetnek hibák. 
+
+Dolgozatom célja egy tesztelő keretrendszer megalkotása, amellyel olyan \emph{rendszerek rendszere (System of Systems)} deploymenteket lehet automatizáltan és az összes rendszerre kiterjedően \emph{End-to-End (E2E)} tesztelni, ahol a komponensek és azok deploymentje is modellből van generálva. Ezzel áthidalva a modell és a valós implementáció közti szakadékot. 
+
+Támogatott platformnak az Arrowhead Framework keretrendszert választottam. A prototípusom erre a platformra lesz specializálva, de tervezés során kidolgozott elvek és módszerek általános esetekben is alkalmazhatóak. A dolgozatban bemutatott módszerek segítségével lehetőség nyílik mikroszolgáltatások architektúrára építő komplex rendszerek fejlesztésének és telepítésének támogatására és különböző konfigurációkban történő tesztelésére.
+
+Az általam megtervezett és megvalósított eszköz lehetőséget ad szabványosított Arrowhead projektek modell alapú inicializálására, azok automatizált fordítására és konténerizálására, végül lehetőség nyílik azokat modell alapján felkonfigurálni és telepíteni, majd ezeken a telepítéseken automatizált teszteket futtatni, akár ugyanazokat a teszteket különböző telepítési konfigurációkon is lefuttatva.
+
+\vfill
+\selectenglish
+
+
+%----------------------------------------------------------------------------
+% Abstract in English
+%----------------------------------------------------------------------------
+\chapter*{Abstract}\addcontentsline{toc}{chapter}{Abstract}
+
+Testing microservices or any distributed systems is a complex task because the simple conventional testing techniques, such as unit testing and integration testing, can only test one component of a complex system, but not the whole system and its integration. Testing the integration of the system requires a whole new approach.
+
+When using formal methods, engineers create a model of the system to validate it. This provides an opportunity to mathematically prove that the system satisfies the requirements. The problem with this approach is that the model is not an implementation. Creating a working code, configuring it, and installing it is a lot of manual work, which may introduce bugs and errors. Because of this, a mathematically proven system can contain implementation or configuration bugs.
+
+The goal of my thesis is to create the prototype of a testing framework, which can automatically perform End-to-End testing of System of Systems deployments where the components and their deployments are generated from models. The purpose of this prototype is to tear down the barrier between the model and the actual implementation.
+
+The Arrowhead Framework was chosen as the targeted platform, therefore my framework specializes to this platform, but the proposed approach is generally applicable. With the methods presented in my thesis, it is possible to support the development and installation of complex systems based on the microservice architecture and to test them in different configurations. 
+
+My tool provides support for initializing Arrowhead projects based on models. It also provides support for automated builds and containerizations. Furthermore, it can automatically configure and start deployments based on models and run tests on different deployment configurations.
+
+\vfill
+\cleardoublepage
+
+\selectthesislanguage
+
+\newcounter{romanPage}
+\setcounter{romanPage}{\value{page}}
+\stepcounter{romanPage}
