@@ -45,5 +45,19 @@ This is an SQL database, providing persistence for the KonstraineR-Core. It stor
 
 The status of the DSL instance represents the compilation state of the instance, whether it is being compiled, successfully compiled, or outdated and needs to be recompiled.
 
-Caching the compiled DSL instances is very important. A DSL instances are compiled to JVM byte code using gradle, so it can take a long to compile an instance. Compiling a DSL before each launch of an agent would significantly increase the startup time of the agent. A long startup time would mean a relatively long outage when the pod of an already existing agent gets destroyed. This could happen for many reasons, such as the pod gets evicted, deleted manually by an administrator or just simply encounters a fatal error.
+Caching the compiled DSL instances is very important. A DSL instances are compiled to JVM byte code using gradle, so compilation can take long. Compiling a DSL before each launch of an agent would significantly increase the startup time of the agent. A long startup time would mean a relatively long outage when the pod of an already existing agent gets destroyed. This could happen for many reasons, such as the pod gets evicted, deleted manually by an administrator or just simply encounters a fatal error.
+
+\subsection{KonstraineR-UI}
+
+It is generally a good idea to decouple, the user interface from the backend in complex applications. The KonstraineR-UI  is a lightweight frontend for the KonstraineR system. It communicates with the Core component on HTTP. It provides a minimalistic, but user friendly interface for DSL uploads, agent management and any other operation with the a KonstraineR system.
+
+\subsection{KonstraineR-Agent}
+
+
+
+\subsection{KonstraineR-Compiler}
+
+\subsection{KonstraineR-Dsl}
+
+\section{Simplified Architecture}
 
