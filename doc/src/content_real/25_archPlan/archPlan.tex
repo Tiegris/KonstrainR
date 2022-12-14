@@ -57,6 +57,8 @@ It is generally a good idea to decouple, the user interface from the backend in 
 
 \subsection{KonstraineR-Compiler}
 
+The compilation task must be decoupled from the other components, because it is a short, but resource intensive task. Keeping it together with either the core or the agent would not be wise, since they are relatively lightweight components, requiring at most 128 MiB RAM and 100m CPU time each. Increasing the resources allocated for these components would waste expensive resources on the node. Keeping them low would result in very slow compilation times, or OOMKilled errors for the components compiling the DSL. An OOMKilled status means that the Pod tr
+
 \subsection{KonstraineR-Dsl}
 
 \section{Simplified Architecture}
