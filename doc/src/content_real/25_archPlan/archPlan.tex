@@ -53,13 +53,19 @@ It is generally a good idea to decouple, the user interface from the backend in 
 
 \subsection{KonstraineR-Agent}
 
+An agent is a webserver that runs a DSL instance and implements a webhook. The core component spawns an agent for each deployed DSL instance.
 
+The agent is implemented as a lightweight Ktor server. It loads a compiled Dsl class at startup time. The configuration of the agent is done by the core component.
 
 \subsection{KonstraineR-Compiler}
 
-The compilation task must be decoupled from the other components, because it is a short, but resource intensive task. Keeping it together with either the core or the agent would not be wise, since they are relatively lightweight components, requiring at most 128 MiB RAM and 100m CPU time each. Increasing the resources allocated for these components would waste expensive resources on the node. Keeping them low would result in very slow compilation times, or OOMKilled errors for the components compiling the DSL. An OOMKilled status means that the Pod tr
+The compilation task must be decoupled from the other components, because it is a short, but resource intensive task. Keeping it together with either the core or the agent would not be wise, since they are relatively lightweight components, requiring at most 128 MiB RAM and 100m CPU time each. Increasing the resources allocated for these components would waste expensive resources on the node. Keeping them low would result in very slow compilation times, or OOMKilled errors for the components compiling the DSL. An OOMKilled status means that the Pod tried to use more memory than its limit.
+
+The core component spawns a Kubernetes job to do the compilation. The compiler at the end of a successful compilation uploads the created artifact to the core server.
 
 \subsection{KonstraineR-Dsl}
 
-\section{Simplified Architecture}
+The KonstraineR-Dsl is an easy to use, highly extendible and expressive domain specific language designed to define rules and constraints in Kubernetes cluster, implemented as a software module.
+
+%\section{Simplified Architecture}
 

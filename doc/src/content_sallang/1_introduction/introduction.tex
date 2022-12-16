@@ -2,30 +2,25 @@
 \setlength{\parskip}{0.6em}
 
 %----------------------------------------------------------------------------
-\chapter{Bevezetés}
+\chapter{Introduction}
 \label{sec:intro}
 %----------------------------------------------------------------------------
 
 
 \paragraph{Kontextus.} 
 
-Kritikus rendszerek esetén a helyes működést modellezéssel és formális ellenőrzési módszerekkel ellenőrzik, azonban amikor a modellből implementáció, később telepítés készül, akkor emberi tévedések folytán kerülhetnek a rendszerbe új hibák. Modellből történő, nemcsak kód, de deployment generálással ezeknek az emberi hibáknak a bekövetkezési valószínűsége jelentősen csökkenthető. Az így generált és elindított deploymenteken végzett tesztekkel tovább csökkenthető a hibák valószínűsége, valamint ellenőrizhető, hogy az implementáció megfelel-e a modellben megfogalmazottaknak.
 
 \paragraph{Problémafelvetés.}
-Sokféle elosztott architektúrát támogató platform létezik, ezek közül egyik az Arrowhead Framework. Ezt választottam a dolgozatomban használt platformnak. Ehhez a platformhoz nem tartozik projekt inicializáló, csak egy kezdetleges projektsablon, egyszerű példák és iránymutatások, úgyhogy projektet és deploymentet generálni még nehezebb feladat. Elosztott architektúrában a tesztelés alapvetően egy bonyolult feladat. Sok komponens kommunikál egymással, amely komponensekből több példány is létezhet, és ezek a komponensek akár külön fizikai, vagy virtuális gépeken futhatnak, úgyhogy nehéz a rendszer állapotáról egy átfogó képet alkotni, ami nagyban nehezíti teljes rendszer, azon belül annak konfigurációjának és telepítésének a tesztelését.
+
 
 \paragraph{Célkitűzés.}
-A dolgozat célja egy olyan eszköz megteremtése, ami a SysML v2 modellezési nyelven elkészített modellekből képes Arrowhead projekteket inicializálni, azaz kigenerálni egy előkészített projektsablont, majd a implementált projektekhez szintén modell alapján egy deploymentet létrehozni, végül a deploymenten \emph{End-to-End (E2E)} teszteket futtatni. Cél, hogy az eszköz segítse a fordítást, konténerizációt, az automatikus deploymentet és a tesztelést.
+
 
 \paragraph{Kontribúció.}
-Dolgozatomban bemutatom, hogy hogyan lehetséges a hamarosan megjelenő SysML v2 nyelven írt modellekből elosztott architektúrájú rendszereket generálni, majd a rendszer modelljét felhasználva, hogyan lehet olyan modelleket alkotni, amelyek nemcsak a rendszer egyes komponenseit írják le, hanem egy teljes telepítést és konfigurációt is leírnak. Megalkottam egy eszközt, ami képes ezeket a modelleket feldolgozni és a bennük definiált telepítéseket automatikusan elindítani, majd azokon teszteket futtatni. A megalkotott eszköz kiemelendő funkciója, hogy a tesztek futtatása során könnyedén lehet különböző modellekben definiált konfigurációkkal is futtatni a teszteket.
 
-Mivel a SysML v2 nyelv annyira új, hogy igazából még meg sem jelent, így bátran jelenthetem ki, hogy az általam megvalósított eszköz az elsők között van, amelyek a SysML v2 nyelvet használják fel projektek és telepítések generálására.
 
 \paragraph{Hozzáadott érték.}
 
-Munkám által lehetőség nyílik Arrowhead projektek modellalapú inicializálására és telepítésére. Megmutattam, hogy az új SysML v2 nyelv alkalmas elosztott architektúrájú rendszerek modellezésére. Megoldást adtam modellalapú deployment generálásra és többféle deployment hatékony kezelésére. Bemutattam, hogy hogyan lehet elosztott architektúrában a naplózást automatikus tesztelésre használni. A megalkotott prototípus ugyan az Arrowhead Frameworkre épít, de a kidolgozott módszerek általánosan is alkalmazhatóak egyéb elosztott architektúrára építő rendszerek esetén.
 
 \paragraph{A dolgozat felépítése.}
 
-Dolgozatomat \aref{sec:preliminaries}. fejezetben a szükséges előismeretek tisztázásával kezdem: bemutatom az Arrowhead Framework lényegi részeit és működését, tisztázok alapvető modellezési ismereteket és bevezetem a SysML v2 nyelvvel kapcsolatos tudnivalókat. Az előismeretek tisztázása után ismertetem az általam végzett munkát. \Aref{sec:framework-overview}. fejezetben magas szinten mutatom be, hogy az általam megalkotott keretrendszer segítségével hogyan lehet végigvinni egy teljes projektet és közben bemutatom a keretrendszer architektúráját. \Aref{sec:projgen}--\ref{sec:tracingTesting}. fejezetekben a munkám megtervezését és annak implementálást mutatom be. \Aref{sec:projgen}. fejezet a projektgenerálásról szól, a tervezéstől és a modellezéstől egészen a generált elemek bemutatásáig. \Aref{sec:depgen}. fejezetben a deploymentek modellezését, generálását és indítását mutatom be. \Aref{sec:tracingTesting}. fejezet a tesztelés megtervezését és a megvalósítás mögötti elveket mutatja be. \Aref{sec:demo}. fejezetben egy esettanulmányon keresztül mutatom be a teljes keretrendszer használatát. Végül \aref{sec:relwork}. fejezetben az irodalomban található, más hasonló munkákat mutatom be és hasonlítom össze a saját munkámmal. Befejezésül \aref{sec:summary}. fejezetben összefoglalom a dolgozatot.
