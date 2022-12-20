@@ -8,9 +8,7 @@
 
 After a research and the first POC, I designed an architecture for the system. I considered all the use cases, the technical nature of the platform and technologies.
 
-\section{Complex architecture}
-
-My first architecture design was a scalable, optimized complex architecture. The \ref{fig:comp_arch} figure shows this architecture.
+The \ref{fig:comp_arch} figure shows this architecture.
 
 \begin{figure}[h]
     \centering
@@ -19,11 +17,11 @@ My first architecture design was a scalable, optimized complex architecture. The
     \label{fig:comp_arch}
 \end{figure}
 
-\subsection{KonstraineR-Core}
+\section{KonstraineR-Core}
 
 The main component in this setup is the KonstraineR-Core. This is an HTTP API server managing the whole application. DSL instances can be uploaded to it, and serves as a store for the uploaded and compiled DSL instances. It handles all tasks related to spawning, starting, configuring, and destroying agents. Most importantly it manages the TLS certificates and webhooks, which are crucial parts of the agent lifecycle management.
 
-\subsubsection{Agent lifecycle}
+\subsection{Agent lifecycle}
 
 In Kubernetes, webhooks need to communicate with the Kubernetes API on a secured connection. To achieve this, KonstraineR-Agent instances require a TLS certificate, and need to serve request using the HTTPS protocol. This certificate can be self signed, but in the webhook creation request the CA Key of the certificate must be sent to the Kubernetes API for signing. After this, the Kubernetes API will trust the certificate of the webhook.
 
@@ -33,13 +31,13 @@ After the webhook is configured and created in Kubernetes, the Agent can be spaw
 
 When an Agent is deleted there is a cleanup job to do. All the created Kubernetes resources associated with the given Agent must be deleted alongside with the \emph{WebhookConfiguration}. The deletion of the \emph{deployment}, \emph{service} and \emph{WebhookConfiguration} must be atomic.
 
-\subsubsection{DSL store}
+\subsection{DSL store}
 
 Rules, constraints defined using the KonstraineR-Dsl can be uploaded to the Core component. To apply a ruleset, first it must be uploaded. The compilation of the rule will start right after the upload.
 
 It is simply a HTTP API with support for the CRUD operations. DSLs can be uploaded, listed, inspected, updated and deleted.
 
-\subsection{KonstraineR-Db}
+\section{KonstraineR-Db}
 
 This is an SQL database, providing persistence for the KonstraineR-Core. It stores all the uploaded DSL instances, their statuses and the serves as a cache for the compiled DSLs.
 
@@ -47,25 +45,23 @@ The status of the DSL instance represents the compilation state of the instance,
 
 Caching the compiled DSL instances is very important. A DSL instances are compiled to JVM byte code using gradle, so compilation can take long. Compiling a DSL before each launch of an agent would significantly increase the startup time of the agent. A long startup time would mean a relatively long outage when the pod of an already existing agent gets destroyed. This could happen for many reasons, such as the pod gets evicted, deleted manually by an administrator or just simply encounters a fatal error.
 
-\subsection{KonstraineR-UI}
+\section{KonstraineR-UI}
 
 It is generally a good idea to decouple, the user interface from the backend in complex applications. The KonstraineR-UI  is a lightweight frontend for the KonstraineR system. It communicates with the Core component on HTTP. It provides a minimalistic, but user friendly interface for DSL uploads, agent management and any other operation with the a KonstraineR system.
 
-\subsection{KonstraineR-Agent}
+\section{KonstraineR-Agent}
 
 An agent is a webserver that runs a DSL instance and implements a webhook. The core component spawns an agent for each deployed DSL instance.
 
 The agent is implemented as a lightweight Ktor server. It loads a compiled Dsl class at startup time. The configuration of the agent is done by the core component.
 
-\subsection{KonstraineR-Compiler}
+\section{KonstraineR-Compiler}
 
 The compilation task must be decoupled from the other components, because it is a short, but resource intensive task. Keeping it together with either the core or the agent would not be wise, since they are relatively lightweight components, requiring at most 128 MiB RAM and 100m CPU time each. Increasing the resources allocated for these components would waste expensive resources on the node. Keeping them low would result in very slow compilation times, or OOMKilled errors for the components compiling the DSL. An OOMKilled status means that the Pod tried to use more memory than its limit.
 
 The core component spawns a Kubernetes job to do the compilation. The compiler at the end of a successful compilation uploads the created artifact to the core server.
 
-\subsection{KonstraineR-Dsl}
+\section{KonstraineR-Dsl}
 
 The KonstraineR-Dsl is an easy to use, highly extendible and expressive domain specific language designed to define rules and constraints in Kubernetes cluster, implemented as a software module.
-
-%\section{Simplified Architecture}
 
