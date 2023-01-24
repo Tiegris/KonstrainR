@@ -1,4 +1,4 @@
-package me.btieger.spawner.kelm
+package me.btieger.logic.spawner.kelm
 
 import com.fkorotkov.kubernetes.admissionregistration.v1.*
 import me.btieger.dsl.*

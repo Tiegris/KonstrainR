@@ -8,7 +8,7 @@ import me.btieger.persistance.DatabaseFactory
 import me.btieger.persistance.tables.Dsl
 import me.btieger.persistance.tables.Dsls
 import me.btieger.persistance.tables.Server
-import me.btieger.spawner.Kelm
+import me.btieger.logic.spawner.Kelm
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
 

@@ -1,4 +1,4 @@
-package me.btieger.spawner
+package me.btieger.logic.spawner
 
 import java.security.KeyStore
 

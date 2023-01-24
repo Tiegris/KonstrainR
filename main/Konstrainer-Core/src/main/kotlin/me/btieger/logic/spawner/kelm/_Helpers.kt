@@ -1,19 +1,16 @@
-package me.btieger.spawner.kelm
+package me.btieger.logic.spawner.kelm
 
 import io.fabric8.kubernetes.api.model.HasMetadata
 import io.fabric8.kubernetes.api.model.ObjectMeta
 
 const val agentNamespace = "konstrainer-agents-ns"
+const val jobsNamespace = "konstrainer-jobs-ns"
 
-val konstrainerLabels = arrayOf(
-    "managedBy" to "",
-    "" to ""
-)
 
 fun ObjectMeta.labels(_name: String) = apply {
     labels = mapOf(
         "app" to _name,
-        *konstrainerLabels
+        "managedBy" to "konstrainer",
     )
 }
 

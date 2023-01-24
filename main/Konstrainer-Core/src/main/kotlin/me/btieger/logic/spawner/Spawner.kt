@@ -1,8 +1,8 @@
-package me.btieger.spawner
+package me.btieger.logic.spawner
 
 import me.btieger.dsl.*
 import io.fabric8.kubernetes.client.KubernetesClientBuilder
-import me.btieger.spawner.kelm.*
+import me.btieger.logic.spawner.kelm.*
 
 private val client = KubernetesClientBuilder().build()
 
