@@ -1,12 +1,9 @@
 package me.btieger.logic.loader
 
 import me.btieger.dsl.Server
-import java.io.File
 import java.net.URLClassLoader
 import java.nio.file.Files
 import java.nio.file.Path
-import java.util.*
-import kotlin.io.path.deleteExisting
 import kotlin.io.path.deleteIfExists
 import kotlin.io.path.writeBytes
 
@@ -16,9 +13,9 @@ object Loader {
             arrayOf(myJar.toUri().toURL()),
             this.javaClass.classLoader
         )
-        val classToLoad = Class.forName("me.btieger.example.ExampleKt", true, child)
-        val method = classToLoad.getDeclaredMethod("getServer")
-        return method.invoke(null) as Server
+        val loadedClass = Class.forName("me.btieger.example.ExampleKt", true, child)
+        val getServerMethod = loadedClass.getDeclaredMethod("getServer")
+        return getServerMethod.invoke(null) as Server
     }
 
     fun loadServerConfig(jar: ByteArray): Server {
