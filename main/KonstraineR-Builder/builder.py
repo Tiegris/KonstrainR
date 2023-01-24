@@ -20,7 +20,7 @@ class Compilation():
         pass
 
     def upload(self, data: bytes):
-        requests.post(f'{self._base_url}/jars/{self._dsl_id}', data) # TODO       
+        requests.post(f'{self._base_url}/jars/{self._dsl_id}', data) # TODO
         
 
 def main():

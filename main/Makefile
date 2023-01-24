@@ -20,3 +20,9 @@ testRun:
 
 testTeardown:
 	kubectl delete -n demo-ns deployment.apps/demo || true
+
+buildBuilder:
+	docker build -f KonstraineR-Builder/Dockerfile -t tiegris/konstrainer-builder:dev .
+
+pushBuilder:
+	docker push "tiegris/konstrainer-builder:dev"
