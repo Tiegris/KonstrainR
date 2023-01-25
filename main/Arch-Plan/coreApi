@@ -1,0 +1,78 @@
+/* This document describes the API of the KonstrainR-Core in an informal way. */
+
+AttackerModel {
+    a potential attacker might have:
+    - malicious pods running in the cluster
+    - acces to the api of the KonstrainR-Core and KonstrainR-UI
+    KonstrainR is NOT deffending against an attacker with:
+    - acces to kubectl on the cluster
+    - stolen creds to the KonstrainR-Core OR employee with malicious intents
+}
+
+@Secured("LoginRequired")
+route("/api/v1/dsls") {
+    get {
+        lists all DSLs
+        Content-Type: json
+        list[{
+            id: int
+            name: str
+            status: enum[Building,Ready,Failed]
+        }]
+    }
+    get("{id}") {
+        Content-Type: json
+        {
+            id: int
+            name: str
+            status: enum[Building,Ready,Failed]
+            error message, if status is Failed else null
+            submission timestamp, if status is Building else null
+            metadata if status is Ready else null {
+                // TODO Design what is needed in the metadata section, depends on what is needed for spawning webhooks
+            }
+        }
+    }
+    get("{id}/file") {
+        fetch kotlin file of dsl instance
+        Content-Type: text
+    }
+    get("{id}/jar") {
+        fetch compiled dsl jar
+        Content-Type: binary
+    }
+    @Secured("AuthSecret")
+    post("{id}/jar") {
+        upload compiled dsl jar
+        Content-Type: binary
+        Security: only the spawned builder job should be able to call it, else it should return 401
+    }
+    @Secured("AuthSecret")
+    post("{id}/jar/fail") {
+        upload compiled dsl jar
+        Content-Type: json
+        Security: only the spawned builder job should be able to call it, else it should return 401
+    }
+    post {
+        uploads new DSL
+        request {
+            kotlin file of dsl instance
+            Content-Type: text
+        }
+        response {
+            Content-Type: json
+            {
+                id: int
+                name: str
+                status: enum[Building,Ready,Failed]
+            }
+        }
+    }
+    !put {
+        NOT_TO_IMPLEMENT, LOW_PRIO
+        even a small update whould induce to many changes, so an update method would only be a shortcut for a delete and create.
+    }
+    delete("{id}") {
+
+    }
+}
