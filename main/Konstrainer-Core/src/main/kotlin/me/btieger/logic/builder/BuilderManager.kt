@@ -8,8 +8,8 @@ import me.btieger.logic.spawner.kelm.agentNamespace
 import me.btieger.logic.spawner.kelm.jobsNamespace
 import me.btieger.logic.spawner.kelm.labels
 
-fun spawnBuilderJob(_name: String) {
-    Job().apply{
+fun spawnBuilderJob(_name: String, dslId: Int, baseUrl: String) {
+    Job().apply {
         metadata {
             name = _name
             namespace = jobsNamespace
@@ -27,12 +27,20 @@ fun spawnBuilderJob(_name: String) {
                     containers = listOf(
                         newContainer {
                             name = "builder"
-                            image = "gradle:7.6-jdk17-jammy"
-                            command = listOf("java", "-jar", "/app/builder.jar")
+                            image = "tiegris/konstrainer-builder:dev"
+                            env = listOf(
+                                newEnvVar {
+                                    name = "KSR_CORE_BASE_URL"
+                                    value = baseUrl
+                                },
+                                newEnvVar {
+                                    name = "KSR_DSL_ID"
+                                    value = dslId.toString()
+                                }
+                            )
                         }
                     )
                 }
-
             }
 
         }
