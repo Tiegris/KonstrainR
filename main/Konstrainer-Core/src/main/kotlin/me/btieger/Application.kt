@@ -5,9 +5,8 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import me.btieger.controllers.dslController
 import me.btieger.controllers.echoController
-import me.btieger.controllers.serverController
 import me.btieger.persistance.DatabaseFactory
-import me.btieger.plugins.*
+import me.btieger.plugins.configureSerialization
 
 fun main() {
     embeddedServer(Netty, port = 8080, host = "127.0.0.1", module = Application::module)
@@ -18,6 +17,6 @@ fun Application.module() {
     configureSerialization()
     echoController()
     dslController()
-    serverController()
+    //serverController()
     DatabaseFactory.init()
 }

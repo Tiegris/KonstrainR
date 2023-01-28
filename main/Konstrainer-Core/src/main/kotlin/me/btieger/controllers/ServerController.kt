@@ -4,14 +4,12 @@ import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.routing.*
 import me.btieger.domain.CreateServerDto
-import me.btieger.domain.dto
 import me.btieger.id
 import me.btieger.notFound
 import me.btieger.ok
-import me.btieger.persistance.services.dslService
-import me.btieger.persistance.services.serverService
 import me.btieger.persistance.tables.Server
 
+/*
 fun Application.serverController() {
     routing {
         route("/server") {
@@ -21,7 +19,7 @@ fun Application.serverController() {
             }
             get("/{id}") {
                 val id = call.id
-                val res = serverService.read(id, Server::dto) ?: return@get notFound()
+                val res = serverService.read(id, Server::) ?: return@get notFound()
                 ok(res)
             }
             get("/{id}/file") {
@@ -48,4 +46,4 @@ fun Application.serverController() {
         }
     }
 
-}
+}*/

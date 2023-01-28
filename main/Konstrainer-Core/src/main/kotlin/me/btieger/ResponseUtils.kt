@@ -3,7 +3,6 @@ package me.btieger
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
-import io.ktor.server.util.*
 import io.ktor.util.pipeline.*
 
 @DslMarker
@@ -49,7 +48,18 @@ suspend inline fun PipelineContext<*, ApplicationCall>.badRequest() {
 suspend inline fun <reified T : Any> PipelineContext<*, ApplicationCall>.internalServerError(data: T) {
     call.respond(HttpStatusCode.InternalServerError, data)
 }
+
 @ResponseDslMarker
 suspend inline fun PipelineContext<*, ApplicationCall>.internalServerError() {
     call.respond(HttpStatusCode.InternalServerError)
+}
+
+@ResponseDslMarker
+private suspend inline fun <reified T : Any> PipelineContext<*, ApplicationCall>.notReady(data: T) {
+    call.respond(HttpStatusCode.NotAcceptable, data)
+}
+
+@ResponseDslMarker
+suspend inline fun PipelineContext<*, ApplicationCall>.notReady() {
+    call.respond(HttpStatusCode.NotAcceptable)
 }

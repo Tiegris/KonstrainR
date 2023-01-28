@@ -48,7 +48,7 @@ route("/api/v1/dsls") {
         Security: only the spawned builder job should be able to call it, else it should return 401
     }
     @Secured("AuthSecret")
-    post("{id}/jar/fail") {
+    post("{id}/jar") {
         upload compiled dsl jar
         Content-Type: json
         Security: only the spawned builder job should be able to call it, else it should return 401

@@ -1,49 +1,76 @@
 package me.btieger.persistance.services
 
-import me.btieger.IdDto
-import me.btieger.domain.DslDto
-import me.btieger.domain.dto
+import me.btieger.domain.DslConciseDto
+import me.btieger.domain.DslDetailedDto
+import me.btieger.domain.toConciseDto
+import me.btieger.domain.toDetailedDto
+import me.btieger.persistance.DatabaseFactory
 import me.btieger.persistance.tables.Dsl
 import me.btieger.persistance.tables.Dsls
-import me.btieger.dto
-import me.btieger.persistance.DatabaseFactory
+import me.btieger.persistance.tables.Status
+import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.statements.api.ExposedBlob
 import org.jetbrains.exposed.sql.update
+import java.time.LocalDateTime
 
 interface DslService {
-    suspend fun all(): List<DslDto>
-    suspend fun <T> read(id: Int, transform: Dsl.() -> T): T?
-    suspend fun create(name: String, content: ByteArray): IdDto?
-    suspend fun update(id: Int, name: String, content: ByteArray): Boolean
-    suspend fun delete(id: Int): Boolean
+    suspend fun all(): List<DslConciseDto>
+    suspend fun getJar(id: Int): ByteArray?
+    suspend fun getFile(id: Int): String?
+    suspend fun getDetails(id: Int): DslDetailedDto?
+    suspend fun createDsl(name: String, content: ByteArray): DslDetailedDto?
+    suspend fun setJar(id: Int, jarBytes: ByteArray)
+    suspend fun setError(id: Int, errorMessage: String)
+    suspend fun deleteDsl(id: Int): Boolean
 }
 
 class DslServiceImpl : DslService {
     override suspend fun all() = DatabaseFactory.dbQuery {
-        Dsl.all().map { it.dto }
+        Dsl.all().map(Dsl::toConciseDto)
     }
 
-    override suspend fun <T> read(id: Int, transform: Dsl.() -> T) = DatabaseFactory.dbQuery {
-        Dsl.findById(id)?.let(transform)
+    override suspend fun getJar(id: Int) = DatabaseFactory.dbQuery {
+        Dsl.findById(id)?.jar?.bytes
     }
 
-    override suspend fun create(name: String, content: ByteArray) = DatabaseFactory.dbQuery {
+    override suspend fun getFile(id: Int) = DatabaseFactory.dbQuery {
+        Dsl.findById(id)?.let {
+            String(it.file.bytes)
+        }
+    }
+
+    override suspend fun getDetails(id: Int) = DatabaseFactory.dbQuery {
+        Dsl.findById(id)?.let(Dsl::toDetailedDto)
+    }
+
+    override suspend fun createDsl(name: String, content: ByteArray) = DatabaseFactory.dbQuery {
         val x = Dsl.new {
             this.name = name
             this.file = ExposedBlob(content)
+            this.status = Status.Building
+            this.buildSubmissionTime = LocalDateTime.now()
         }
-        x.id.value.dto
+        x.toDetailedDto()
     }
 
-    override suspend fun update(id: Int, name: String, content: ByteArray) = DatabaseFactory.dbQuery {
-        Dsls.update({ Dsls.id eq id }) {
-            it[Dsls.name] = name
-            it[file] = ExposedBlob(content)
-        } > 0
+    override suspend fun setJar(id: Int, jarBytes: ByteArray): Unit = DatabaseFactory.dbQuery {
+        Dsls.update({ Dsls.id eq id and Dsls.jar.isNull() }) {
+            it[jar] = ExposedBlob(jarBytes)
+            it[buildSubmissionTime] = null
+            it[errorMessage] = null
+            it[status] = Status.Ready
+        }
     }
 
-    override suspend fun delete(id: Int) = DatabaseFactory.dbQuery {
+    override suspend fun setError(id: Int, errorMessage: String): Unit = DatabaseFactory.dbQuery {
+        Dsls.update({ (Dsls.id eq id) and Dsls.jar.isNull() }) {
+            it[Dsls.errorMessage] = errorMessage
+            it[status] = Status.Failed
+        }
+    }
+
+    override suspend fun deleteDsl(id: Int) = DatabaseFactory.dbQuery {
         Dsls.deleteWhere { Dsls.id eq id } > 0
     }
 
