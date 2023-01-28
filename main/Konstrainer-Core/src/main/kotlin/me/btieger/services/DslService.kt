@@ -1,9 +1,11 @@
-package me.btieger.persistance.services
+package me.btieger.services
 
 import me.btieger.domain.DslConciseDto
 import me.btieger.domain.DslDetailedDto
 import me.btieger.domain.toConciseDto
 import me.btieger.domain.toDetailedDto
+import me.btieger.logic.kelm.K8s
+import me.btieger.logic.kelm.resources.makeBuilderJob
 import me.btieger.persistance.DatabaseFactory
 import me.btieger.persistance.tables.Dsl
 import me.btieger.persistance.tables.Dsls
@@ -12,7 +14,9 @@ import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.statements.api.ExposedBlob
 import org.jetbrains.exposed.sql.update
+import java.security.SecureRandom
 import java.time.LocalDateTime
+import java.util.*
 
 interface DslService {
     suspend fun all(): List<DslConciseDto>
@@ -45,16 +49,23 @@ class DslServiceImpl : DslService {
     }
 
     override suspend fun createDsl(name: String, content: ByteArray) = DatabaseFactory.dbQuery {
-        val x = Dsl.new {
+        val secretBytes = ByteArray(1024)
+        SecureRandom().nextBytes(secretBytes)
+        val secret = String(Base64.getEncoder().encode(secretBytes))
+        val result = Dsl.new {
             this.name = name
             this.file = ExposedBlob(content)
             this.status = Status.Building
+            this.jobSecret = secret
             this.buildSubmissionTime = LocalDateTime.now()
         }
-        x.toDetailedDto()
+        val builderJob = makeBuilderJob(result.id.value)
+        K8s.create(builderJob)
+        result.toDetailedDto()
     }
 
     override suspend fun setJar(id: Int, jarBytes: ByteArray): Unit = DatabaseFactory.dbQuery {
+        TODO("VALIDATE TOKEN")
         Dsls.update({ Dsls.id eq id and Dsls.jar.isNull() }) {
             it[jar] = ExposedBlob(jarBytes)
             it[buildSubmissionTime] = null
@@ -64,6 +75,7 @@ class DslServiceImpl : DslService {
     }
 
     override suspend fun setError(id: Int, errorMessage: String): Unit = DatabaseFactory.dbQuery {
+        TODO("VALIDATE TOKEN")
         Dsls.update({ (Dsls.id eq id) and Dsls.jar.isNull() }) {
             it[Dsls.errorMessage] = errorMessage
             it[status] = Status.Failed

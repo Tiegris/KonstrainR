@@ -1,4 +1,4 @@
-package me.btieger.logic.spawner.kelm
+package me.btieger.logic.kelm.resources
 
 import com.fkorotkov.kubernetes.*
 import com.fkorotkov.kubernetes.apps.spec

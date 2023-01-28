@@ -11,6 +11,7 @@ class Dsl(id: EntityID<Int>) : Entity<Int>(id) {
 
     var name by Dsls.name
     var status by Dsls.status
+    var jobSecret by Dsls.jobSecret
     var buildSubmissionTime by Dsls.buildSubmissionTime
     var errorMessage by Dsls.errorMessage
     var file by Dsls.file
@@ -21,6 +22,7 @@ object Dsls : IntIdTable() {
     val name = varchar("name", 128)
     val file = blob("file")
     val status = enumeration("status", Status::class)
+    val jobSecret = varchar("job_secret", 1024).nullable()
     val buildSubmissionTime = datetime("build_submission").nullable()
     val errorMessage = text("error").nullable()
     val jar = blob("jar").nullable()

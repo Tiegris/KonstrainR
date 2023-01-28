@@ -1,4 +1,4 @@
-package me.btieger.logic.spawner.kelm
+package me.btieger.logic.kelm.resources
 
 import io.fabric8.kubernetes.api.model.ConfigMap
 import me.btieger.dsl.Server

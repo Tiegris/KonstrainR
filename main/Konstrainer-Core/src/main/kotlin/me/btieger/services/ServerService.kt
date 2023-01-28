@@ -1,4 +1,4 @@
-package me.btieger.persistance.services
+package me.btieger.services
 
 import me.btieger.domain.CreateServerDto
 import me.btieger.domain.ServerDto

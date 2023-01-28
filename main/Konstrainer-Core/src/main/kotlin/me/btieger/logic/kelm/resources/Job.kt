@@ -1,15 +1,13 @@
-package me.btieger.logic.builder
+package me.btieger.logic.kelm.resources
 
-import com.fkorotkov.kubernetes.apps.*
 import com.fkorotkov.kubernetes.batch.v1.*
 import com.fkorotkov.kubernetes.*
 import io.fabric8.kubernetes.api.model.batch.v1.Job
-import me.btieger.logic.spawner.kelm.agentNamespace
-import me.btieger.logic.spawner.kelm.jobsNamespace
-import me.btieger.logic.spawner.kelm.labels
+import me.btieger.configuration
 
-fun spawnBuilderJob(_name: String, dslId: Int, baseUrl: String) {
-    Job().apply {
+fun makeBuilderJob(dslId: Int): Job {
+    val _name = "dsl-build-job-$dslId"
+    return Job().apply {
         metadata {
             name = _name
             namespace = jobsNamespace
@@ -19,7 +17,7 @@ fun spawnBuilderJob(_name: String, dslId: Int, baseUrl: String) {
             )
         }
         spec {
-            ttlSecondsAfterFinished = 60*15 // 15 minutes
+            ttlSecondsAfterFinished = 60* configuration.buildJobTtlMinutes
             backoffLimit = 2
             template {
                 spec {
@@ -27,11 +25,11 @@ fun spawnBuilderJob(_name: String, dslId: Int, baseUrl: String) {
                     containers = listOf(
                         newContainer {
                             name = "builder"
-                            image = "tiegris/konstrainer-builder:dev"
+                            image = configuration.builderImage
                             env = listOf(
                                 newEnvVar {
                                     name = "KSR_CORE_BASE_URL"
-                                    value = baseUrl
+                                    value = configuration.serviceName
                                 },
                                 newEnvVar {
                                     name = "KSR_DSL_ID"

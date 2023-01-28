@@ -4,8 +4,11 @@ import kotlinx.serialization.Serializable
 import me.btieger.persistance.tables.Dsl
 
 @Serializable
-data class DslConciseDto(val id: Int, val name: String)
+data class IdDto(val id: Int)
+fun Int.toIdDto() = IdDto(this)
 
+@Serializable
+data class DslConciseDto(val id: Int, val name: String)
 fun Dsl.toConciseDto() = DslConciseDto(id.value, name)
 
 @Serializable
@@ -24,3 +27,5 @@ data class ServerDto(val id: Int, val dslId: Int)
 
 @Serializable
 data class CreateServerDto(val dslId: Int)
+
+

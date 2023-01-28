@@ -1,10 +1,19 @@
-package me.btieger.logic.spawner
+package me.btieger.logic.kelm
 
-import me.btieger.dsl.*
+import io.fabric8.kubernetes.api.model.HasMetadata
 import io.fabric8.kubernetes.client.KubernetesClientBuilder
-import me.btieger.logic.spawner.kelm.*
+import me.btieger.dsl.Server
+import me.btieger.logic.kelm.resources.deployment
+import me.btieger.logic.kelm.resources.mutatingWebhookConfiguration
+import me.btieger.logic.kelm.resources.service
 
 private val client = KubernetesClientBuilder().build()
+
+object K8s {
+    fun create(resource: HasMetadata) {
+        client.resource(resource).create()
+    }
+}
 
 object Kelm {
 

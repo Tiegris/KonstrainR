@@ -1,11 +1,11 @@
-package me.btieger.logic.spawner.kelm
+package me.btieger.logic.kelm.resources
 
 import io.fabric8.kubernetes.api.model.HasMetadata
 import io.fabric8.kubernetes.api.model.ObjectMeta
 
 const val agentNamespace = "konstrainer-agents-ns"
 const val jobsNamespace = "konstrainer-jobs-ns"
-
+const val coreNamespace = "konstrainer-ns"
 
 fun ObjectMeta.labels(_name: String) = apply {
     labels = mapOf(
@@ -20,4 +20,9 @@ fun HasMetadata.metadata(_name: String) = apply {
         namespace = agentNamespace
         labels(_name)
     }
+}
+
+
+fun fqdn(ns: String, svc: String): String {
+    return "$svc.$ns.svc.cluster.local"
 }
