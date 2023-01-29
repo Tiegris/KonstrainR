@@ -49,7 +49,7 @@ class DslServiceImpl : DslService {
     }
 
     override suspend fun createDsl(name: String, content: ByteArray) = DatabaseFactory.dbQuery {
-        val secretBytes = ByteArray(1024)
+        val secretBytes = ByteArray(64)
         SecureRandom().nextBytes(secretBytes)
         val secret = String(Base64.getEncoder().encode(secretBytes))
         // TODO review token security

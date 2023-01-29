@@ -22,7 +22,7 @@ object Dsls : IntIdTable() {
     val name = varchar("name", 128)
     val file = blob("file")
     val status = enumeration("status", Status::class)
-    val jobSecret = varchar("job_secret", 1024).nullable()
+    val jobSecret = varchar("job_secret", 64).nullable()
     val buildSubmissionTime = datetime("build_submission").nullable()
     val errorMessage = text("error").nullable()
     val jar = blob("jar").nullable()
