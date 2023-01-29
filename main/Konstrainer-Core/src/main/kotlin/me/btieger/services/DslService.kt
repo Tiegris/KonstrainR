@@ -58,7 +58,7 @@ class DslServiceImpl : DslService {
             this.name = name
             this.file = ExposedBlob(content)
             this.status = Status.Building
-            this.jobSecret = secret
+            this.jobSecret = secretBytes
             this.buildSubmissionTime = LocalDateTime.now()
         }
         val builderJob = makeBuilderJob(result.id.value, secret)
@@ -67,7 +67,8 @@ class DslServiceImpl : DslService {
     }
 
     override suspend fun setJar(id: Int, secret: String, jarBytes: ByteArray): Unit = DatabaseFactory.dbQuery {
-        Dsls.update({ Dsls.id eq id and Dsls.jar.isNull() and (Dsls.jobSecret eq secret)}) {
+        val secretBytes = Base64.getDecoder().decode(secret)
+        Dsls.update({ Dsls.id eq id and Dsls.jar.isNull() and (Dsls.jobSecret eq secretBytes)}) {
             it[jar] = ExposedBlob(jarBytes)
             it[buildSubmissionTime] = null
             it[errorMessage] = null
@@ -77,7 +78,8 @@ class DslServiceImpl : DslService {
     }
 
     override suspend fun setError(id: Int, secret: String, errorMessage: String): Unit = DatabaseFactory.dbQuery {
-        Dsls.update({ (Dsls.id eq id) and Dsls.jar.isNull() and (Dsls.jobSecret eq secret)}) {
+        val secretBytes = Base64.getDecoder().decode(secret)
+        Dsls.update({ (Dsls.id eq id) and Dsls.jar.isNull() and (Dsls.jobSecret eq secretBytes)}) {
             it[Dsls.errorMessage] = errorMessage
             it[status] = Status.Failed
             it[jobSecret] = null

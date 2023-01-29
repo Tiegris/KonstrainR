@@ -8,8 +8,8 @@ data class IdDto(val id: Int)
 fun Int.toIdDto() = IdDto(this)
 
 @Serializable
-data class DslConciseDto(val id: Int, val name: String)
-fun Dsl.toConciseDto() = DslConciseDto(id.value, name)
+data class DslConciseDto(val id: Int, val name: String, val status: String)
+fun Dsl.toConciseDto() = DslConciseDto(id.value, name, status.name)
 
 @Serializable
 data class DslDetailedDto(
