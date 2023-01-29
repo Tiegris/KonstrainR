@@ -8,9 +8,9 @@ val kubernetes_client_version: String by project
 
 plugins {
     application
-    kotlin("jvm") version "1.7.20"
-    id("io.ktor.plugin") version "2.1.3"
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.7.20"
+    kotlin("jvm") version "1.8.0"
+    id("io.ktor.plugin") version "2.2.2"
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.8.0"
 }
 
 group = "me.btieger"
@@ -26,7 +26,7 @@ ktor {
     docker {
         jreVersion.set(io.ktor.plugin.features.JreVersion.JRE_17)
         localImageName.set("tiegris/konstrainer-core")
-        imageTag.set("0.0.1-snapshot")
+        imageTag.set("$version")
     }
 }
 

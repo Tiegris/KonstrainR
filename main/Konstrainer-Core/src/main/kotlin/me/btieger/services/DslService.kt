@@ -10,6 +10,7 @@ import me.btieger.persistance.DatabaseFactory
 import me.btieger.persistance.tables.Dsl
 import me.btieger.persistance.tables.Dsls
 import me.btieger.persistance.tables.Status
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.statements.api.ExposedBlob
