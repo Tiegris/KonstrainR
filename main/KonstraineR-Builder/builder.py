@@ -2,9 +2,10 @@ import os
 import requests
 
 class Compilation():
-    def __init__(self, base_url: str, dsl_id: int):
+    def __init__(self, base_url: str, dsl_id: int, secret: str):
         self._base_url = base_url.strip('/')
         self._dsl_id = dsl_id
+        self._secret = secret
 
     def download(self) -> str:
         dsl_file = requests.get(f'{self._base_url}/dsl/{self._dsl_id}/file')
@@ -26,7 +27,7 @@ class Compilation():
         return file_bytes
 
     def upload(self, data: bytes):
-        response = requests.post(f'{self._base_url}/jars/{self._dsl_id}', data) # TODO url finalize
+        response = requests.post(f'{self._base_url}/{self._dsl_id}/jar', data, headers={ "Authorization" : self._secret }) # TODO url finalize
         if response.status_code == 200:
             return
         raise Exception(f"Status code of upload was: {response.status_code}, message: {response.text}")
@@ -34,9 +35,11 @@ class Compilation():
 
 def main():
     base_url = os.environ.get("KSR_CORE_BASE_URL")
+    base_url = f'http://{base_url}/api/v1/dsls'
     dsl_id = os.environ.get("KSR_DSL_ID")
+    secret = os.environ.get("KSR_SECRET")
     try:
-        c = Compilation(base_url, dsl_id)
+        c = Compilation(base_url, dsl_id, secret)
         dsl_text = c.download()
         c.arrange(dsl_text)
         c.compile()
@@ -44,8 +47,7 @@ def main():
         c.upload(jar)
     except Exception as e:
         # Report failed build
-        requests.post(f'{base_url}/jars/{dsl_id}', 
-          {'buildResult':'Fail', 'message': f'{str(e)}'}) # TODO url finalize
+        requests.post(f'{base_url}/{dsl_id}/jar', str(e), headers={ "Authorization" : secret }) # TODO url finalize
 
 if __name__ == "__main__":
     main()

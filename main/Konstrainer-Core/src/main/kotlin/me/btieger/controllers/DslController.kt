@@ -38,15 +38,16 @@ fun Application.dslController() {
             // Upload compiled DSL JAR
             post("{id}/jar") {
                 val id = call.id
+                val secret = call.request.headers["Authorization"] ?: return@post badRequest()
                 val contentType = call.contentType
                 if (contentType.match(ContentType.Text.Plain)) {
                     val errorReport: String = call.receive()
-                    dslService.setError(id, errorReport)
+                    dslService.setError(id, secret, errorReport)
                     return@post ok()
                 }
                 if (contentType.match("application/java-archive")) {
                     val jarBytes: ByteArray = call.receive()
-                    dslService.setJar(id, jarBytes)
+                    dslService.setJar(id, secret, jarBytes)
                     return@post ok()
                 }
                 badRequest()

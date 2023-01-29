@@ -24,8 +24,8 @@ interface DslService {
     suspend fun getFile(id: Int): String?
     suspend fun getDetails(id: Int): DslDetailedDto?
     suspend fun createDsl(name: String, content: ByteArray): DslDetailedDto?
-    suspend fun setJar(id: Int, jarBytes: ByteArray)
-    suspend fun setError(id: Int, errorMessage: String)
+    suspend fun setJar(id: Int, secret: String, jarBytes: ByteArray)
+    suspend fun setError(id: Int, secret: String, errorMessage: String)
     suspend fun deleteDsl(id: Int): Boolean
 }
 
@@ -52,6 +52,8 @@ class DslServiceImpl : DslService {
         val secretBytes = ByteArray(1024)
         SecureRandom().nextBytes(secretBytes)
         val secret = String(Base64.getEncoder().encode(secretBytes))
+        // TODO review token security
+
         val result = Dsl.new {
             this.name = name
             this.file = ExposedBlob(content)
@@ -59,26 +61,26 @@ class DslServiceImpl : DslService {
             this.jobSecret = secret
             this.buildSubmissionTime = LocalDateTime.now()
         }
-        val builderJob = makeBuilderJob(result.id.value)
+        val builderJob = makeBuilderJob(result.id.value, secret)
         K8s.create(builderJob)
         result.toDetailedDto()
     }
 
-    override suspend fun setJar(id: Int, jarBytes: ByteArray): Unit = DatabaseFactory.dbQuery {
-        TODO("VALIDATE TOKEN")
-        Dsls.update({ Dsls.id eq id and Dsls.jar.isNull() }) {
+    override suspend fun setJar(id: Int, secret: String, jarBytes: ByteArray): Unit = DatabaseFactory.dbQuery {
+        Dsls.update({ Dsls.id eq id and Dsls.jar.isNull() and (Dsls.jobSecret eq secret)}) {
             it[jar] = ExposedBlob(jarBytes)
             it[buildSubmissionTime] = null
             it[errorMessage] = null
+            it[jobSecret] = null
             it[status] = Status.Ready
         }
     }
 
-    override suspend fun setError(id: Int, errorMessage: String): Unit = DatabaseFactory.dbQuery {
-        TODO("VALIDATE TOKEN")
-        Dsls.update({ (Dsls.id eq id) and Dsls.jar.isNull() }) {
+    override suspend fun setError(id: Int, secret: String, errorMessage: String): Unit = DatabaseFactory.dbQuery {
+        Dsls.update({ (Dsls.id eq id) and Dsls.jar.isNull() and (Dsls.jobSecret eq secret)}) {
             it[Dsls.errorMessage] = errorMessage
             it[status] = Status.Failed
+            it[jobSecret] = null
         }
     }
 
