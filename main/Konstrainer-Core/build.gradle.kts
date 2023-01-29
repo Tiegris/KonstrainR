@@ -14,12 +14,20 @@ plugins {
 }
 
 group = "me.btieger"
-version = "0.0.1"
+version = "0.0.1-snapshot"
 application {
     mainClass.set("me.btieger.ApplicationKt")
 
     val isDevelopment: Boolean = project.ext.has("development")
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
+}
+
+ktor {
+    docker {
+        jreVersion.set(io.ktor.plugin.features.JreVersion.JRE_17)
+        localImageName.set("tiegris/konstrainer-core")
+        imageTag.set("0.0.1-snapshot")
+    }
 }
 
 repositories {
