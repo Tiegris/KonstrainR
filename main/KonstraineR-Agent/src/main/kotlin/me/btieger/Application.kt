@@ -1,15 +1,15 @@
 package me.btieger
 
-import io.ktor.network.tls.certificates.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
+import me.btieger.loader.Loader
 import me.btieger.plugins.*
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileInputStream
+import java.nio.file.Path
 import java.security.KeyStore
-import java.security.cert.X509Certificate
 
 
 fun main() {
@@ -39,8 +39,10 @@ fun main() {
 }
 
 fun Application.module() {
+    val rulesJarLocation = System.getenv("KSR_RULES_JAR_PATH") ?: "/app/ruleset.jar"
+    val ruleset = Loader("DslInstanceKt").loadServer(rulesJarLocation)
     configureHTTP()
     configureSerialization()
     configureAdministration()
-    configureRouting(server)
+    configureRouting(ruleset)
 }

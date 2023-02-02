@@ -10,13 +10,13 @@ import kotlinx.serialization.json.*
 import me.btieger.dsl.*
 import me.btieger.toBase64
 
-fun Application.configureRouting(model: Server) {
+fun Application.configureRouting(ruleset: Server) {
 
     routing {
         get("/") {
             call.respondText("OK")
         }
-        model.rules.forEach {
+        ruleset.rules.forEach {
             val rule = it
             post(rule.path) {
                 val body: JsonObject = call.receive()

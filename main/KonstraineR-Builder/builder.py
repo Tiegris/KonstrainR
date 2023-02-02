@@ -12,6 +12,7 @@ class Compilation():
         return dsl_file.text
 
     def arrange(self, dsl_text: str):
+        # remove package
         if dsl_text.startswith("package"):
             dsl_text = dsl_text.split("\n",maxsplit=1)
         with open("/app/framework/lib/src/main/kotlin/DslInstance.kt", "w") as f:

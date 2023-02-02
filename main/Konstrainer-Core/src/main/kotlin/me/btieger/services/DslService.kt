@@ -4,7 +4,7 @@ import me.btieger.domain.DslConciseDto
 import me.btieger.domain.DslDetailedDto
 import me.btieger.domain.toConciseDto
 import me.btieger.domain.toDetailedDto
-import me.btieger.logic.kelm.K8s
+import me.btieger.logic.kelm.kubectl
 import me.btieger.logic.kelm.resources.makeBuilderJob
 import me.btieger.persistance.DatabaseFactory
 import me.btieger.persistance.tables.Dsl
@@ -50,9 +50,9 @@ class DslServiceImpl : DslService {
     }
 
     override suspend fun createDsl(name: String, content: ByteArray) = DatabaseFactory.dbQuery {
-        val secretBytes = ByteArray(64)
+        val secretBytes = ByteArray(64) // 512 bit token
         SecureRandom().nextBytes(secretBytes)
-        val secret = String(Base64.getEncoder().encode(secretBytes))
+        val secretEncoded = String(Base64.getEncoder().encode(secretBytes))
         // TODO review token security
 
         val result = Dsl.new {
@@ -62,14 +62,14 @@ class DslServiceImpl : DslService {
             this.jobSecret = secretBytes
             this.buildSubmissionTime = LocalDateTime.now()
         }
-        val builderJob = makeBuilderJob(result.id.value, secret)
-        K8s.create(builderJob)
+        val builderJob = makeBuilderJob(result.id.value, secretEncoded)
+        kubectl.create(builderJob)
         result.toDetailedDto()
     }
 
     override suspend fun setJar(id: Int, secret: String, jarBytes: ByteArray): Unit = DatabaseFactory.dbQuery {
         val secretBytes = Base64.getDecoder().decode(secret)
-        Dsls.update({ Dsls.id eq id and Dsls.jar.isNull() and (Dsls.jobSecret eq secretBytes)}) {
+        Dsls.update({ Dsls.id eq id and Dsls.jar.isNull() and (Dsls.jobSecret eq secretBytes) }) {
             it[jar] = ExposedBlob(jarBytes)
             it[buildSubmissionTime] = null
             it[errorMessage] = null
@@ -80,7 +80,7 @@ class DslServiceImpl : DslService {
 
     override suspend fun setError(id: Int, secret: String, errorMessage: String): Unit = DatabaseFactory.dbQuery {
         val secretBytes = Base64.getDecoder().decode(secret)
-        Dsls.update({ (Dsls.id eq id) and Dsls.jar.isNull() and (Dsls.jobSecret eq secretBytes)}) {
+        Dsls.update({ (Dsls.id eq id) and Dsls.jar.isNull() and (Dsls.jobSecret eq secretBytes) }) {
             it[Dsls.errorMessage] = errorMessage
             it[status] = Status.Failed
             it[jobSecret] = null

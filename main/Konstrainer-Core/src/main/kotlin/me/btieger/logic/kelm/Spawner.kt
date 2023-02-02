@@ -9,13 +9,13 @@ import me.btieger.logic.kelm.resources.service
 
 private val client = KubernetesClientBuilder().build()
 
-object K8s {
+object kubectl {
     fun create(resource: HasMetadata) {
         client.resource(resource).create()
     }
 }
 
-object Kelm {
+object kelm {
 
     fun install(server: Server) {
         client.resource(mutatingWebhookConfiguration(server)).createOrReplace()
