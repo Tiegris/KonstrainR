@@ -9,41 +9,36 @@ import me.btieger.notFound
 import me.btieger.ok
 import me.btieger.persistance.tables.Server
 
-/*
+
 fun Application.serverController() {
-    routing {
-        route("/server") {
-            get {
-                val res = serverService.all()
-                ok(res)
-            }
-            get("/{id}") {
-                val id = call.id
-                val res = serverService.read(id, Server::) ?: return@get notFound()
-                ok(res)
-            }
-            get("/{id}/file") {
-                val id = call.id
-                val file = serverService.read(id) { jar.bytes } ?: return@get notFound()
-                ok(file)
-            }
-            post {
-                val body = call.receive<CreateServerDto>()
-                val result = serverService.create(body)
+//    routing {
+//        route("/server") {
+//            get {
+//                val res = serverService.all()
+//                ok(res)
+//            }
+//            get("/{id}") {
+//                val id = call.id
+//                val res = serverService.read(id, Server::) ?: return@get notFound()
+//                ok(res)
+//            }
+//            post {
+//                val body = call.receive<CreateServerDto>()
+//                val result = serverService.create(body)
+//
+//                result?.let{
+//                    ok(it)
+//                } ?: notFound()
+//            }
+//            delete("/{id}") {
+//                val id = call.id
+//                val result = serverService.delete(id)
+//                if (result)
+//                    ok()
+//                else
+//                    notFound()
+//            }
+//        }
+//    }
 
-                result?.let{
-                    ok(it)
-                } ?: notFound()
-            }
-            delete("/{id}") {
-                val id = call.id
-                val result = serverService.delete(id)
-                if (result)
-                    ok()
-                else
-                    notFound()
-            }
-        }
-    }
-
-}*/
+}
