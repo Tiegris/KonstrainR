@@ -1,0 +1,23 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "konstrainr-core.fullname" . }}
+rules:
+- apiGroups: ["batch"]
+  resources: ["jobs"]
+  verbs: ["*"]
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "konstrainr-core.fullname" . }}
+subjects:
+- kind: ServiceAccount
+  name: {{ include "konstrainr-core.serviceAccountName" . }}
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: {{ include "konstrainr-core.fullname" . }}
+  apiGroup: rbac.authorization.k8s.io
