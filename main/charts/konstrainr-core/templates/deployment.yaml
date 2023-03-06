@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "konstrainr-core.fullname" . }}
-  {{ include "konstrainr-core.namespace" . | nindent 2}}
   labels:
     {{- include "konstrainr-core.labels" . | nindent 4 }}
 spec:
@@ -35,6 +34,8 @@ spec:
           env:
           - name: KSR_SERVICE_NAME
             value: {{ include "konstrainr-core.fullname" . }}
+          - name: KSR_NAMESPACE
+            value: {{ .Release.Namespace }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}

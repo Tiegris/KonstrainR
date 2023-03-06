@@ -1,6 +1,3 @@
-namespaces:
-  main: "konstrainr-ns"
-
 image:
   repository: tiegris/konstrainer-core
   pullPolicy: Always
