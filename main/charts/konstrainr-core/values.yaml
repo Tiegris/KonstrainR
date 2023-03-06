@@ -1,8 +1,11 @@
+namespaces:
+  main: "konstrainr-ns"
+
 image:
   repository: tiegris/konstrainer-core
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "0.0.1-snapshot"
+  tag: "0.0.1-snapshot-230306-b"
 
 imagePullSecrets: []
 nameOverride: ""
