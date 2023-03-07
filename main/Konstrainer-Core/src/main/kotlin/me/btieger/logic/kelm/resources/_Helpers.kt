@@ -2,10 +2,7 @@ package me.btieger.logic.kelm.resources
 
 import io.fabric8.kubernetes.api.model.HasMetadata
 import io.fabric8.kubernetes.api.model.ObjectMeta
-
-const val agentNamespace = "konstrainer-ns"
-const val jobsNamespace = "konstrainer-ns"
-const val coreNamespace = "konstrainer-ns"
+import me.btieger.configuration
 
 fun ObjectMeta.labels(_name: String) = apply {
     labels = mapOf(
@@ -17,7 +14,7 @@ fun ObjectMeta.labels(_name: String) = apply {
 fun HasMetadata.metadata(_name: String) = apply {
     metadata = ObjectMeta().apply {
         name = _name
-        namespace = agentNamespace
+        namespace = configuration.namespace
         labels(_name)
     }
 }

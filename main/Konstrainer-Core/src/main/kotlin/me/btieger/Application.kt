@@ -14,7 +14,7 @@ class Configuration(val serviceName: String, val builderImage: String, val build
 val configuration = Configuration(
     System.getenv("KSR_SERVICE_NAME"),
     System.getenv("KSR_BUILDER_JOB_IMAGE") ?: "tiegris/konstrainer-builder:dev",
-    System.getenv("KSR_BUILDER_JOB_TTL_MINUTES")?.toInt() ?: 15,
+    System.getenv("KSR_BUILDER_JOB_TTL_MINUTES")?.toInt() ?: 1,
     System.getenv("KSR_NAMESPACE") ?: "konstrainer-ns",
 )
 

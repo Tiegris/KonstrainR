@@ -3,6 +3,7 @@ package me.btieger.logic.kelm.resources
 import com.fkorotkov.kubernetes.admissionregistration.v1.*
 import me.btieger.dsl.*
 import io.fabric8.kubernetes.api.model.admissionregistration.v1.MutatingWebhookConfiguration
+import me.btieger.configuration
 
 
 fun mutatingWebhookConfiguration(server: Server) =
@@ -17,7 +18,7 @@ fun mutatingWebhookConfiguration(server: Server) =
                     caBundle = "TODO caAsString"
                     service {
                         name = server.whName
-                        namespace = agentNamespace
+                        namespace = configuration.namespace
                         path = "TODO"
                     }
                 }

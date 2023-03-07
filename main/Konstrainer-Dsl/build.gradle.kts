@@ -29,7 +29,7 @@ dependencies {
 
     //implementation("io.github.serpro69:kotlin-faker:1.12.0")
 
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
+    api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
 }
 
 tasks.test {

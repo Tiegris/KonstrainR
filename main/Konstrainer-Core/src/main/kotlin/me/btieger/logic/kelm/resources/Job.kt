@@ -10,7 +10,7 @@ fun makeBuilderJob(dslId: Int, secret: String): Job {
     return Job().apply {
         metadata {
             name = _name
-            namespace = jobsNamespace
+            namespace = configuration.namespace
             labels = mapOf(
                 "app" to _name,
                 "managedBy" to "konstrainer",
