@@ -1,9 +1,10 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
+val kotlin_version: String by project
+
 plugins {
-    kotlin("jvm") version "1.7.20"
-    application
-    kotlin("plugin.serialization") version "1.7.20"
+    kotlin("jvm") version "1.8.10"
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.8.10"
     `maven-publish`
 }
 
@@ -25,9 +26,10 @@ publishing {
 
 dependencies {
     testImplementation(kotlin("test"))
-    implementation("com.lordcodes.turtle:turtle:0.8.0")
-    implementation("io.github.serpro69:kotlin-faker:1.12.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
+
+    //implementation("io.github.serpro69:kotlin-faker:1.12.0")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
 }
 
 tasks.test {
@@ -35,9 +37,5 @@ tasks.test {
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "11"
-}
-
-application {
-    mainClass.set("MainKt")
+    kotlinOptions.jvmTarget = "17"
 }

@@ -54,16 +54,21 @@ fun Application.dslController() {
             }
             // Upload DSL source code
             post {
-                val multipartData = call.receiveMultipart()
-                multipartData.forEachPart { part ->
-                    if (part is PartData.FileItem) {
-                        val filename = part.originalFileName
-                            ?: return@forEachPart badRequest("No file name")
-                        val fileBytes = part.streamProvider().readBytes()
-                        val result = dslService.createDsl(filename, fileBytes)
-                            ?: return@forEachPart internalServerError("Could not upload file")
-                        created(result)
+                try {
+                    val multipartData = call.receiveMultipart()
+                    multipartData.forEachPart { part ->
+                        if (part is PartData.FileItem) {
+                            val filename = part.originalFileName
+                                ?: return@forEachPart badRequest("No file name")
+                            val fileBytes = part.streamProvider().readBytes()
+                            val result = dslService.createDsl(filename, fileBytes)
+                                ?: return@forEachPart internalServerError("Could not upload file")
+                            created(result)
+                        }
                     }
+                } catch (e: Exception) {
+                    logger.error(e.message)
+                    logger.error(e.stackTraceToString())
                 }
             }
             // Delete DSL entity

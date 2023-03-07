@@ -7,14 +7,13 @@ val kubernetes_dsl_version: String by project
 val kubernetes_client_version: String by project
 
 plugins {
-    application
-    kotlin("jvm") version "1.8.0"
-    id("io.ktor.plugin") version "2.2.2"
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.8.0"
+    kotlin("jvm") version "1.8.10"
+    id("io.ktor.plugin") version "2.2.4"
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.8.10"
 }
 
 group = "me.btieger"
-version = "0.0.1-snapshot"
+version = "0.0.1-snapshot-230306-b"
 application {
     mainClass.set("me.btieger.ApplicationKt")
 
@@ -38,9 +37,9 @@ repositories {
 
 dependencies {
     implementation("com.github.fkorotkov:k8s-kotlin-dsl:${kubernetes_dsl_version}")
+    implementation("io.fabric8:kubernetes-client:${kubernetes_client_version}")
 
     implementation("me.btieger:KonstrainerDsl:0.0.1-SNAPSHOT")
-
 
     implementation("io.ktor:ktor-network-tls-certificates:$ktor_version")
     implementation("com.lordcodes.turtle:turtle:0.8.0")
@@ -48,12 +47,14 @@ dependencies {
     implementation("io.ktor:ktor-client-core:$ktor_version")
     implementation("io.ktor:ktor-client-cio:$ktor_version")
 
-    implementation("io.fabric8:kubernetes-client:${kubernetes_client_version}")
     implementation("io.ktor:ktor-server-core-jvm:$ktor_version")
     implementation("io.ktor:ktor-server-content-negotiation-jvm:$ktor_version")
     implementation("io.ktor:ktor-serialization-kotlinx-json-jvm:$ktor_version")
     implementation("io.ktor:ktor-server-netty-jvm:$ktor_version")
+
+    implementation("io.ktor:ktor-server-call-logging-jvm:$ktor_version")
     implementation("ch.qos.logback:logback-classic:$logback_version")
+
     testImplementation("io.ktor:ktor-server-tests-jvm:$ktor_version")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
 

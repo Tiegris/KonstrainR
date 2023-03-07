@@ -3,8 +3,8 @@ package me.btieger.logic.kelm.resources
 import io.fabric8.kubernetes.api.model.HasMetadata
 import io.fabric8.kubernetes.api.model.ObjectMeta
 
-const val agentNamespace = "konstrainer-agents-ns"
-const val jobsNamespace = "konstrainer-jobs-ns"
+const val agentNamespace = "konstrainer-ns"
+const val jobsNamespace = "konstrainer-ns"
 const val coreNamespace = "konstrainer-ns"
 
 fun ObjectMeta.labels(_name: String) = apply {
