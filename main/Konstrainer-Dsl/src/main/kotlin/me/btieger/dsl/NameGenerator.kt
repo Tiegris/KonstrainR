@@ -1,3 +1,4 @@
+/*
 package me.btieger.dsl
 
 import io.github.serpro69.kfaker.faker
@@ -16,3 +17,4 @@ internal fun randomName(obj: Any): String {
 internal fun String.join(): String {
     return this.split(" ").joinToString { it.replaceFirst(it.first(), it.first().uppercaseChar()) }
 }
+*/
