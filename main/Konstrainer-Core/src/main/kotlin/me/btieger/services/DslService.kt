@@ -1,5 +1,6 @@
 package me.btieger.services
 
+import io.ktor.util.logging.*
 import me.btieger.domain.DslConciseDto
 import me.btieger.domain.DslDetailedDto
 import me.btieger.domain.toConciseDto
@@ -13,8 +14,10 @@ import me.btieger.persistance.tables.Status
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
+import org.jetbrains.exposed.sql.exposedLogger
 import org.jetbrains.exposed.sql.statements.api.ExposedBlob
 import org.jetbrains.exposed.sql.update
+import org.slf4j.LoggerFactory
 import java.security.SecureRandom
 import java.time.LocalDateTime
 import java.util.*
@@ -31,6 +34,8 @@ interface DslService {
 }
 
 class DslServiceImpl : DslService {
+    val logger = LoggerFactory.getLogger("DslService")
+
     override suspend fun all() = DatabaseFactory.dbQuery {
         Dsl.all().map(Dsl::toConciseDto)
     }
@@ -61,32 +66,51 @@ class DslServiceImpl : DslService {
             this.buildSubmissionTime = LocalDateTime.now()
         }
         val builderJob = makeBuilderJob(result.id.value, secretEncoded)
-        kubectl.create(builderJob)
+        try {
+            kubectl.create(builderJob)
+        } catch (e: Exception) {
+            logger.error("Failed to spawn k8s job")
+            throw e
+        }
+        logger.info("Started k8s job named: `{}` in the namespace: `{}`", "${builderJob.fullResourceName}/${builderJob.metadata.name}", builderJob.metadata.namespace)
         result.toDetailedDto()
     }
 
     override suspend fun setJar(id: Int, secret: String, jarBytes: ByteArray): Unit = DatabaseFactory.dbQuery {
         val secretBytes = Base64.getDecoder().decode(secret)
-        Dsls.update({ Dsls.id eq id and Dsls.jar.isNull() and (Dsls.jobSecret eq secretBytes) }) {
+        val success = Dsls.update({ Dsls.id eq id and Dsls.jar.isNull() and (Dsls.jobSecret eq secretBytes) }) {
             it[jar] = ExposedBlob(jarBytes)
             it[buildSubmissionTime] = null
             it[errorMessage] = null
             it[jobSecret] = null
             it[status] = Status.Ready
-        }
+        } > 0
+        if (!success)
+            logger.warn("Failed JAR upload attempt, dsl.id: `{}`", id)
+        else
+            logger.info("Successful JAR upload, dsl.id: `{}`", id)
     }
 
     override suspend fun setError(id: Int, secret: String, errorMessage: String): Unit = DatabaseFactory.dbQuery {
         val secretBytes = Base64.getDecoder().decode(secret)
-        Dsls.update({ (Dsls.id eq id) and Dsls.jar.isNull() and (Dsls.jobSecret eq secretBytes) }) {
+        val success= Dsls.update({ (Dsls.id eq id) and Dsls.jar.isNull() and (Dsls.jobSecret eq secretBytes) }) {
             it[Dsls.errorMessage] = errorMessage
             it[status] = Status.Failed
             it[jobSecret] = null
-        }
+        } > 0
+        if (!success)
+            logger.warn("Failed build error report upload attempt, dsl.id: `{}`", id)
+        else
+            logger.info("Successful build error report upload, dsl.id: `{}`", id)
     }
 
     override suspend fun deleteDsl(id: Int) = DatabaseFactory.dbQuery {
-        Dsls.deleteWhere { Dsls.id eq id } > 0
+        val success = Dsls.deleteWhere { Dsls.id eq id } > 0
+        if (!success)
+            logger.info("Failed delete dsl, dsl.id: `{}`", id)
+        else
+            logger.info("Deleted dsl, dsl.id: `{}`", id)
+        success
     }
 
 }

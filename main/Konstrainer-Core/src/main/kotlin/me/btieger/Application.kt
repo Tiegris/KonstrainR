@@ -8,6 +8,8 @@ import me.btieger.controllers.dslController
 import me.btieger.controllers.echoController
 import me.btieger.persistance.DatabaseFactory
 import me.btieger.plugins.configureSerialization
+import me.btieger.services.DslService
+import me.btieger.services.DslServiceImpl
 import org.slf4j.event.Level
 
 class Configuration(val serviceName: String, val builderImage: String, val buildJobTtlMinutes: Int, val namespace: String)
