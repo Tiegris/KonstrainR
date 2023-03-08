@@ -114,5 +114,3 @@ class DslServiceImpl : DslService {
     }
 
 }
-
-val dslService: DslService = DslServiceImpl()

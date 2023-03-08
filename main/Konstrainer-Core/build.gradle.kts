@@ -5,6 +5,7 @@ val exposed_version: String by project
 val h2_version: String by project
 val kubernetes_dsl_version: String by project
 val kubernetes_client_version: String by project
+val koin_version: String by project
 
 plugins {
     kotlin("jvm") version "1.8.10"
@@ -45,6 +46,8 @@ dependencies {
     implementation("io.ktor:ktor-server-content-negotiation-jvm:$ktor_version")
     implementation("io.ktor:ktor-serialization-kotlinx-json-jvm:$ktor_version")
     implementation("io.ktor:ktor-server-netty-jvm:$ktor_version")
+
+    implementation("io.insert-koin:koin-ktor:$koin_version")
 
     implementation("io.ktor:ktor-server-call-logging-jvm:$ktor_version")
     implementation("ch.qos.logback:logback-classic:$logback_version")

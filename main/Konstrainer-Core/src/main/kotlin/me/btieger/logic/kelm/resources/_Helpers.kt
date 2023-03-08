@@ -2,7 +2,7 @@ package me.btieger.logic.kelm.resources
 
 import io.fabric8.kubernetes.api.model.HasMetadata
 import io.fabric8.kubernetes.api.model.ObjectMeta
-import me.btieger.configuration
+import me.btieger.config
 
 fun ObjectMeta.labels(_name: String) = apply {
     labels = mapOf(
@@ -14,7 +14,7 @@ fun ObjectMeta.labels(_name: String) = apply {
 fun HasMetadata.metadata(_name: String) = apply {
     metadata = ObjectMeta().apply {
         name = _name
-        namespace = configuration.namespace
+        namespace = config.namespace
         labels(_name)
     }
 }

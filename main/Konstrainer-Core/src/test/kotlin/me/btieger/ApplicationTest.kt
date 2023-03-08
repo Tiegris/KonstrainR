@@ -1,5 +1,6 @@
 package me.btieger
 
+import io.ktor.client.call.*
 import io.ktor.server.routing.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
@@ -17,17 +18,29 @@ import me.btieger.persistance.DatabaseFactory
 import me.btieger.plugins.*
 
 class ApplicationTest {
+
     @Test
-    fun testRoot() = testApplication {
+    fun testEcho() = testApplication {
         application {
             configureSerialization()
             echoController()
-            dslController()
-            DatabaseFactory.init()
         }
         client.get("/").apply {
             assertEquals(HttpStatusCode.OK, status)
-            assertEquals("Hello World!", bodyAsText())
+            assertEquals("got it", bodyAsText())
         }
     }
+
+//    @Test
+//    fun testEmtpy() = testApplication {
+//        application {
+//            module()
+//        }
+//        client.get("/api/v1/dsls").apply {
+//            assertEquals(HttpStatusCode.OK, status)
+//
+//            assertEquals("[]", bodyAsText())
+//        }
+//    }
+
 }

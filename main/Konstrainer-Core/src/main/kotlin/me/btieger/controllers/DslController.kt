@@ -6,10 +6,12 @@ import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.routing.*
 import me.btieger.*
-import me.btieger.services.dslService
+import me.btieger.services.DslService
+import org.koin.ktor.ext.inject
 
 const val apiVersion = "v1"
 fun Application.dslController() {
+    val dslService by inject<DslService>()
     routing {
         route("/api/$apiVersion/dsls") {
             // Return all DLS infos (brief)

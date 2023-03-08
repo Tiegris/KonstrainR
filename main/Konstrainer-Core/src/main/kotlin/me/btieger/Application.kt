@@ -10,22 +10,43 @@ import me.btieger.persistance.DatabaseFactory
 import me.btieger.plugins.configureSerialization
 import me.btieger.services.DslService
 import me.btieger.services.DslServiceImpl
+import org.koin.dsl.module
+import org.koin.ktor.plugin.Koin
 import org.slf4j.event.Level
 
-class Configuration(val serviceName: String, val builderImage: String, val buildJobTtlMinutes: Int, val namespace: String)
-val configuration = Configuration(
-    System.getenv("KSR_SERVICE_NAME"),
-    System.getenv("KSR_BUILDER_JOB_IMAGE") ?: "tiegris/konstrainer-builder:dev",
-    System.getenv("KSR_BUILDER_JOB_TTL_MINUTES")?.toInt() ?: 1,
-    System.getenv("KSR_NAMESPACE") ?: "konstrainer-ns",
-)
+
+@Suppress("ClassName")
+object config : EnvVarSettings("KSR_") {
+    val serviceName by string()
+    val builderImage by string("tiegris/konstrainer-builder:dev")
+    val builderJobTtlMinutes by int(1)
+    val namespace by string("konstrainer-ns")
+    val port by int(8080)
+    val host by string("0.0.0.0")
+
+    init {
+        loadAll()
+    }
+}
+
 
 fun main() {
-    embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = Application::module)
+    embeddedServer(Netty,
+        port = config.port,
+        host = config.host,
+        module = Application::module)
         .start(wait = true)
 }
 
+
 fun Application.module() {
+    install(Koin) {
+        modules(
+            module {
+                single<DslService> { DslServiceImpl() }
+            }
+        )
+    }
     install(CallLogging) {
         level = Level.INFO
     }
