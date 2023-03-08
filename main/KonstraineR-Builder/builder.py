@@ -35,6 +35,7 @@ class Compilation():
 
     def compile(self):
         os.chdir('/app/framework')
+        logger.error("Compilation started")
         result = subprocess.run(['./gradlew', 'jar'], stdout=subprocess.PIPE)
         if result.returncode != 0:
             logger.error("Compilation failed")
@@ -49,7 +50,7 @@ class Compilation():
         return file_bytes
 
     def upload(self, data: bytes):
-        response = requests.post(f'{self._base_url}/{self._dsl_id}/jar', data, headers={ "Authorization" : self._secret })
+        response = requests.post(f'{self._base_url}/{self._dsl_id}/jar', data, headers={ "Authorization" : self._secret, "Content-Type": "application/java-archive" })
         if response.status_code == 200:
             logger.info(f"Upload was successful")
         else:
@@ -72,7 +73,7 @@ def main():
     except Exception as e:
         # Report failed build
         try:
-            requests.post(f'{base_url}/{dsl_id}/jar', str(e), headers={ "Authorization" : secret })
+            requests.post(f'{base_url}/{dsl_id}/jar', str(e), headers={ "Authorization" : secret, "Content-Type": "text/plain" })
         except:
             logger.fatal(f"There was an error during build and the message could not be uploaded to KontraineR-Core. Message: {e}")
             sys.exit(1)
