@@ -14,12 +14,6 @@ plugins {
 
 group = "me.btieger"
 version = "0.0.1-snapshot-230306-b"
-application {
-    mainClass.set("me.btieger.ApplicationKt")
-
-    val isDevelopment: Boolean = project.ext.has("development")
-    applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
-}
 
 ktor {
     docker {

@@ -25,6 +25,7 @@ fun makeBuilderJob(dslId: Int, secret: String): Job {
                     containers = listOf(
                         newContainer {
                             name = "builder"
+                            imagePullPolicy = "Always"
                             image = configuration.builderImage
                             env = listOf(
                                 newEnvVar {

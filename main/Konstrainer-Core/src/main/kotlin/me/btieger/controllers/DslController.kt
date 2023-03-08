@@ -14,47 +14,57 @@ fun Application.dslController() {
         route("/api/$apiVersion/dsls") {
             // Return all DLS infos (brief)
             get {
-                val res = dslService.all()
-                ok(res)
+                exceptionGuard {
+                    val res = dslService.all()
+                    ok(res)
+                }
             }
             // Return DSL info by id (detailed)
             get("{id}") {
-                val id = call.id
-                val res = dslService.getDetails(id) ?: return@get notFound()
-                ok(res)
+                exceptionGuard {
+                    val id = call.id
+                    val res = dslService.getDetails(id) ?: return@get notFound()
+                    ok(res)
+                }
             }
             // Return textual DSL file
             get("{id}/file") {
-                val id = call.id
-                val file = dslService.getFile(id) ?: return@get notFound()
-                ok(file)
+                exceptionGuard {
+                    val id = call.id
+                    val file = dslService.getFile(id) ?: return@get notFound()
+                    ok(file)
+                }
             }
             // Return compiled DSL JAR
             get("{id}/jar") {
-                val id = call.id
-                val file = dslService.getJar(id) ?: return@get notReady()
-                ok(file)
+                exceptionGuard {
+                    val id = call.id
+                    val file = dslService.getJar(id) ?: return@get notReady()
+                    ok(file)
+                }
             }
             // Upload compiled DSL JAR
             post("{id}/jar") {
-                val id = call.id
-                val secret = call.request.headers["Authorization"] ?: return@post badRequest()
-                val contentType = call.contentType
-                if (contentType.match(ContentType.Text.Plain)) {
-                    val errorReport: String = call.receive()
-                    dslService.setError(id, secret, errorReport)
-                    return@post ok()
+                exceptionGuard {
+                    val id = call.id
+                    val secret = call.request.headers["Authorization"] ?: return@post badRequest()
+                    val contentType = call.contentType
+                    if (contentType.match(ContentType.Text.Plain)) {
+                        val errorReport: String = call.receive()
+                        dslService.setError(id, secret, errorReport)
+                        return@post ok()
+                    }
+                    if (contentType.match("application/java-archive")) {
+                        val jarBytes: ByteArray = call.receive()
+                        dslService.setJar(id, secret, jarBytes)
+                        return@post ok()
+                    }
+                    badRequest()
                 }
-                if (contentType.match("application/java-archive")) {
-                    val jarBytes: ByteArray = call.receive()
-                    dslService.setJar(id, secret, jarBytes)
-                    return@post ok()
-                }
-                badRequest()
             }
             // Upload DSL source code
             post {
-                try {
+                exceptionGuard {
                     val multipartData = call.receiveMultipart()
                     multipartData.forEachPart { part ->
                         if (part is PartData.FileItem) {
@@ -66,19 +76,18 @@ fun Application.dslController() {
                             created(result)
                         }
                     }
-                } catch (e: Exception) {
-                    logger.error(e.message)
-                    logger.error(e.stackTraceToString())
                 }
             }
             // Delete DSL entity
             delete("{id}") {
-                val id = call.id
-                val result = dslService.deleteDsl(id)
-                if (result)
-                    ok()
-                else
-                    notFound()
+                exceptionGuard {
+                    val id = call.id
+                    val result = dslService.deleteDsl(id)
+                    if (result)
+                        ok()
+                    else
+                        notFound()
+                }
             }
         }
 

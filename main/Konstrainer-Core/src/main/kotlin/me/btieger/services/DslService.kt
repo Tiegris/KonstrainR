@@ -22,7 +22,7 @@ import java.util.*
 interface DslService {
     suspend fun all(): List<DslConciseDto>
     suspend fun getJar(id: Int): ByteArray?
-    suspend fun getFile(id: Int): String?
+    suspend fun getFile(id: Int): ByteArray?
     suspend fun getDetails(id: Int): DslDetailedDto?
     suspend fun createDsl(name: String, content: ByteArray): DslDetailedDto?
     suspend fun setJar(id: Int, secret: String, jarBytes: ByteArray)
@@ -36,13 +36,11 @@ class DslServiceImpl : DslService {
     }
 
     override suspend fun getJar(id: Int) = DatabaseFactory.dbQuery {
-        Dsl.findById(id)?.jar?.bytes
+        Dsl.findById(id)?.jar?.let { it.inputStream.readAllBytes() }
     }
 
     override suspend fun getFile(id: Int) = DatabaseFactory.dbQuery {
-        Dsl.findById(id)?.let {
-            String(it.file.bytes)
-        }
+        Dsl.findById(id)?.let { it.file.inputStream.readAllBytes() }
     }
 
     override suspend fun getDetails(id: Int) = DatabaseFactory.dbQuery {
@@ -63,7 +61,7 @@ class DslServiceImpl : DslService {
             this.buildSubmissionTime = LocalDateTime.now()
         }
         val builderJob = makeBuilderJob(result.id.value, secretEncoded)
-        kubectl.create(builderJob)
+        //kubectl.create(builderJob)
         result.toDetailedDto()
     }
 
