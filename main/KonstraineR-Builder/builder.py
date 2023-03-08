@@ -35,7 +35,7 @@ class Compilation():
 
     def compile(self):
         os.chdir('/app/framework')
-        logger.error("Compilation started")
+        logger.info("Compilation started")
         result = subprocess.run(['./gradlew', 'jar'], stdout=subprocess.PIPE)
         if result.returncode != 0:
             logger.error("Compilation failed")
