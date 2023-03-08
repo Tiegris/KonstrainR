@@ -5,6 +5,11 @@ import logging
 import subprocess
 
 logger = logging.getLogger("Compilation")
+logger.setLevel(logging.INFO)
+_handler = logging.StreamHandler(sys.stdout)
+_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+logger.handlers.clear()
+logger.addHandler(_handler)
 
 class Compilation():
     def __init__(self, base_url: str, dsl_id: int, secret: str):

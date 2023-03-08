@@ -10,4 +10,5 @@ repositories {
 
 dependencies {    
     implementation(files("/app/dsl.jar"))
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
 }
