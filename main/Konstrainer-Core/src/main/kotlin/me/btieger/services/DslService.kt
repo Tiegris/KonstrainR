@@ -61,7 +61,7 @@ class DslServiceImpl : DslService {
             this.buildSubmissionTime = LocalDateTime.now()
         }
         val builderJob = makeBuilderJob(result.id.value, secretEncoded)
-        //kubectl.create(builderJob)
+        kubectl.create(builderJob)
         result.toDetailedDto()
     }
 
