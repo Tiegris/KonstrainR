@@ -6,6 +6,7 @@ metadata:
     {{- include "konstrainr-core.labels" . | nindent 4 }}
 spec:
   replicas: 1
+  revisionHistoryLimit: 2
   selector:
     matchLabels:
       {{- include "konstrainr-core.selectorLabels" . | nindent 6 }}
