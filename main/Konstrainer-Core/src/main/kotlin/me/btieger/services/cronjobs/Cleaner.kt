@@ -26,6 +26,7 @@ class Cleaner(private val kubectl: KubernetesClient) {
                 dsl.jobSecret = null
             }
         }
+        logger.info("Cleaning done")
     }
 
 }
