@@ -47,6 +47,9 @@ open class EnvVarSettings(private val prefix: String) {
     fun int(default: Int? = null, key: String? = null): ReadOnlyProperty<Any, Int> =
         create(default, key, String::toIntOrNull)
 
+    fun long(default: Long? = null, key: String? = null): ReadOnlyProperty<Any, Long> =
+        create(default, key, String::toLongOrNull)
+
     fun string(default: String? = null, key: String? = null): ReadOnlyProperty<Any, String> =
         create(default, key, fun String.() = this)
 

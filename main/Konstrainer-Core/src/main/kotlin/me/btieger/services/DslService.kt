@@ -1,11 +1,12 @@
 package me.btieger.services
 
+import io.fabric8.kubernetes.client.KubernetesClient
 import io.ktor.util.logging.*
 import me.btieger.domain.DslConciseDto
 import me.btieger.domain.DslDetailedDto
 import me.btieger.domain.toConciseDto
 import me.btieger.domain.toDetailedDto
-import me.btieger.logic.kelm.kubectl
+import me.btieger.logic.kelm.create
 import me.btieger.logic.kelm.resources.makeBuilderJob
 import me.btieger.persistance.DatabaseFactory
 import me.btieger.persistance.tables.Dsl
@@ -33,8 +34,8 @@ interface DslService {
     suspend fun deleteDsl(id: Int): Boolean
 }
 
-class DslServiceImpl : DslService {
-    val logger = LoggerFactory.getLogger("DslService")
+class DslServiceImpl(private val kubectl: KubernetesClient) : DslService {
+    private val logger: Logger = LoggerFactory.getLogger("DslService")!!
 
     override suspend fun all() = DatabaseFactory.dbQuery {
         Dsl.all().map(Dsl::toConciseDto)

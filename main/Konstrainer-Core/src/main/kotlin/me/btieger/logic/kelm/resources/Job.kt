@@ -5,8 +5,10 @@ import com.fkorotkov.kubernetes.*
 import io.fabric8.kubernetes.api.model.batch.v1.Job
 import me.btieger.config
 
+fun makeJobName(dslId: Int) = "dsl-build-job-$dslId"
+
 fun makeBuilderJob(dslId: Int, secret: String): Job {
-    val _name = "dsl-build-job-$dslId"
+    val _name = makeJobName(dslId)
     return Job().apply {
         metadata {
             name = _name

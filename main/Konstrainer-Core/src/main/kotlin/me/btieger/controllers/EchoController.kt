@@ -1,17 +1,19 @@
 package me.btieger.controllers
 
+import io.fabric8.kubernetes.client.KubernetesClient
 import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import java.io.File
+import me.btieger.services.DslService
+import org.koin.ktor.ext.inject
 
 fun Application.echoController() {
+    val dslService: DslService by inject()
+    val kubectl: KubernetesClient by inject()
+
     routing {
         get("/") {
             call.respond("got it")
-        }
-        get("debug") {
-            call.respond("nothing to debug")
         }
     }
 }
