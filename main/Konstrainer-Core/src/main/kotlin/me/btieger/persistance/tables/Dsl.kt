@@ -10,25 +10,34 @@ class Dsl(id: EntityID<Int>) : Entity<Int>(id) {
     companion object : EntityClass<Int, Dsl>(Dsls)
 
     var name by Dsls.name
-    var status by Dsls.status
+    var buildStatus by Dsls.buildStatus
     var jobSecret by Dsls.jobSecret
     var buildSubmissionTime by Dsls.buildSubmissionTime
     var errorMessage by Dsls.errorMessage
     var file by Dsls.file
     var jar by Dsls.jar
+    var serverStatus by Dsls.serverStatus
 }
 
 object Dsls : IntIdTable() {
     val name = varchar("name", 128)
     val file = blob("file")
-    val status = enumeration("status", Status::class)
+    val buildStatus = enumeration("buildStatus", BuildStatus::class)
     val jobSecret = binary("job_secret", 64).nullable()
     val buildSubmissionTime = datetime("build_submission").nullable()
     val errorMessage = text("error").nullable()
     val jar = blob("jar").nullable()
+    val serverStatus = enumeration("serverStatus", ServerStatus::class).default(ServerStatus.Down)
 }
 
-enum class Status {
+enum class ServerStatus {
+    Spawning,
+    Up,
+    Down,
+    Error
+}
+
+enum class BuildStatus {
     Building,
     Ready,
     Failed,

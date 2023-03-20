@@ -3,10 +3,10 @@ package me.btieger.logic.kelm.resources
 import com.fkorotkov.kubernetes.admissionregistration.v1.*
 import me.btieger.dsl.*
 import io.fabric8.kubernetes.api.model.admissionregistration.v1.MutatingWebhookConfiguration
-import me.btieger.config
+import me.btieger.Config
 
 
-fun mutatingWebhookConfiguration(server: Server) =
+fun mutatingWebhookConfiguration(server: Server, cert: String) =
     MutatingWebhookConfiguration().apply {
         metadata(server.whName)
         webhooks = server.rules.map {
@@ -15,11 +15,11 @@ fun mutatingWebhookConfiguration(server: Server) =
                 admissionReviewVersions = listOf("v1", "v1beta1")
                 sideEffects = "None"
                 clientConfig {
-                    caBundle = "TODO caAsString"
+                    caBundle = cert
                     service {
                         name = server.whName
-                        namespace = config.namespace
-                        path = "TODO"
+                        namespace = Config.namespace
+                        path = server.rules[0].path // TODO
                     }
                 }
                 rules = listOf(

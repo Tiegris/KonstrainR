@@ -11,11 +11,10 @@ import me.btieger.logic.kelm.resources.makeBuilderJob
 import me.btieger.persistance.DatabaseFactory
 import me.btieger.persistance.tables.Dsl
 import me.btieger.persistance.tables.Dsls
-import me.btieger.persistance.tables.Status
+import me.btieger.persistance.tables.BuildStatus
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
-import org.jetbrains.exposed.sql.exposedLogger
 import org.jetbrains.exposed.sql.statements.api.ExposedBlob
 import org.jetbrains.exposed.sql.update
 import org.slf4j.LoggerFactory
@@ -62,7 +61,7 @@ class DslServiceImpl(private val kubectl: KubernetesClient) : DslService {
         val result = Dsl.new {
             this.name = name
             this.file = ExposedBlob(content)
-            this.status = Status.Building
+            this.buildStatus = BuildStatus.Building
             this.jobSecret = secretBytes
             this.buildSubmissionTime = LocalDateTime.now()
         }
@@ -84,7 +83,7 @@ class DslServiceImpl(private val kubectl: KubernetesClient) : DslService {
             it[buildSubmissionTime] = null
             it[errorMessage] = null
             it[jobSecret] = null
-            it[status] = Status.Ready
+            it[buildStatus] = BuildStatus.Ready
         } > 0
         if (!success)
             logger.warn("Failed JAR upload attempt, dsl.id: `{}`", id)
@@ -96,7 +95,7 @@ class DslServiceImpl(private val kubectl: KubernetesClient) : DslService {
         val secretBytes = Base64.getDecoder().decode(secret)
         val success= Dsls.update({ (Dsls.id eq id) and Dsls.jar.isNull() and (Dsls.jobSecret eq secretBytes) }) {
             it[Dsls.errorMessage] = errorMessage
-            it[status] = Status.Failed
+            it[buildStatus] = BuildStatus.Failed
             it[jobSecret] = null
         } > 0
         if (!success)

@@ -9,7 +9,7 @@ import io.ktor.util.pipeline.*
 annotation class ResponseDslMarker
 
 @ResponseDslMarker
-private suspend inline fun <reified T : Any> PipelineContext<*, ApplicationCall>.notFound(data: T) {
+suspend inline fun <reified T : Any> PipelineContext<*, ApplicationCall>.notFound(data: T) {
     call.respond(HttpStatusCode.NotFound, data)
 }
 @ResponseDslMarker
@@ -55,11 +55,21 @@ suspend inline fun PipelineContext<*, ApplicationCall>.internalServerError() {
 }
 
 @ResponseDslMarker
-private suspend inline fun <reified T : Any> PipelineContext<*, ApplicationCall>.notReady(data: T) {
+suspend inline fun <reified T : Any> PipelineContext<*, ApplicationCall>.notReady(data: T) {
     call.respond(HttpStatusCode.NotAcceptable, data)
 }
 
 @ResponseDslMarker
 suspend inline fun PipelineContext<*, ApplicationCall>.notReady() {
     call.respond(HttpStatusCode.NotAcceptable)
+}
+
+@ResponseDslMarker
+suspend inline fun <reified T : Any> PipelineContext<*, ApplicationCall>.respond(statusCode: HttpStatusCode, data: T) {
+    call.respond(statusCode, data)
+}
+
+@ResponseDslMarker
+suspend inline fun PipelineContext<*, ApplicationCall>.respond(statusCode: HttpStatusCode) {
+    call.respond(statusCode)
 }

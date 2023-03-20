@@ -1,28 +1,45 @@
 package me.btieger.services.cronjobs
 
 import io.fabric8.kubernetes.client.KubernetesClient
-import me.btieger.config
+import io.ktor.server.application.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import me.btieger.Config
 import me.btieger.logic.kelm.resources.makeJobName
 import me.btieger.persistance.DatabaseFactory
 import me.btieger.persistance.tables.Dsl
 import me.btieger.persistance.tables.Dsls
-import me.btieger.persistance.tables.Status
+import me.btieger.persistance.tables.BuildStatus
+import org.koin.ktor.ext.inject
 
 import org.slf4j.LoggerFactory
+
+
+fun Application.launchCleaner() {
+    val k8sClient by inject<KubernetesClient>()
+    launch {
+        val interval = Config.cleanerIntervalSeconds * 1000L
+        val cleaner = Cleaner(k8sClient)
+        while(true) {
+            delay(interval)
+            cleaner.runCleaner()
+        }
+    }
+}
 
 class Cleaner(private val kubectl: KubernetesClient) {
     private val logger = LoggerFactory.getLogger("Cleaner")!!
 
     suspend fun runCleaner() = DatabaseFactory.dbQuery {
         logger.info("Running job cleaner")
-        val inProgressDsls = Dsl.find { Dsls.status eq Status.Building }
-        val k8sJobs = kubectl.batch().v1().jobs().inNamespace(config.namespace).list().items
+        val inProgressDsls = Dsl.find { Dsls.buildStatus eq BuildStatus.Building }
+        val k8sJobs = kubectl.batch().v1().jobs().inNamespace(Config.namespace).list().items
         inProgressDsls.forEach { dsl ->
             val matchingJob = k8sJobs.find { job -> job.metadata.name == makeJobName(dsl.id.value) }
             if (matchingJob == null) {
                 logger.warn("Dsl build with id: `{}` marked failed by cleaner", dsl.id.value)
                 dsl.errorMessage = "Lost in space."
-                dsl.status = Status.Failed
+                dsl.buildStatus = BuildStatus.Failed
                 dsl.jobSecret = null
             }
         }

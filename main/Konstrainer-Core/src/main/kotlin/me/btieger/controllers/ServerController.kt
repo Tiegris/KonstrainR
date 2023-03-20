@@ -1,44 +1,45 @@
 package me.btieger.controllers
 
+import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.plugins.*
 import io.ktor.server.request.*
+import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import me.btieger.domain.CreateServerDto
-import me.btieger.id
-import me.btieger.notFound
-import me.btieger.ok
-import me.btieger.persistance.tables.Server
+import me.btieger.*
+import me.btieger.services.ServerService
+import org.koin.ktor.ext.inject
 
 
 fun Application.serverController() {
-//    routing {
-//        route("/server") {
-//            get {
-//                val res = serverService.all()
-//                ok(res)
-//            }
-//            get("/{id}") {
-//                val id = call.id
-//                val res = serverService.read(id, Server::) ?: return@get notFound()
-//                ok(res)
-//            }
-//            post {
-//                val body = call.receive<CreateServerDto>()
-//                val result = serverService.create(body)
-//
-//                result?.let{
-//                    ok(it)
-//                } ?: notFound()
-//            }
-//            delete("/{id}") {
-//                val id = call.id
-//                val result = serverService.delete(id)
-//                if (result)
-//                    ok()
-//                else
-//                    notFound()
-//            }
-//        }
-//    }
+    val serverService by inject<ServerService>()
+
+    routing {
+        route("/api/$apiVersion/servers") {
+            route("{id}") {
+                post("start") {
+                    exceptionGuard {
+                        try {
+                            serverService.start(call.id)
+                            respond(HttpStatusCode.Accepted)
+                        } catch (e: NotFoundException) {
+                            notFound()
+                        } catch (e: IllegalStateException) {
+                            val message = e.message
+                            if (message != null)
+                                badRequest(message)
+                            else
+                                badRequest()
+                        }
+                    }
+                }
+                post("stop") {
+                    exceptionGuard {
+                        TODO()
+                    }
+                }
+            }
+        }
+    }
 
 }

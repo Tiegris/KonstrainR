@@ -26,7 +26,7 @@ fun main() {
         }
         sslConnector(
             keyStore = keyStore,
-            keyAlias = "sampleAlias",
+            keyAlias = "AgentCert",
             keyStorePassword = { passwd },
             privateKeyPassword = { passwd }) {
             keyStorePath = keyStoreFile

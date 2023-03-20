@@ -3,7 +3,7 @@ package me.btieger.logic.kelm.resources
 import com.fkorotkov.kubernetes.batch.v1.*
 import com.fkorotkov.kubernetes.*
 import io.fabric8.kubernetes.api.model.batch.v1.Job
-import me.btieger.config
+import me.btieger.Config
 
 fun makeJobName(dslId: Int) = "dsl-build-job-$dslId"
 
@@ -12,14 +12,14 @@ fun makeBuilderJob(dslId: Int, secret: String): Job {
     return Job().apply {
         metadata {
             name = _name
-            namespace = config.namespace
+            namespace = Config.namespace
             labels = mapOf(
                 "app" to _name,
                 "managedBy" to "konstrainer",
             )
         }
         spec {
-            ttlSecondsAfterFinished = 60 * config.builderJobTtlMinutes
+            ttlSecondsAfterFinished = 60 * Config.builderJobTtlMinutes
             backoffLimit = 1
             template {
                 spec {
@@ -28,7 +28,7 @@ fun makeBuilderJob(dslId: Int, secret: String): Job {
                         newContainer {
                             name = "builder"
                             imagePullPolicy = "Always"
-                            image = config.builderImage
+                            image = Config.builderImage
                             env = listOf(
                                 newEnvVar {
                                     name = "KSR_SECRET"
@@ -36,7 +36,7 @@ fun makeBuilderJob(dslId: Int, secret: String): Job {
                                 },
                                 newEnvVar {
                                     name = "KSR_CORE_BASE_URL"
-                                    value = config.serviceName
+                                    value = Config.serviceName
                                 },
                                 newEnvVar {
                                     name = "KSR_DSL_ID"

@@ -5,7 +5,7 @@ import com.fkorotkov.kubernetes.apps.spec
 import com.fkorotkov.kubernetes.apps.template
 import me.btieger.dsl.*
 import io.fabric8.kubernetes.api.model.apps.Deployment
-import me.btieger.config
+import me.btieger.Config
 
 fun deployment(server: Server) =
     Deployment().apply {
@@ -14,7 +14,7 @@ fun deployment(server: Server) =
             replicas = 1
             template {
                 metadata {
-                    namespace = config.namespace
+                    namespace = Config.namespace
                     labels(server.whName)
                 }
                 spec {
