@@ -1,5 +1,16 @@
 # KonstrainR
 
+
+
+
+
+
+
+
+
+
+## Magic commands
+
 ```bash
 kubectl -n demo-ns run alpine \
     --image=alpine \

@@ -37,19 +37,10 @@ architecture {
                     dsl instance: gets it from KonstrainR-Core
                 }
             }
-        simplified:
-            KonstrainR {
-                single ktor server
-                provisions rules
-                has permission to create k8s resources
-                stores rules in litesql
-                monolith architecture: embedded UI with tymeleaf
-                build infra installed in docker image -> can compile
-            }
     }
     rules server framework {
         ktor server configured as webhook
-        can load compiled dsl 
+        can load compiled dsl
     }
 }
 
@@ -61,10 +52,7 @@ terms {
 }
 
 roadmap {
-    learn ktor+exposed: 0.5d
-    manage files api: 0.5d
     design & implement language: 2d
-    create language compiler: 1d
     ui: 1d
     launch k8s resources {
         find out how to deploy any resource: 0.5d
@@ -80,5 +68,4 @@ roadmap {
 extra {
     set profiles
     high level patch dsl elements
-    
 }
