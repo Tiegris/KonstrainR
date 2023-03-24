@@ -4,18 +4,16 @@ import io.fabric8.kubernetes.api.model.HasMetadata
 import io.fabric8.kubernetes.api.model.ObjectMeta
 import me.btieger.Config
 
-fun ObjectMeta.labels(_name: String) = apply {
-    labels = mapOf(
-        "app" to _name,
-        "managedBy" to "konstrainer",
-    )
-}
+fun myLabels(_name: String) = mapOf(
+    "app" to _name,
+    "managedBy" to "konstrainer",
+)
 
 fun HasMetadata.metadata(_name: String) = apply {
     metadata = ObjectMeta().apply {
         name = _name
         namespace = Config.namespace
-        labels(_name)
+        labels = myLabels(_name)
     }
 }
 

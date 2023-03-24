@@ -1,6 +1,7 @@
 package me.btieger.logic.kelm.resources
 
 import com.fkorotkov.kubernetes.*
+import com.fkorotkov.kubernetes.apps.selector
 import com.fkorotkov.kubernetes.apps.spec
 import com.fkorotkov.kubernetes.apps.template
 import me.btieger.dsl.*
@@ -12,16 +13,21 @@ fun deployment(server: Server) =
         metadata(server.whName)
         spec {
             replicas = 1
+            selector {
+                matchLabels = myLabels(server.whName)
+            }
             template {
                 metadata {
                     namespace = Config.namespace
-                    labels(server.whName)
+                    labels = myLabels(server.whName)
                 }
                 spec {
                     containers = listOf(
                         newContainer {
-                            name = "wh-server"
-                            image = server.serverBaseImage
+                            name = "agent-server"
+                            //image = server.serverBaseImage
+                            //TODO remove
+                            image = ""
                             ports = listOf(
                                 newContainerPort {
                                     containerPort = 8443
@@ -29,8 +35,8 @@ fun deployment(server: Server) =
                             )
                             volumeMounts = listOf(
                                 newVolumeMount {
-                                    name = "config"
-                                    mountPath = "/conf"
+                                    name = "tls-cert"
+                                    mountPath = "/tls-cert"
                                     readOnly = true
                                 }
                             )
@@ -38,15 +44,10 @@ fun deployment(server: Server) =
                     )
                     volumes = listOf(
                         newVolume {
-                            name = "config"
-                            configMap {
-                                name = "${server.whName}-cm"
-                                items = listOf(
-                                    newKeyToPath {
-                                        key = "keystore.jks"
-                                        path = "keystore.jks"
-                                    }
-                                )
+                            name = "tls-cert"
+                            secret {
+                                secretName = server.whName
+                                optional = true // TODO remove
                             }
                         }
                     )

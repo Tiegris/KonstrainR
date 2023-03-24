@@ -5,9 +5,11 @@ import io.ktor.server.application.*
 import io.ktor.server.plugins.*
 import kotlinx.coroutines.launch
 import me.btieger.Config
+import me.btieger.bytesStable
 import me.btieger.logic.kelm.resources.secret
 import me.btieger.persistance.DatabaseFactory
 import me.btieger.dsl.Server
+import me.btieger.loader.Loader
 import me.btieger.logger
 import me.btieger.logic.kelm.create
 import me.btieger.logic.kelm.resources.deployment
@@ -36,7 +38,7 @@ class ServerServiceImpl(private val context: Application) : ServerService {
         if (dsl.buildStatus != BuildStatus.Ready || dsl.jar == null) throw IllegalStateException("Dsl not ready")
         if (dsl.serverStatus == ServerStatus.Up) throw IllegalStateException("Server is already up")
         if (dsl.serverStatus == ServerStatus.Spawning) throw IllegalStateException("Server already spawning")
-        return@dbQuery dsl
+        return@dbQuery dsl.jar!!.bytesStable
     }
 
     private suspend fun setDslStatus(id: Int, status: ServerStatus) = DatabaseFactory.dbQuery {
@@ -52,7 +54,10 @@ class ServerServiceImpl(private val context: Application) : ServerService {
         context.launch {
             try {
                 // read server conf from db
-                val server: Server = me.btieger.example.server // TODO
+                //val server = Loader("DslInstanceKt").loadServer(dsl)
+                val server = me.btieger.example.server
+
+
 
                 //val cert = sslService.deriveCert()
                 //val secret = secret(server, cert)
@@ -61,7 +66,7 @@ class ServerServiceImpl(private val context: Application) : ServerService {
                 val dep = deployment(server)
                 val svc = service(server)
 
-                //k8sclient.create(dep)
+                k8sclient.create(dep)
                 k8sclient.create(svc)
 
                 k8sclient.services().withName(svc.fullResourceName).waitUntilReady(5, TimeUnit.SECONDS)

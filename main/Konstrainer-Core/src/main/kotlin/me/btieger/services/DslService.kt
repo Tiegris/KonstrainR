@@ -2,6 +2,7 @@ package me.btieger.services
 
 import io.fabric8.kubernetes.client.KubernetesClient
 import io.ktor.util.logging.*
+import me.btieger.bytesStable
 import me.btieger.domain.DslConciseDto
 import me.btieger.domain.DslDetailedDto
 import me.btieger.domain.toConciseDto
@@ -41,11 +42,13 @@ class DslServiceImpl(private val kubectl: KubernetesClient) : DslService {
     }
 
     override suspend fun getJar(id: Int) = DatabaseFactory.dbQuery {
-        Dsl.findById(id)?.jar?.let { it.inputStream.readAllBytes() }
+        // jar.bytes throws exception, since Kotlin version update
+        Dsl.findById(id)?.jar?.let { it.bytesStable }
     }
 
     override suspend fun getFile(id: Int) = DatabaseFactory.dbQuery {
-        Dsl.findById(id)?.let { it.file.inputStream.readAllBytes() }
+        // jar.bytes throws exception, since Kotlin version update
+        Dsl.findById(id)?.let { it.file.bytesStable }
     }
 
     override suspend fun getDetails(id: Int) = DatabaseFactory.dbQuery {

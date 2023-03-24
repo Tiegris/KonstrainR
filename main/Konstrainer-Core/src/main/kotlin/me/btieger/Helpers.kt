@@ -7,6 +7,7 @@ import io.ktor.server.util.*
 import io.ktor.util.*
 import io.ktor.util.logging.*
 import io.ktor.util.pipeline.*
+import org.jetbrains.exposed.sql.statements.api.ExposedBlob
 import java.lang.StringBuilder
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
@@ -71,6 +72,9 @@ open class EnvVarSettings(private val prefix: String) {
         }
     }
 }
+
+val ExposedBlob.bytesStable: ByteArray
+    get() = inputStream.readAllBytes()
 
 fun String.toScreamingCamelCase() = StringBuilder().apply {
         for (c in this@toScreamingCamelCase) {
