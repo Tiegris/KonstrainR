@@ -13,6 +13,9 @@ import me.btieger.persistance.DatabaseFactory
 import me.btieger.plugins.configureSerialization
 import me.btieger.services.*
 import me.btieger.services.cronjobs.launchCleaner
+import me.btieger.services.ssl.SslServiceOpenSslWrapperImpl
+import me.btieger.services.ssl.SslService
+import me.btieger.services.ssl.SslServiceMockImpl
 import org.koin.dsl.module
 import org.koin.ktor.plugin.Koin
 import org.slf4j.event.Level
@@ -49,7 +52,11 @@ fun Application.startup() {
             module {
                 single<KubernetesClient> { k8sClient }
                 single<DslService> { DslServiceImpl(k8sClient) }
-                single<SslService> { SslServiceImpl() }
+                if (environment.developmentMode)
+                    single<SslService> { SslServiceMockImpl() }
+                else
+                    single<SslService> { SslServiceOpenSslWrapperImpl() }
+
                 single<ServerService> { ServerServiceImpl(this@startup) }
             }
         )

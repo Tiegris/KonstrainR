@@ -18,6 +18,7 @@ import me.btieger.logic.kelm.resources.service
 import me.btieger.persistance.tables.Dsl
 import me.btieger.persistance.tables.ServerStatus
 import me.btieger.persistance.tables.BuildStatus
+import me.btieger.services.ssl.SslService
 import org.koin.ktor.ext.inject
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -29,7 +30,7 @@ interface ServerService {
 }
 
 class ServerServiceImpl(private val context: Application) : ServerService {
-    private val sslService by context.inject<SslService>()
+    private val sslService: SslService by context.inject()
     private val k8sclient by context.inject<KubernetesClient>()
     private val logger: Logger = LoggerFactory.getLogger("ServerService")!!
 

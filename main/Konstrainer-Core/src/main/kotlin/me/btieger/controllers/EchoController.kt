@@ -5,6 +5,8 @@ import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import me.btieger.services.DslService
+import me.btieger.services.ssl.SslServiceMockImpl
+import me.btieger.services.ssl.SslServiceOpenSslWrapperImpl
 import org.koin.ktor.ext.inject
 
 fun Application.echoController() {
@@ -14,6 +16,12 @@ fun Application.echoController() {
     routing {
         get("/") {
             call.respond("got it")
+        }
+        get("/debug") {
+            SslServiceMockImpl().getRootCaAsPem()
+
+
+            call.respond("ok")
         }
     }
 }
