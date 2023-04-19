@@ -52,7 +52,7 @@ class ServerServiceImpl(
 
     @OptIn(DelicateCoroutinesApi::class)
     override suspend fun start(id: Int) {
-        val dsl = getDsl(id)
+        //val dsl = getDsl(id)
 
         setDslStatus(id, ServerStatus.Spawning)
         logger.info("Launching server spawner coroutine, dsl.id: `{}`", id)

@@ -1,6 +1,7 @@
 package me.btieger.logic.kelm.resources
 
 import io.fabric8.kubernetes.api.model.Secret
+import io.ktor.util.*
 import me.btieger.dsl.Server
 import me.btieger.logic.kelm.HelmService
 import me.btieger.services.ssl.SecretBundle
@@ -9,7 +10,7 @@ fun HelmService.secret(server: Server, cert: SecretBundle) =
     Secret().apply {
         metadata(server.whName, config.namespace)
         data = mapOf(
-            "key.pem" to cert.keyPair,
-            "cert.pem" to cert.certificate,
+            "key.pem" to cert.keyPair.encodeBase64(),
+            "cert.pem" to cert.certificate.encodeBase64(),
         )
     }

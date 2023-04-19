@@ -26,9 +26,7 @@ fun HelmService.deployment(server: Server) =
                     containers = listOf(
                         newContainer {
                             name = "agent-server"
-                            //image = server.serverBaseImage
-                            //TODO remove
-                            image = ""
+                            image = config.agentImage
                             ports = listOf(
                                 newContainerPort {
                                     containerPort = 8443
@@ -37,7 +35,7 @@ fun HelmService.deployment(server: Server) =
                             volumeMounts = listOf(
                                 newVolumeMount {
                                     name = "tls-cert"
-                                    mountPath = "/tls-cert"
+                                    mountPath = "/app/tls-cert"
                                     readOnly = true
                                 }
                             )
@@ -48,7 +46,6 @@ fun HelmService.deployment(server: Server) =
                             name = "tls-cert"
                             secret {
                                 secretName = server.whName
-                                optional = true // TODO remove
                             }
                         }
                     )

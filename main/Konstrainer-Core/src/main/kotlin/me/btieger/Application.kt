@@ -30,6 +30,7 @@ class Config : EnvVarSettings("KSR_") {
     val port by int(8080)
     val host by string("0.0.0.0")
     val cleanerIntervalSeconds by int(5*60)
+    val agentImage by string("tiegris/konstrainer-agent:latest")
 
     init {
         loadAll()
