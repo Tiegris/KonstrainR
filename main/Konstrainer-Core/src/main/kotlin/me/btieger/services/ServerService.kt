@@ -98,24 +98,24 @@ class ServerServiceImpl(
                 logger.error("Error when spawning server, dsl.id: `{}`, message: `{}`", id, e.message)
                 logger.error(e.stackTraceToString())
                 setDslStatus(id, ServerStatus.Error)
-                delete(id)
-                logger.info("Successful rollback, dsl.id: `{}`", id)
+                if (delete(id))
+                    logger.info("Successful rollback, dsl.id: `{}`", id)
             }
         }
 
     }
 
-    private fun delete(id: Int) {
-        try {
+    private fun delete(id: Int) = try {
             k8sclient.secrets().inNamespace(config.namespace).withLabel("agentId", "$id").delete()
             k8sclient.apps().deployments().inNamespace(config.namespace).withLabel("agentId", "$id").delete()
             k8sclient.services().inNamespace(config.namespace).withLabel("agentId", "$id").delete()
             k8sclient.admissionRegistration().v1().mutatingWebhookConfigurations().withLabel("agentId", "$id").delete()
+            true
         } catch (e: Throwable) {
             logger.error("Error deleting agent, dsl.id: `{}`, message: `{}`", id, e.message)
             logger.error(e.stackTraceToString())
+            false
         }
-    }
 
 
     override suspend fun stop(id: Int) {
