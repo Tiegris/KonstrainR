@@ -31,7 +31,7 @@ class SslServiceOpenSslWrapperImpl : SslService {
                     "-sha256",
                     "-days", "365",
                     "-out", "rootCA.crt",
-                    "-subj", "\"/C=HU/O=me.btieger/CN=konstrainer-core\""
+                    "-subj", "/C=HU/O=me.btieger/CN=konstrainer-core"
                 )
             }
 
@@ -59,7 +59,7 @@ class SslServiceOpenSslWrapperImpl : SslService {
             openssl(
                 "req", "-new", "-sha256",
                 "-key", keyName,
-                "-subj", "\"/C=HU/O=me.btieger/CN=$agentServiceName\"",
+                "-subj", "/C=HU/O=me.btieger/CN=$agentServiceName",
                 "-out", csrName
             )
             openssl(
