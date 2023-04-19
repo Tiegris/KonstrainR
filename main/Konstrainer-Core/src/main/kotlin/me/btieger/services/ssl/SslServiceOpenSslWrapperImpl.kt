@@ -3,6 +3,7 @@ package me.btieger.services.ssl
 import com.lordcodes.turtle.ShellScript
 import com.lordcodes.turtle.shellRun
 import java.io.File
+import java.nio.file.Files
 import java.util.concurrent.ThreadLocalRandom
 import kotlin.streams.asSequence
 
@@ -13,9 +14,9 @@ class SslServiceOpenSslWrapperImpl : SslService {
         if (pwd.exists() && !pwd.isDirectory())
             throw ExceptionInInitializerError("Ssl root dir exists, but is not a directory!")
 
-        if (!pwd.exists())
-            if (pwd.mkdirs())
-                throw Exception("Could not create ssl root folder!")
+        if (!pwd.exists()) {
+            Files.createDirectories(pwd.toPath())
+        }
 
         if (!File(pwd, "rootCA.key").exists())
             shell {
