@@ -7,9 +7,9 @@ import io.fabric8.kubernetes.api.model.IntOrString
 import io.fabric8.kubernetes.api.model.Service
 import me.btieger.logic.kelm.HelmService
 
-fun HelmService.service(server: Server) =
+fun HelmService.service(server: Server, agentId: Int) =
     Service().apply {
-        metadata(server.whName, config.namespace)
+        metadata(server.whName, config.namespace, agentId)
         spec {
             ports = listOf(
                 newServicePort {
@@ -17,9 +17,7 @@ fun HelmService.service(server: Server) =
                     targetPort = IntOrString(8443)
                 }
             )
-            selector = mapOf(
-               "app" to ""
-            )
+            selector = myLabels(server.whName, agentId)
         }
     }
 

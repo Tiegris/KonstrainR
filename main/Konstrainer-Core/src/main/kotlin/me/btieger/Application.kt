@@ -31,6 +31,8 @@ class Config : EnvVarSettings("KSR_") {
     val host by string("0.0.0.0")
     val cleanerIntervalSeconds by int(5*60)
     val agentImage by string("tiegris/konstrainer-agent:latest")
+    val agentSpawnWaitSeconds by long(5L)
+    val agentSpawnWaitMaxRetries by int(5)
 
     init {
         loadAll()

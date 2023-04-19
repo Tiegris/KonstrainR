@@ -3,7 +3,6 @@ package me.btieger.logic.kelm.resources
 import com.fkorotkov.kubernetes.batch.v1.*
 import com.fkorotkov.kubernetes.*
 import io.fabric8.kubernetes.api.model.batch.v1.Job
-import me.btieger.Config
 import me.btieger.logic.kelm.HelmService
 
 fun makeJobName(dslId: Int) = "dsl-build-job-$dslId"
@@ -14,10 +13,7 @@ fun HelmService.makeBuilderJob(dslId: Int, secret: String): Job {
         metadata {
             name = _name
             namespace = config.namespace
-            labels = mapOf(
-                "app" to _name,
-                "managedBy" to "konstrainer",
-            )
+            labels = myLabels(_name, dslId)
         }
         spec {
             ttlSecondsAfterFinished = 60 * config.builderJobTtlMinutes

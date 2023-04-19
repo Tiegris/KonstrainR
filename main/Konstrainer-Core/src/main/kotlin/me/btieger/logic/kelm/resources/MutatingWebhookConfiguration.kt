@@ -7,9 +7,9 @@ import me.btieger.Config
 import me.btieger.logic.kelm.HelmService
 
 
-fun HelmService.mutatingWebhookConfiguration(server: Server, cert: String) =
+fun HelmService.mutatingWebhookConfiguration(server: Server, cert: String, agentId: Int) =
     MutatingWebhookConfiguration().apply {
-        metadata(server.whName, config.namespace)
+        metadata(server.whName, config.namespace, agentId)
         webhooks = server.rules.map {
             newMutatingWebhook {
                 name = server.whName

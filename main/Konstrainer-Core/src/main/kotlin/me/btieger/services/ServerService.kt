@@ -1,6 +1,7 @@
 package me.btieger.services
 
 import io.fabric8.kubernetes.client.KubernetesClient
+import io.fabric8.kubernetes.client.KubernetesClientTimeoutException
 import io.ktor.server.application.*
 import io.ktor.server.plugins.*
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -19,7 +20,6 @@ import me.btieger.persistance.tables.Dsl
 import me.btieger.persistance.tables.ServerStatus
 import me.btieger.persistance.tables.BuildStatus
 import me.btieger.services.ssl.SslService
-import org.koin.ktor.ext.inject
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit
@@ -65,20 +65,31 @@ class ServerServiceImpl(
                 val cname = "${server.whName}.${config.namespace}.svc"
 
                 val cert = sslService.deriveCert(cname)
-                val secret = helm.secret(server, cert)
-                k8sclient.resource(secret).inNamespace(config.namespace).create()
+                val secret = helm.secret(server, cert, id)
+                k8sclient.create(secret)
 
-                val dep = helm.deployment(server)
-                val svc = helm.service(server)
+                val dep = helm.deployment(server, id)
+                val svc = helm.service(server, id)
 
                 k8sclient.create(dep)
                 k8sclient.create(svc)
-
-                k8sclient.services().withName(svc.fullResourceName).waitUntilReady(5, TimeUnit.SECONDS)
-
+                logger.info("Waiting for agent to start, dsl.id: `{}`", id)
+                var retryCounter = 0;
+                while (true) {
+                    try {
+                        k8sclient.services().withName(svc.fullResourceName).waitUntilReady(config.agentSpawnWaitSeconds, TimeUnit.SECONDS)
+                        break
+                    } catch (e: KubernetesClientTimeoutException) {
+                        retryCounter++
+                        if (retryCounter > config.agentSpawnWaitMaxRetries)
+                            throw e
+                        logger.warn("Still waiting for agent to start, dsl.id: `{}`, retries: `{}`", id, retryCounter)
+                    }
+                }
+                logger.info("Agent to started, dsl.id: `{}`", id)
 
                 val ca = sslService.getRootCaAsPem()
-                val mwhc = helm.mutatingWebhookConfiguration(server, ca)
+                val mwhc = helm.mutatingWebhookConfiguration(server, ca, id)
                 k8sclient.create(mwhc)
 
                 setDslStatus(id, ServerStatus.Up)
@@ -87,11 +98,24 @@ class ServerServiceImpl(
                 logger.error("Error when spawning server, dsl.id: `{}`, message: `{}`", id, e.message)
                 logger.error(e.stackTraceToString())
                 setDslStatus(id, ServerStatus.Error)
+                delete(id)
+                logger.info("Successful rollback, dsl.id: `{}`", id)
             }
         }
 
     }
 
+    private fun delete(id: Int) {
+        try {
+            k8sclient.secrets().inNamespace(config.namespace).withLabel("agentId", "$id").delete()
+            k8sclient.apps().deployments().inNamespace(config.namespace).withLabel("agentId", "$id").delete()
+            k8sclient.services().inNamespace(config.namespace).withLabel("agentId", "$id").delete()
+            k8sclient.admissionRegistration().v1().mutatingWebhookConfigurations().withLabel("agentId", "$id").delete()
+        } catch (e: Throwable) {
+            logger.error("Error deleting agent, dsl.id: `{}`, message: `{}`", id, e.message)
+            logger.error(e.stackTraceToString())
+        }
+    }
 
 
     override suspend fun stop(id: Int) {

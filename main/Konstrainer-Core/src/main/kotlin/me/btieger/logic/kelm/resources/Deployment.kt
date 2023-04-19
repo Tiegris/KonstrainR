@@ -9,18 +9,18 @@ import io.fabric8.kubernetes.api.model.apps.Deployment
 import me.btieger.Config
 import me.btieger.logic.kelm.HelmService
 
-fun HelmService.deployment(server: Server) =
+fun HelmService.deployment(server: Server, agentId: Int) =
     Deployment().apply {
-        metadata(server.whName, config.namespace)
+        metadata(server.whName, config.namespace, agentId)
         spec {
             replicas = 1
             selector {
-                matchLabels = myLabels(server.whName)
+                matchLabels = myLabels(server.whName, agentId)
             }
             template {
                 metadata {
                     namespace = config.namespace
-                    labels = myLabels(server.whName)
+                    labels = myLabels(server.whName, agentId)
                 }
                 spec {
                     containers = listOf(
