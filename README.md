@@ -11,6 +11,10 @@
 
 ## Magic commands
 
+```PowerShell
+./gradlew build publishToMavenLocal
+```
+
 ```bash
 kubectl -n demo-ns run alpine \
     --image=alpine \

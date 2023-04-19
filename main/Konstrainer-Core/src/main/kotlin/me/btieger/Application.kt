@@ -10,6 +10,7 @@ import me.btieger.controllers.dslController
 import me.btieger.controllers.echoController
 import me.btieger.controllers.serverController
 import me.btieger.persistance.DatabaseFactory
+import me.btieger.plugins.configureKoin
 import me.btieger.plugins.configureSerialization
 import me.btieger.services.*
 import me.btieger.services.cronjobs.launchCleaner
@@ -21,7 +22,7 @@ import org.koin.ktor.plugin.Koin
 import org.slf4j.event.Level
 
 
-object Config : EnvVarSettings("KSR_") {
+class Config : EnvVarSettings("KSR_") {
     val serviceName by string()
     val builderImage by string("tiegris/konstrainer-builder:dev")
     val builderJobTtlMinutes by int(1)
@@ -34,37 +35,25 @@ object Config : EnvVarSettings("KSR_") {
         loadAll()
     }
 }
-
+private val config = Config()
 
 fun main() {
     embeddedServer(Netty,
-        port = Config.port,
-        host = Config.host,
+        port = config.port,
+        host = config.host,
         module = Application::startup)
         .start(wait = true)
 }
 
 
 fun Application.startup() {
-    val k8sClient = KubernetesClientBuilder().build()
-    install(Koin) {
-        modules(
-            module {
-                single<KubernetesClient> { k8sClient }
-                single<DslService> { DslServiceImpl(k8sClient) }
-                if (environment.developmentMode)
-                    single<SslService> { SslServiceMockImpl() }
-                else
-                    single<SslService> { SslServiceOpenSslWrapperImpl() }
 
-                single<ServerService> { ServerServiceImpl(this@startup) }
-            }
-        )
-    }
     install(CallLogging) {
         level = Level.INFO
     }
+
     configureSerialization()
+    configureKoin(config)
 
     echoController()
     dslController()

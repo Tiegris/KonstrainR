@@ -1,30 +1,15 @@
 package me.btieger.logic.kelm.resources
 
-import io.fabric8.kubernetes.api.model.ConfigMap
 import io.fabric8.kubernetes.api.model.Secret
 import me.btieger.dsl.Server
-import java.io.ByteArrayOutputStream
-import java.security.KeyStore
-import java.util.*
+import me.btieger.logic.kelm.HelmService
+import me.btieger.services.ssl.SecretBundle
 
-private fun KeyStore.toBase64(): String {
-    val os = ByteArrayOutputStream()
-    this.store(os, "alma".toCharArray())
-    return Base64.getEncoder().encodeToString(os.toByteArray())
-}
-
-fun configMap(server: Server, cert: KeyStore) =
-    ConfigMap().apply {
-        metadata("${server.whName}-cm")
-        data = mapOf(
-            "keystore.jks" to cert.toBase64()
-        )
-    }
-
-fun secret(server: Server, cert: KeyStore) =
+fun HelmService.secret(server: Server, cert: SecretBundle) =
     Secret().apply {
-        metadata(server.whName)
+        metadata(server.whName, config.namespace)
         data = mapOf(
-            "keystore.jks" to cert.toBase64()
+            "key.pem" to cert.keyPair,
+            "cert.pem" to cert.certificate,
         )
     }

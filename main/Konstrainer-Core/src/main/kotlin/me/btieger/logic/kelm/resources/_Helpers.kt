@@ -9,10 +9,10 @@ fun myLabels(_name: String) = mapOf(
     "managedBy" to "konstrainer",
 )
 
-fun HasMetadata.metadata(_name: String) = apply {
+fun HasMetadata.metadata(_name: String, ns: String) = apply {
     metadata = ObjectMeta().apply {
         name = _name
-        namespace = Config.namespace
+        namespace = ns
         labels = myLabels(_name)
     }
 }

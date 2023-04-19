@@ -17,9 +17,10 @@ import org.slf4j.LoggerFactory
 
 fun Application.launchCleaner() {
     val k8sClient by inject<KubernetesClient>()
+    val config by inject<Config>()
     launch {
-        val interval = Config.cleanerIntervalSeconds * 1000L
-        val cleaner = Cleaner(k8sClient)
+        val interval = config.cleanerIntervalSeconds * 1000L
+        val cleaner = Cleaner(k8sClient, config)
         while(true) {
             delay(interval)
             cleaner.runCleaner()
@@ -27,13 +28,13 @@ fun Application.launchCleaner() {
     }
 }
 
-class Cleaner(private val kubectl: KubernetesClient) {
+class Cleaner(private val kubectl: KubernetesClient, private val config: Config) {
     private val logger = LoggerFactory.getLogger("Cleaner")!!
 
     suspend fun runCleaner() = DatabaseFactory.dbQuery {
         logger.info("Running job cleaner")
         val inProgressDsls = Dsl.find { Dsls.buildStatus eq BuildStatus.Building }
-        val k8sJobs = kubectl.batch().v1().jobs().inNamespace(Config.namespace).list().items
+        val k8sJobs = kubectl.batch().v1().jobs().inNamespace(config.namespace).list().items
         inProgressDsls.forEach { dsl ->
             val matchingJob = k8sJobs.find { job -> job.metadata.name == makeJobName(dsl.id.value) }
             if (matchingJob == null) {

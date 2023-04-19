@@ -4,7 +4,7 @@ import java.io.File
 
 class SslServiceMockImpl : SslService {
 
-    val pwd = File("build/ssl")
+    private val pwd = File("build/ssl")
     init {
         pwd.mkdirs()
     }

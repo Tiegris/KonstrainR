@@ -2,11 +2,13 @@ package me.btieger.services
 
 import io.fabric8.kubernetes.client.KubernetesClient
 import io.ktor.util.logging.*
+import me.btieger.Config
 import me.btieger.bytesStable
 import me.btieger.domain.DslConciseDto
 import me.btieger.domain.DslDetailedDto
 import me.btieger.domain.toConciseDto
 import me.btieger.domain.toDetailedDto
+import me.btieger.logic.kelm.HelmService
 import me.btieger.logic.kelm.create
 import me.btieger.logic.kelm.resources.makeBuilderJob
 import me.btieger.persistance.DatabaseFactory
@@ -18,6 +20,7 @@ import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.statements.api.ExposedBlob
 import org.jetbrains.exposed.sql.update
+import org.koin.java.KoinJavaComponent.inject
 import org.slf4j.LoggerFactory
 import java.security.SecureRandom
 import java.time.LocalDateTime
@@ -34,7 +37,11 @@ interface DslService {
     suspend fun deleteDsl(id: Int): Boolean
 }
 
-class DslServiceImpl(private val kubectl: KubernetesClient) : DslService {
+class DslServiceImpl(
+    private val kubectl: KubernetesClient,
+    private val config: Config,
+    private val helm: HelmService,
+) : DslService {
     private val logger: Logger = LoggerFactory.getLogger("DslService")!!
 
     override suspend fun all() = DatabaseFactory.dbQuery {
@@ -68,7 +75,7 @@ class DslServiceImpl(private val kubectl: KubernetesClient) : DslService {
             this.jobSecret = secretBytes
             this.buildSubmissionTime = LocalDateTime.now()
         }
-        val builderJob = makeBuilderJob(result.id.value, secretEncoded)
+        val builderJob = helm.makeBuilderJob(result.id.value, secretEncoded)
         try {
             kubectl.create(builderJob)
         } catch (e: Exception) {

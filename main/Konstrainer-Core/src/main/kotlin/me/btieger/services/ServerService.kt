@@ -3,14 +3,14 @@ package me.btieger.services
 import io.fabric8.kubernetes.client.KubernetesClient
 import io.ktor.server.application.*
 import io.ktor.server.plugins.*
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import me.btieger.Config
 import me.btieger.bytesStable
+import me.btieger.logic.kelm.HelmService
 import me.btieger.logic.kelm.resources.secret
 import me.btieger.persistance.DatabaseFactory
-import me.btieger.dsl.Server
-import me.btieger.loader.Loader
-import me.btieger.logger
 import me.btieger.logic.kelm.create
 import me.btieger.logic.kelm.resources.deployment
 import me.btieger.logic.kelm.resources.mutatingWebhookConfiguration
@@ -29,9 +29,12 @@ interface ServerService {
     suspend fun stop(id: Int)
 }
 
-class ServerServiceImpl(private val context: Application) : ServerService {
-    private val sslService: SslService by context.inject()
-    private val k8sclient by context.inject<KubernetesClient>()
+class ServerServiceImpl(
+    private val sslService: SslService,
+    private val k8sclient: KubernetesClient,
+    private val config: Config,
+    private val helm: HelmService,
+) : ServerService {
     private val logger: Logger = LoggerFactory.getLogger("ServerService")!!
 
     private suspend fun getDsl(id: Int) = DatabaseFactory.dbQuery {
@@ -47,25 +50,26 @@ class ServerServiceImpl(private val context: Application) : ServerService {
         dsl.serverStatus = status
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     override suspend fun start(id: Int) {
         val dsl = getDsl(id)
 
         setDslStatus(id, ServerStatus.Spawning)
         logger.info("Launching server spawner coroutine, dsl.id: `{}`", id)
-        context.launch {
+        GlobalScope.launch {
             try {
                 // read server conf from db
                 //val server = Loader("DslInstanceKt").loadServer(dsl)
-                val server = me.btieger.example.server
+                val server = me.btieger.server
 
+                val cname = "${server.whName}.${config.namespace}.svc"
 
+                val cert = sslService.deriveCert(cname)
+                val secret = helm.secret(server, cert)
+                k8sclient.resource(secret).inNamespace(config.namespace).create()
 
-                //val cert = sslService.deriveCert()
-                //val secret = secret(server, cert)
-                //k8sclient.resource(secret).inNamespace(Config.namespace).create()
-
-                val dep = deployment(server)
-                val svc = service(server)
+                val dep = helm.deployment(server)
+                val svc = helm.service(server)
 
                 k8sclient.create(dep)
                 k8sclient.create(svc)
@@ -73,9 +77,9 @@ class ServerServiceImpl(private val context: Application) : ServerService {
                 k8sclient.services().withName(svc.fullResourceName).waitUntilReady(5, TimeUnit.SECONDS)
 
 
-                //val ca = sslService.getRootCaAsPem()
-                //val mwhc = mutatingWebhookConfiguration(server, ca)
-                //k8sclient.create(mwhc)
+                val ca = sslService.getRootCaAsPem()
+                val mwhc = helm.mutatingWebhookConfiguration(server, ca)
+                k8sclient.create(mwhc)
 
                 setDslStatus(id, ServerStatus.Up)
                 logger.info("Server started, dsl.id: `{}`", id)

@@ -7,10 +7,11 @@ import com.fkorotkov.kubernetes.apps.template
 import me.btieger.dsl.*
 import io.fabric8.kubernetes.api.model.apps.Deployment
 import me.btieger.Config
+import me.btieger.logic.kelm.HelmService
 
-fun deployment(server: Server) =
+fun HelmService.deployment(server: Server) =
     Deployment().apply {
-        metadata(server.whName)
+        metadata(server.whName, config.namespace)
         spec {
             replicas = 1
             selector {
@@ -18,7 +19,7 @@ fun deployment(server: Server) =
             }
             template {
                 metadata {
-                    namespace = Config.namespace
+                    namespace = config.namespace
                     labels = myLabels(server.whName)
                 }
                 spec {
