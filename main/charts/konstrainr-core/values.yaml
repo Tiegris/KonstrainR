@@ -2,7 +2,7 @@ image:
   repository: tiegris/konstrainer-core
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "0.0.1-snapshot-230306-b"
+  tag: "0.0.2"
 
 imagePullSecrets: []
 nameOverride: ""

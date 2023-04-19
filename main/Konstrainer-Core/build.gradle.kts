@@ -14,7 +14,7 @@ plugins {
 }
 
 group = "me.btieger"
-version = "0.0.1-snapshot-230306-b"
+version = "snapshot"
 
 ktor {
     docker {
