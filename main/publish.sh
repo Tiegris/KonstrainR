@@ -26,13 +26,15 @@ docker push "tiegris/konstrainer-core:$version"
 
 #################################
 #
-# Build & Publish Ksr-Core
+# Build & Publish Ksr-Agent
 #
 #################################
 
 cd $home/KonstraineR-Agent
 ./gradlew publishImageToLocalRegistry
 version="0.0.1"
+cd docker
+docker build -t tiegris/konstrainer-agent:$version .
 
 
 #################################
