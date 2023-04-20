@@ -10,13 +10,13 @@ plugins {
 }
 
 group = "me.btieger"
-version = "0.0.1"
+version = "snapshot"
 
 ktor {
     docker {
         jreVersion.set(io.ktor.plugin.features.JreVersion.JRE_17)
-        localImageName.set("tiegris/konstrainer-core")
-        imageTag.set("$version")
+        localImageName.set("tiegris/konstrainer-agent")
+        imageTag.set("stage1")
     }
 }
 
