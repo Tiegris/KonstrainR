@@ -13,7 +13,7 @@ import java.security.KeyStore
 
 fun main() {
     val passwd = "foobar".toCharArray()
-    val keyStoreFilePath = "build/keystore.jks"
+    val keyStoreFilePath = "/app/keystore.jks"
     val keyStoreFile = File(keyStoreFilePath)
     val keyStore = KeyStore.getInstance(KeyStore.getDefaultType())
     FileInputStream(keyStoreFile).use { fis -> keyStore.load(fis, passwd) }
