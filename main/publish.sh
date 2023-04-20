@@ -26,6 +26,17 @@ docker push "tiegris/konstrainer-core:$version"
 
 #################################
 #
+# Build & Publish Ksr-Core
+#
+#################################
+
+cd $home/KonstraineR-Agent
+./gradlew publishImageToLocalRegistry
+version="0.0.1"
+
+
+#################################
+#
 # Helm install Ksr-Core
 #
 #################################
