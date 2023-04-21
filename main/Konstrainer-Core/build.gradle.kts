@@ -8,9 +8,9 @@ val kubernetes_client_version: String by project
 val koin_version: String by project
 
 plugins {
-    kotlin("jvm") version "1.8.10"
-    id("io.ktor.plugin") version "2.2.4"
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.8.10"
+    kotlin("jvm") version "1.8.20"
+    id("io.ktor.plugin") version "2.3.0"
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.8.20"
 }
 
 group = "me.btieger"
