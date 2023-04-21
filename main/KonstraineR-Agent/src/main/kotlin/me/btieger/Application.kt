@@ -40,7 +40,7 @@ suspend fun main() {
 
     HttpClient(CIO).use {
         val url = "http://${config.coreBaseUrl}:8080/api/v1/dsls"
-        val response: HttpResponse = it.request("$url/${config.dslId}")
+        val response: HttpResponse = it.request("$url/${config.dslId}/jar")
         File("/app/ruleset.jar").writeBytes(response.readBytes()) // TODO optimise this
     }
 
