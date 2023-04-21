@@ -1,22 +1,46 @@
 package me.btieger
 
+import io.ktor.client.*
+import io.ktor.client.engine.cio.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import me.btieger.loader.Loader
-import me.btieger.plugins.*
+import me.btieger.plugins.configureAdministration
+import me.btieger.plugins.configureHTTP
+import me.btieger.plugins.configureRouting
+import me.btieger.plugins.configureSerialization
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileInputStream
 import java.security.KeyStore
 
+class Config : EnvVarSettings("KSR_") {
+    val coreBaseUrl by string()
+    val dslId by int()
 
-fun main() {
+    init {
+        loadAll()
+    }
+}
+private val config = Config()
+
+suspend fun main() {
     val passwd = "foobar".toCharArray()
     val keyStoreFilePath = "/app/keystore.jks"
     val keyStoreFile = File(keyStoreFilePath)
     val keyStore = KeyStore.getInstance(KeyStore.getDefaultType())
-    FileInputStream(keyStoreFile).use { fis -> keyStore.load(fis, passwd) }
+    withContext(Dispatchers.IO) {
+        FileInputStream(keyStoreFile).use { fis -> keyStore.load(fis, passwd) }
+    }
+
+    val client = HttpClient(CIO)
+    val response: HttpResponse = client.request("${config.coreBaseUrl}/api/v1/servers/${config.dslId}")
+    File("/app/ruleset.jar").writeBytes(response.readBytes()) // TODO optimise this
 
     val environment = applicationEngineEnvironment {
         log = LoggerFactory.getLogger("ktor.application")
@@ -38,8 +62,7 @@ fun main() {
 }
 
 fun Application.module() {
-    val rulesJarLocation = System.getenv("KSR_RULES_JAR_PATH") ?: "/app/ruleset.jar"
-    val ruleset = Loader("DslInstanceKt").loadServer(rulesJarLocation)
+    val ruleset = Loader("DslInstanceKt").loadServer("/app/ruleset.jar")
     configureHTTP()
     configureSerialization()
     configureAdministration()

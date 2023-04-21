@@ -34,6 +34,9 @@ dependencies {
     implementation("io.ktor:ktor-server-netty-jvm:$ktor_version")
     implementation("ch.qos.logback:logback-classic:$logback_version")
 
+    implementation("io.ktor:ktor-client-core:$ktor_version")
+    implementation("io.ktor:ktor-client-cio:$ktor_version")
+
     implementation("me.btieger:KonstrainerDsl:0.0.1-SNAPSHOT")
 
     testImplementation("io.ktor:ktor-server-tests-jvm:$ktor_version")

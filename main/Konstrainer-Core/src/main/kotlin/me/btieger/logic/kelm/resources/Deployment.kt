@@ -27,6 +27,16 @@ fun HelmService.deployment(server: Server, agentId: Int) =
                         newContainer {
                             name = "agent-server"
                             image = config.agentImage
+                            env = listOf(
+                                newEnvVar {
+                                    name = "KSR_CORE_BASE_URL"
+                                    value = config.serviceName
+                                },
+                                newEnvVar {
+                                    name = "KSR_DSL_ID"
+                                    value = agentId.toString()
+                                }
+                            )
                             ports = listOf(
                                 newContainerPort {
                                     containerPort = 8443
