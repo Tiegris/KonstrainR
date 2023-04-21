@@ -38,9 +38,10 @@ suspend fun main() {
         FileInputStream(keyStoreFile).use { fis -> keyStore.load(fis, passwd) }
     }
 
-    val client = HttpClient(CIO)
-    val response: HttpResponse = client.request("${config.coreBaseUrl}/api/v1/servers/${config.dslId}")
-    File("/app/ruleset.jar").writeBytes(response.readBytes()) // TODO optimise this
+    HttpClient(CIO).use {
+        val response: HttpResponse = it.request("${config.coreBaseUrl}/api/v1/servers/${config.dslId}")
+        File("/app/ruleset.jar").writeBytes(response.readBytes()) // TODO optimise this
+    }
 
     val environment = applicationEngineEnvironment {
         log = LoggerFactory.getLogger("ktor.application")
