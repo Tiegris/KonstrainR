@@ -72,7 +72,7 @@ class SslServiceOpenSslWrapperImpl : SslService {
                 "-out", certName,
                 "-CAkey", "rootCA.key",
                 "-CA", "rootCA.crt",
-                "-extfile", "<(printf \"subjectAltName=${serializeAltNames(altnames)}\")"
+                "-extfile <(printf \"subjectAltName=${altnames.joinToString(prefix = "DNS:", separator = ",")}\")"
             )
         }
         val key = getFile(keyName)
@@ -80,13 +80,6 @@ class SslServiceOpenSslWrapperImpl : SslService {
         return SecretBundle(cert, key)
     }
 
-    private fun serializeAltNames(altnames: List<String>) =
-        StringBuilder().apply {
-            altnames.forEach {
-                append("DNS:$it,")
-            }
-            removeSuffix(",")
-        }.toString()
     private fun getFile(fileName: String) = File(pwd, fileName).readText(Charsets.US_ASCII)
     private fun ShellScript.openssl(vararg args: String) = command("openssl", args.toList())
     private fun shell(script: ShellScript.()->String) = shellRun(workingDirectory = pwd) {
