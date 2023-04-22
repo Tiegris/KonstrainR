@@ -60,8 +60,8 @@ class ServerServiceImpl(
         GlobalScope.launch {
             try {
                 // read server conf from db
-                val server = Loader("DslInstanceKt").loadServer(dsl)
-                //val server = me.btieger.server
+                //val server = Loader("DslInstanceKt").loadServer(dsl)
+                val server = me.btieger.server
 
                 val cname = "${server.whName}.${config.namespace}.svc"
 
@@ -79,7 +79,7 @@ class ServerServiceImpl(
                 while (true) {
                     try {
                         k8sclient.resource(dep).waitUntilCondition({
-                            x->x.status.availableReplicas > 0
+                            (it.status.availableReplicas ?: 0) > 0
                         }, config.agentSpawnWaitSeconds, TimeUnit.SECONDS)
                         break
                     } catch (e: KubernetesClientTimeoutException) {
