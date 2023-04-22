@@ -13,7 +13,7 @@ class SslServiceOpenSslWrapperImpl : SslService {
     private val pwd = File("/app/ssl")
     private val rootCA: String
     init {
-        if (pwd.exists() && !pwd.isDirectory())
+        if (pwd.exists() && !pwd.isDirectory)
             throw ExceptionInInitializerError("Ssl root dir exists, but is not a directory!")
 
         if (!pwd.exists()) {
@@ -67,7 +67,10 @@ class SslServiceOpenSslWrapperImpl : SslService {
                 "-subj", "/C=HU/O=me.btieger/CN=$agentServiceName",
                 "-out", csrName,
             )
-            File(confName).writeText("subjectAltName=${altnames.joinToString(prefix = "DNS:", separator = ",")}")
+            File(confName).apply {
+                createNewFile()
+                writeText("subjectAltName=${altnames.joinToString(prefix = "DNS:", separator = ",")}")
+            }
             openssl(
                 "x509", "-req",
                 "-days", "365",
