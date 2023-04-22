@@ -60,7 +60,7 @@ class ServerServiceImpl(
             try {
                 // read server conf from db
                 val server = Loader("DslInstanceKt").loadServer(dsl)
-                val server = me.btieger.server
+                //val server = me.btieger.server
 
                 val cname = "${server.whName}.${config.namespace}.svc"
 
