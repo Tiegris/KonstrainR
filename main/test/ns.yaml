@@ -3,4 +3,5 @@ kind: Namespace
 metadata:
   name: demo-ns
   labels:
-    sidecar-injection: enabled
+    managed: true
+    istio-injection: false
