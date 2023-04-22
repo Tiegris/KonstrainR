@@ -2,7 +2,7 @@
 home=$PWD
 set -e -v -u -x
 
-helm uninstall konstrainr-core
+helm uninstall konstrainr-core || true
 git pull
 
 #################################
