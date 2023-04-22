@@ -1,7 +1,7 @@
 #! /bin/bash
 home=$PWD
 set -e -v -u -x
-
+git pull
 
 #################################
 #
