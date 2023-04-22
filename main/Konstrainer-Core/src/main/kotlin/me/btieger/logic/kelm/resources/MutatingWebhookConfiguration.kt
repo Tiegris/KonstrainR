@@ -10,10 +10,11 @@ import me.btieger.logic.kelm.HelmService
 
 fun HelmService.mutatingWebhookConfiguration(server: Server, cert: String, agentId: Int) =
     MutatingWebhookConfiguration().apply {
-        metadata(server.whName, config.namespace, agentId)
+        val _name = "${server.whName}.btieger.me"
+        metadata(_name, config.namespace, agentId)
         webhooks = server.rules.map {
             newMutatingWebhook {
-                name = server.whName
+                name = _name
                 admissionReviewVersions = listOf("v1", "v1beta1")
                 sideEffects = "None"
                 clientConfig {
