@@ -1,6 +1,8 @@
 #! /bin/bash
 home=$PWD
 set -e -v -u -x
+
+helm uninstall konstrainr-core
 git pull
 
 #################################
