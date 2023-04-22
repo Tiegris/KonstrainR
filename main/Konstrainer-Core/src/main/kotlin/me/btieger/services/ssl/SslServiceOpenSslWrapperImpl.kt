@@ -67,7 +67,7 @@ class SslServiceOpenSslWrapperImpl : SslService {
                 "-subj", "/C=HU/O=me.btieger/CN=$agentServiceName",
                 "-out", csrName,
             )
-            BufferedWriter(FileWriter(confName)).use {
+            BufferedWriter(FileWriter(File(pwd, confName))).use {
                 it.write("subjectAltName=${altnames.joinToString(prefix = "DNS:", separator = ",")}")
             }
             openssl(
