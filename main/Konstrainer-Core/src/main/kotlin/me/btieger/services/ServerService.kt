@@ -52,14 +52,14 @@ class ServerServiceImpl(
 
     @OptIn(DelicateCoroutinesApi::class)
     override suspend fun start(id: Int) {
-        //val dsl = getDsl(id)
+        val dsl = getDsl(id)
 
         setDslStatus(id, ServerStatus.Spawning)
         logger.info("Launching server spawner coroutine, dsl.id: `{}`", id)
         GlobalScope.launch {
             try {
                 // read server conf from db
-                //val server = Loader("DslInstanceKt").loadServer(dsl)
+                val server = Loader("DslInstanceKt").loadServer(dsl)
                 val server = me.btieger.server
 
                 val cname = "${server.whName}.${config.namespace}.svc"
@@ -77,7 +77,9 @@ class ServerServiceImpl(
                 var retryCounter = 0;
                 while (true) {
                     try {
-                        k8sclient.services().withName(svc.fullResourceName).waitUntilReady(config.agentSpawnWaitSeconds, TimeUnit.SECONDS)
+                        k8sclient.apps().deployments().withName(dep.fullResourceName).waitUntilCondition({
+                                x->x.status.availableReplicas > 0
+                            }, config.agentSpawnWaitSeconds, TimeUnit.SECONDS)
                         break
                     } catch (e: KubernetesClientTimeoutException) {
                         retryCounter++
