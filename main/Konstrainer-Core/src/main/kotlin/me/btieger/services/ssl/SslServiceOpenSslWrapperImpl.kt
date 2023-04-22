@@ -2,9 +2,9 @@ package me.btieger.services.ssl
 
 import com.lordcodes.turtle.ShellScript
 import com.lordcodes.turtle.shellRun
-import kotlinx.coroutines.yield
+import java.io.BufferedWriter
 import java.io.File
-import java.io.FileOutputStream
+import java.io.FileWriter
 import java.nio.file.Files
 import java.util.concurrent.ThreadLocalRandom
 import kotlin.streams.asSequence
@@ -67,9 +67,8 @@ class SslServiceOpenSslWrapperImpl : SslService {
                 "-subj", "/C=HU/O=me.btieger/CN=$agentServiceName",
                 "-out", csrName,
             )
-            File(confName).apply {
-                createNewFile()
-                writeText("subjectAltName=${altnames.joinToString(prefix = "DNS:", separator = ",")}")
+            BufferedWriter(FileWriter(confName)).use {
+                it.write("subjectAltName=${altnames.joinToString(prefix = "DNS:", separator = ",")}")
             }
             openssl(
                 "x509", "-req",
