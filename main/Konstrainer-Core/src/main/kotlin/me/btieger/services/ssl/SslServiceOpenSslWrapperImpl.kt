@@ -68,7 +68,7 @@ class SslServiceOpenSslWrapperImpl : SslService {
                 "-out", csrName,
             )
             BufferedWriter(FileWriter(File(pwd, confName))).use {
-                it.write("subjectAltName=${altnames.joinToString(prefix = "DNS:", separator = ",")}")
+                it.write("subjectAltName=${altnames.joinToString(prefix = "DNS:", separator = ",DNS:")}")
             }
             openssl(
                 "x509", "-req",
