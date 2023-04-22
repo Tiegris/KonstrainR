@@ -13,12 +13,12 @@ val server = server {
         apiVersions(ANY)
         resources(PODS, DEPLOYMENTS, REPLICASETS)
         scope(ANY)
-/*        namespaceSelector {
+        namespaceSelector {
             matchLabels {
                 "managed" eq "true"
                 "istio-injection" eq "false"
             }
-        }*/
+        }
         failurePolicy(FAIL)
     }
 
