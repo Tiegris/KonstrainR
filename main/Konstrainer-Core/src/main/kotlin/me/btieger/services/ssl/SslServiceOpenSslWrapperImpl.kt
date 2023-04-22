@@ -4,6 +4,7 @@ import com.lordcodes.turtle.ShellScript
 import com.lordcodes.turtle.shellRun
 import kotlinx.coroutines.yield
 import java.io.File
+import java.io.FileOutputStream
 import java.nio.file.Files
 import java.util.concurrent.ThreadLocalRandom
 import kotlin.streams.asSequence
@@ -57,6 +58,7 @@ class SslServiceOpenSslWrapperImpl : SslService {
         val keyName = "$folder/agent.key"
         val certName = "$folder/agent.crt"
         val csrName = "$folder/agent.csr"
+        val confName = "$folder/agent.cnf"
         shell {
             openssl("genrsa", "-out", keyName, "2048")
             openssl(
@@ -65,6 +67,7 @@ class SslServiceOpenSslWrapperImpl : SslService {
                 "-subj", "/C=HU/O=me.btieger/CN=$agentServiceName",
                 "-out", csrName,
             )
+            File(confName).writeText("subjectAltName=${altnames.joinToString(prefix = "DNS:", separator = ",")}")
             openssl(
                 "x509", "-req",
                 "-days", "365",
@@ -72,7 +75,7 @@ class SslServiceOpenSslWrapperImpl : SslService {
                 "-out", certName,
                 "-CAkey", "rootCA.key",
                 "-CA", "rootCA.crt",
-                "-extfile <(printf \"subjectAltName=${altnames.joinToString(prefix = "DNS:", separator = ",")}\")"
+                "-extfile", confName
             )
         }
         val key = getFile(keyName)
