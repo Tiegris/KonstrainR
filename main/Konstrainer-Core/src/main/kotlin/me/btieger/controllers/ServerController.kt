@@ -35,7 +35,8 @@ fun Application.serverController() {
                 }
                 post("stop") {
                     exceptionGuard {
-                        TODO()
+                        serverService.stop(call.id)
+                        respond(HttpStatusCode.OK)
                     }
                 }
             }
