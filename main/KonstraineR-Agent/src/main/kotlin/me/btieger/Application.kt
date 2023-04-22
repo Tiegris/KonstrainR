@@ -17,11 +17,15 @@ import me.btieger.plugins.configureSerialization
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.nio.file.Path
+import java.nio.file.Paths
 import java.security.KeyStore
 
 class Config : EnvVarSettings("KSR_") {
     val coreBaseUrl by string()
     val dslId by int()
+    val rootDir by string("/app")
 
     init {
         loadAll()
@@ -31,7 +35,7 @@ private val config = Config()
 
 suspend fun main() {
     val passwd = "foobar".toCharArray()
-    val keyStoreFilePath = "/app/keystore.jks"
+    val keyStoreFilePath = "${config.rootDir}/keystore.jks"
     val keyStoreFile = File(keyStoreFilePath)
     val keyStore = KeyStore.getInstance(KeyStore.getDefaultType())
     withContext(Dispatchers.IO) {
@@ -41,7 +45,9 @@ suspend fun main() {
     HttpClient(CIO).use {
         val url = "http://${config.coreBaseUrl}:8080/api/v1/dsls"
         val response: HttpResponse = it.request("$url/${config.dslId}/jar")
-        File("/app/ruleset.jar").writeBytes(response.readBytes()) // TODO optimise this
+        FileOutputStream("${config.rootDir}/ruleset.jar").use {
+            it.write(response.readBytes())
+        }
     }
 
     val environment = applicationEngineEnvironment {
@@ -64,7 +70,7 @@ suspend fun main() {
 }
 
 fun Application.module() {
-    val ruleset = Loader("DslInstanceKt").loadServer("/app/ruleset.jar")
+    val ruleset = Loader("DslInstanceKt").loadServer(Paths.get("${config.rootDir}/ruleset.jar"))
     configureHTTP()
     configureSerialization()
     configureAdministration()
