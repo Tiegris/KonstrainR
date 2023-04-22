@@ -9,6 +9,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import me.btieger.Config
 import me.btieger.bytesStable
+import me.btieger.loader.Loader
 import me.btieger.logic.kelm.HelmService
 import me.btieger.logic.kelm.resources.secret
 import me.btieger.persistance.DatabaseFactory
@@ -121,7 +122,12 @@ class ServerServiceImpl(
 
 
     override suspend fun stop(id: Int) {
-        TODO("Not yet implemented")
+        if (delete(id)) {
+            logger.info("Successful rollback, dsl.id: `{}`", id)
+            setDslStatus(id, ServerStatus.Down)
+        } else {
+            setDslStatus(id, ServerStatus.Error)
+        }
     }
 
 
