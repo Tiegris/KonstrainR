@@ -32,7 +32,8 @@ class SslServiceOpenSslWrapperImpl : SslService {
                     "-sha256",
                     "-days", "365",
                     "-out", "rootCA.crt",
-                    "-subj", "/C=HU/O=me.btieger/CN=konstrainer-core"
+                    "-subj", "/C=HU/O=me.btieger/CN=konstrainer-core",
+                    "-addext", "subjectAltName=DNS:konstrainer-core",
                 )
             }
 
@@ -61,7 +62,8 @@ class SslServiceOpenSslWrapperImpl : SslService {
                 "req", "-new", "-sha256",
                 "-key", keyName,
                 "-subj", "/C=HU/O=me.btieger/CN=$agentServiceName",
-                "-out", csrName
+                "-addext", "subjectAltName=DNS:$agentServiceName",
+                "-out", csrName,
             )
             openssl(
                 "x509", "-req",
@@ -69,7 +71,7 @@ class SslServiceOpenSslWrapperImpl : SslService {
                 "-in", csrName,
                 "-out", certName,
                 "-CAkey", "rootCA.key",
-                "-CA", "rootCA.crt"
+                "-CA", "rootCA.crt",
             )
         }
         val key = getFile(keyName)
