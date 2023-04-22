@@ -78,9 +78,9 @@ class ServerServiceImpl(
                 var retryCounter = 0;
                 while (true) {
                     try {
-                        k8sclient.apps().deployments().withName(dep.fullResourceName).waitUntilCondition({
-                                x->x.status.availableReplicas > 0
-                            }, config.agentSpawnWaitSeconds, TimeUnit.SECONDS)
+                        k8sclient.resource(dep).waitUntilCondition({
+                            x->x.status.availableReplicas > 0
+                        }, config.agentSpawnWaitSeconds, TimeUnit.SECONDS)
                         break
                     } catch (e: KubernetesClientTimeoutException) {
                         retryCounter++
