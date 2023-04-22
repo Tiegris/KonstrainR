@@ -60,12 +60,17 @@ class ServerServiceImpl(
         GlobalScope.launch {
             try {
                 // read server conf from db
-                //val server = Loader("DslInstanceKt").loadServer(dsl)
-                val server = me.btieger.server
+                val server = Loader("DslInstanceKt").loadServer(dsl)
+                //val server = me.btieger.server
 
                 val cname = "${server.whName}.${config.namespace}.svc"
+                val altnames = listOf(
+                    "${server.whName}.${config.namespace}.svc",
+                    "${server.whName}.${config.namespace}",
+                    server.whName
+                )
 
-                val cert = sslService.deriveCert(cname)
+                val cert = sslService.deriveCert(cname, altnames)
                 val secret = helm.secret(server, cert, id)
                 k8sclient.create(secret)
 

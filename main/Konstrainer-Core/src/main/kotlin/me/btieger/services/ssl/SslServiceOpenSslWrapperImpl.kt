@@ -2,6 +2,7 @@ package me.btieger.services.ssl
 
 import com.lordcodes.turtle.ShellScript
 import com.lordcodes.turtle.shellRun
+import kotlinx.coroutines.yield
 import java.io.File
 import java.nio.file.Files
 import java.util.concurrent.ThreadLocalRandom
@@ -45,7 +46,7 @@ class SslServiceOpenSslWrapperImpl : SslService {
         return rootCA
     }
 
-    override fun deriveCert(agentServiceName: String): SecretBundle {
+    override fun deriveCert(agentServiceName: String, altnames: List<String>) : SecretBundle {
         var folder = randomString()
         while (File(pwd, folder).exists())
             folder = randomString()
@@ -62,7 +63,6 @@ class SslServiceOpenSslWrapperImpl : SslService {
                 "req", "-new", "-sha256",
                 "-key", keyName,
                 "-subj", "/C=HU/O=me.btieger/CN=$agentServiceName",
-                "-addext", "subjectAltName=DNS:$agentServiceName",
                 "-out", csrName,
             )
             openssl(
@@ -72,6 +72,7 @@ class SslServiceOpenSslWrapperImpl : SslService {
                 "-out", certName,
                 "-CAkey", "rootCA.key",
                 "-CA", "rootCA.crt",
+                "-extfile", "<(printf \"subjectAltName=${serializeAltNames(altnames)}\")"
             )
         }
         val key = getFile(keyName)
@@ -79,6 +80,13 @@ class SslServiceOpenSslWrapperImpl : SslService {
         return SecretBundle(cert, key)
     }
 
+    private fun serializeAltNames(altnames: List<String>) =
+        StringBuilder().apply {
+            altnames.forEach {
+                append("DNS:$it,")
+            }
+            removeSuffix(",")
+        }.toString()
     private fun getFile(fileName: String) = File(pwd, fileName).readText(Charsets.US_ASCII)
     private fun ShellScript.openssl(vararg args: String) = command("openssl", args.toList())
     private fun shell(script: ShellScript.()->String) = shellRun(workingDirectory = pwd) {

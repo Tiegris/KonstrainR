@@ -13,7 +13,7 @@ class SslServiceMockImpl : SslService {
         return getFile("rootCA.crt")
     }
 
-    override fun deriveCert(agentServiceName: String): SecretBundle {
+    override fun deriveCert(agentServiceName: String, altnames: List<String>): SecretBundle {
         return SecretBundle(getFile("agent.crt"), getFile("agent.key"))
     }
 
