@@ -1,20 +1,15 @@
-import kotlinx.serialization.json.add
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.put
-import kotlinx.serialization.json.putJsonArray
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.*
 import me.btieger.dsl.*
+import me.btieger.loader.Loader
+import java.nio.file.Paths
+
 fun main(args: Array<String>) {
-    val s = "asd/asdf'/'asdfasdf/"
 
-    val json = buildJsonObject {
-        put("a", "asdf")
-        putJsonArray("b") {
-            add("x")
-            add("y")
-            add(5)
-        }
-    }
+    //val x = Json.encodeToString(me.btieger.example.server)
+    val x = Loader("me.btieger.example.ExampleKt").loadServer(Paths.get("C:\\Users\\btieger\\Documents\\KonstrainR\\main\\Konstrainer-Dsl\\build\\libs\\KonstrainerDsl-0.0.1-SNAPSHOT.jar"))
 
-    val a = json jqx "/b/2" parseAs int
-    println(a)
+    val k = x.rules[0].provider.invoke(JsonObject(mapOf()))
+
+    println(x)
 }
