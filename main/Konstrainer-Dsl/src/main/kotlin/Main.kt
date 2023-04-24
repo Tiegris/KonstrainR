@@ -6,9 +6,7 @@ import java.nio.file.Paths
 
 fun main(args: Array<String>) {
 
-    //val x = Json.encodeToString(me.btieger.example.server)
-    val x = Loader("me.btieger.example.ExampleKt").loadServer(Paths.get("C:\\Users\\btieger\\Documents\\KonstrainR\\main\\Konstrainer-Dsl\\build\\libs\\KonstrainerDsl-0.0.1-SNAPSHOT.jar"))
-
+    val x = Loader("me.btieger.example.ExampleKt").loadServer(Paths.get("C:\\Users\\btieger\\Documents\\KonstrainR\\main\\KonstraineR-Builder\\framework\\lib\\build\\libs\\lib.jar"))
     val k = x.rules[0].provider.invoke(JsonObject(mapOf()))
 
     println(x)

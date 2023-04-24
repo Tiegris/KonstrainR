@@ -21,8 +21,8 @@ fun Application.configureKoin(config: Config) {
             module {
                 single(createdAtStart = true) { config }
                 single<KubernetesClient>(createdAtStart = true) { KubernetesClientBuilder().build() }
-                single<DslService>(createdAtStart = true) { DslServiceImpl(get(), get(), get()) }
                 single<ServerService>(createdAtStart = true) { ServerServiceImpl(get(), get(), get(), get()) }
+                single<DslService>(createdAtStart = true) { DslServiceImpl(get(), get(), get(), get()) }
                 single(createdAtStart = true) { HelmService(get()) }
                 if (environment.developmentMode) {
                     single<SslService>(createdAtStart = true) { SslServiceMockImpl() }

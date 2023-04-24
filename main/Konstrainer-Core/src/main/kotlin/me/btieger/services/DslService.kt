@@ -41,6 +41,7 @@ class DslServiceImpl(
     private val kubectl: KubernetesClient,
     private val config: Config,
     private val helm: HelmService,
+    private val serverService: ServerService,
 ) : DslService {
     private val logger: Logger = LoggerFactory.getLogger("DslService")!!
 
@@ -115,6 +116,7 @@ class DslServiceImpl(
     }
 
     override suspend fun deleteDsl(id: Int) = DatabaseFactory.dbQuery {
+        serverService.stop(id)
         val success = Dsls.deleteWhere { Dsls.id eq id } > 0
         if (!success)
             logger.info("Failed delete dsl, dsl.id: `{}`", id)

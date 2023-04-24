@@ -20,7 +20,9 @@ import me.btieger.logic.kelm.resources.service
 import me.btieger.persistance.tables.Dsl
 import me.btieger.persistance.tables.ServerStatus
 import me.btieger.persistance.tables.BuildStatus
+import me.btieger.persistance.tables.Dsls
 import me.btieger.services.ssl.SslService
+import org.jetbrains.exposed.sql.update
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit
@@ -28,6 +30,7 @@ import java.util.concurrent.TimeUnit
 interface ServerService {
     suspend fun start(id: Int)
     suspend fun stop(id: Int)
+    suspend fun stopAll()
 }
 
 class ServerServiceImpl(
@@ -49,6 +52,12 @@ class ServerServiceImpl(
     private suspend fun setDslStatus(id: Int, status: ServerStatus) = DatabaseFactory.dbQuery {
         val dsl = Dsl.findById(id) ?: throw NotFoundException()
         dsl.serverStatus = status
+    }
+
+    private suspend fun setAllDown() = DatabaseFactory.dbQuery {
+        Dsls.update {
+            it[Dsls.serverStatus] = ServerStatus.Down
+        }
     }
 
     @OptIn(DelicateCoroutinesApi::class)
@@ -133,6 +142,15 @@ class ServerServiceImpl(
         } else {
             setDslStatus(id, ServerStatus.Error)
         }
+    }
+
+    override suspend fun stopAll() {
+        logger.info("All rules deleted.")
+        k8sclient.secrets().inNamespace(config.namespace).withLabel("agentId", "konstrainer").delete()
+        k8sclient.apps().deployments().inNamespace(config.namespace).withLabel("agentId", "konstrainer").delete()
+        k8sclient.services().inNamespace(config.namespace).withLabel("agentId", "konstrainer").delete()
+        k8sclient.admissionRegistration().v1().mutatingWebhookConfigurations().withLabel("agentId", "konstrainer").delete()
+        setAllDown()
     }
 
 
