@@ -49,6 +49,7 @@ open class RuleBuilder {
     }
 }
 
+typealias Provider = (JsonObject) -> RuleInstance
 class Rule(val name: String, val path: String, val provider: (JsonObject) -> RuleInstance)
 
 class RuleInstance(val allowed: Boolean, val patch: JsonArray, val warnings: List<Warning>, val status: Status)

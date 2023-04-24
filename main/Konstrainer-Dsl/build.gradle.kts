@@ -3,8 +3,8 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 val kotlin_version: String by project
 
 plugins {
-    kotlin("jvm") version "1.8.10"
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.8.10"
+    kotlin("jvm") version "1.8.20"
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.8.20"
     `maven-publish`
 }
 
@@ -26,9 +26,6 @@ publishing {
 
 dependencies {
     testImplementation(kotlin("test"))
-
-    //implementation("io.github.serpro69:kotlin-faker:1.12.0")
-
     api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
 }
 
