@@ -27,6 +27,7 @@ fun HelmService.deployment(server: Server, agentId: Int) =
                         newContainer {
                             name = "agent-server"
                             image = config.agentImage
+                            imagePullPolicy = "Always"
                             env = listOf(
                                 newEnvVar {
                                     name = "KSR_CORE_BASE_URL"
