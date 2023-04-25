@@ -20,6 +20,7 @@ cd $home/Konstrainer-Dsl
 #
 #################################
 
+cd $home
 docker build -f KonstraineR-Builder/Dockerfile -t tiegris/konstrainer-builder:dev .
 docker push "tiegris/konstrainer-builder:dev"
 
