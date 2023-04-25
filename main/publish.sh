@@ -16,6 +16,15 @@ cd $home/Konstrainer-Dsl
 
 #################################
 #
+# Build & Publish Ksr-Builder
+#
+#################################
+
+docker build -f KonstraineR-Builder/Dockerfile -t tiegris/konstrainer-builder:dev .
+docker push "tiegris/konstrainer-builder:dev"
+
+#################################
+#
 # Build & Publish Ksr-Core
 #
 #################################
