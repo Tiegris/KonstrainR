@@ -16,16 +16,6 @@ cd $home/Konstrainer-Dsl
 
 #################################
 #
-# Build & Publish Ksr-Builder
-#
-#################################
-
-cd $home
-docker build -f KonstraineR-Builder/Dockerfile -t tiegris/konstrainer-builder:dev .
-docker push "tiegris/konstrainer-builder:dev"
-
-#################################
-#
 # Build & Publish Ksr-Core
 #
 #################################
@@ -46,8 +36,17 @@ cd $home/KonstraineR-Agent
 ./gradlew publishImageToLocalRegistry
 version="0.0.1"
 cd docker
-docker build -t tiegris/konstrainer-agent:$version .
+docker build -t .
 
+#################################
+#
+# Build & Publish Ksr-Builder
+#
+#################################
+
+cd $home
+docker build -f KonstraineR-Builder/Dockerfile -t tiegris/konstrainer-builder:dev .
+docker push "tiegris/konstrainer-builder:dev"
 
 #################################
 #
