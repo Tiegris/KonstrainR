@@ -2,7 +2,7 @@
 home=$PWD
 set -e -v -u -x
 
-helm uninstall konstrainr-core || true
+helm uninstall konstrainr-core -n konstrainer-ns || true
 git pull
 
 #################################
@@ -55,4 +55,4 @@ docker push "tiegris/konstrainer-builder:dev"
 #################################
 
 cd $home/charts
-helm upgrade konstrainr-core konstrainr-core --install
+helm upgrade konstrainr-core konstrainr-core -n konstrainer-ns --install
