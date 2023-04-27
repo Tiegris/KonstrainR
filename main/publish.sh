@@ -36,7 +36,7 @@ cd $home/KonstraineR-Agent
 ./gradlew publishImageToLocalRegistry
 version="0.0.1"
 cd docker
-docker build -t .
+docker build -t tiegris/konstrainer-agent:$version .
 
 #################################
 #
