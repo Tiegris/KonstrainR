@@ -1,4 +1,4 @@
-FROM openjdk:17-bullseye AS Final
+FROM tiegris/konstrainer-agent:stage1 AS Final
 RUN apt update && apt install -y python3-pip && apt clean
 RUN pip3 install requests
 
