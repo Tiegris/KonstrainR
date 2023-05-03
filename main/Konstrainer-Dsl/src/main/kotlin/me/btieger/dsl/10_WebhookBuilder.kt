@@ -116,7 +116,7 @@ class WebhookBuilder {
         return Webhook(
             operations, apiGroups, apiVersion, resources, scope,
             namespaceSelector.selectorRule.rules, failurePolicy.string,
-            _name, _path, behavior
+            _path, _name, behavior
         )
     }
 }

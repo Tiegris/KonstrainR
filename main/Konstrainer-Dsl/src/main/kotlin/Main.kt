@@ -6,13 +6,7 @@ import java.nio.file.Paths
 
 fun main(args: Array<String>) {
 
-    val k = buildJsonObject {
-        putJsonArray("dat") {
-            addJsonObject {
-                put("asd", "true")
-            }
-        }
-    } jqx "/dat/0/asd" parseAs bool
+    val k = me.btieger.example.server
 
     println()
 

@@ -1,4 +1,4 @@
-package me.btieger.example
+package me.btieger
 
 import kotlinx.serialization.json.*
 import me.btieger.dsl.*
