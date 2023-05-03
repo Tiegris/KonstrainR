@@ -27,10 +27,11 @@ class Compilation():
         logger.info("Build arrangement started")
         # remove package
         if dsl_text.startswith("package"):
-            logger.info("Package removed")
             dsl_text = dsl_text.split("\n",maxsplit=1)[1]
-            
+            logger.info("Package removed")
+        
         dsl_text = "package me.btieger\n\n" + dsl_text
+        logger.info("Package added")
         with open("/app/framework/lib/src/main/kotlin/me/btieger/DslInstance.kt", "w") as f:
             f.write(dsl_text)
         logger.info("File saved")
