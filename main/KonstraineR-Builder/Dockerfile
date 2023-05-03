@@ -6,5 +6,5 @@ COPY KonstraineR-Builder/framework /app/framework
 COPY KonstraineR-Builder/builder.py /app/builder.py
 
 WORKDIR /app
-ENTRYPOINT [ "sleep", "infinity" ]
-#ENTRYPOINT [ "python3", "/app/builder.py" ]
+#ENTRYPOINT [ "sleep", "infinity" ]
+ENTRYPOINT [ "python3", "/app/builder.py" ]
