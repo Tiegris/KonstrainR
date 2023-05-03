@@ -9,7 +9,7 @@ import me.btieger.logic.kelm.HelmService
 
 fun HelmService.service(server: Server, agentId: Int) =
     Service().apply {
-        metadata(server.whName, config.namespace, agentId)
+        metadata(server.name, config.namespace, agentId)
         spec {
             ports = listOf(
                 newServicePort {
@@ -17,7 +17,7 @@ fun HelmService.service(server: Server, agentId: Int) =
                     targetPort = IntOrString(8443)
                 }
             )
-            selector = myLabels(server.whName, agentId)
+            selector = myLabels(server.name, agentId)
         }
     }
 

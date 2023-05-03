@@ -10,33 +10,32 @@ import me.btieger.logic.kelm.HelmService
 
 fun HelmService.mutatingWebhookConfiguration(server: Server, cert: String, agentId: Int) =
     MutatingWebhookConfiguration().apply {
-        val _name = "${server.whName}.btieger.me"
-        metadata(_name, config.namespace, agentId)
-        webhooks = server.rules.map {
+        metadata("${server.name}.btieger.me", config.namespace, agentId)
+        webhooks = server.components.filterIsInstance<Webhook>().map {
             newMutatingWebhook {
-                name = _name
+                name = "${it.name}.btieger.me"
                 admissionReviewVersions = listOf("v1", "v1beta1")
                 sideEffects = "None"
                 clientConfig {
                     caBundle = cert.encodeBase64()
                     service {
-                        name = server.whName
+                        name = it.name
                         namespace = config.namespace
-                        path = server.rules[0].path // TODO
+                        path = it.path
                     }
                 }
                 rules = listOf(
                     newRuleWithOperations {
-                        operations = server.whConf.operations
-                        apiGroups = server.whConf.apiGroups
-                        apiVersions = server.whConf.apiVersion
-                        resources = server.whConf.resources
+                        operations = it.operations
+                        apiGroups = it.apiGroups
+                        apiVersions = it.apiVersion
+                        resources = it.resources
                     }
                 )
                 namespaceSelector {
-                    matchLabels = server.whConf.namespaceSelector
+                    matchLabels = it.namespaceSelector
                 }
-                failurePolicy = server.whConf.failurePolicy
+                failurePolicy = it.failurePolicy
             }
         }
     }

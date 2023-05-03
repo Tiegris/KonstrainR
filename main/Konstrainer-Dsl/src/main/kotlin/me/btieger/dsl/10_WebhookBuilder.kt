@@ -1,6 +1,8 @@
 package me.btieger.dsl
 
-class WhConfBuilder {
+import kotlinx.serialization.json.JsonObject
+
+class WebhookBuilder {
     private var _operations: Array<out Type> by setOnce()
     private var _apiGroups: Array<out Type> by setOnce()
     private var _apiVersions: Array<out Type> by setOnce()
@@ -8,6 +10,40 @@ class WhConfBuilder {
     private var _scope: Type by setOnce(ANY)
     private var _namespaceSelector: NamespaceSelector by setOnce()
     private var _failurePolicy: FailurePolicy by setOnce(FAIL)
+    @DslMarkerVerb5
+    var path: String by setOnce()
+
+    @DslMarkerVerb5
+    var behavior: (JsonObject) -> RuleInstance by setOnce()
+
+    @DslMarkerBlock
+    fun withContext(setup: RuleBehaviorBuilder.()->Unit): RuleInstance {
+        val provider = RuleBehaviorBuilder().apply(setup)
+        return provider.build()
+    }
+
+    private fun validateName(name: String): String {
+        val name = name.split(' ', '.').joinToString(separator = "-")
+        for (c in name) {
+            if (!(c in 'A'..'Z' || c in 'a'..'z' || c == '-' || c == '_'))
+            // TODO
+                throw Exception()
+        }
+        return name
+    }
+
+    private fun validatePath(path: String): String {
+        var path = path
+        if (path.first() != '/')
+            path = "/$path"
+        path.trimEnd('/')
+        for (c in path) {
+            if (c !in 'a'..'z' && c != '/')// TODO
+                throw Exception()
+        }
+        return path
+    }
+
 
     @DslMarkerVerb5
     fun operations(vararg args: Operation) {
@@ -66,7 +102,7 @@ class WhConfBuilder {
         _failurePolicy = failurePolicy
     }
 
-    internal fun build(): WhConf {
+    internal fun build(name: String): Webhook {
         val operations = _operations.map {it.string}
         val apiGroups = _apiGroups.map {it.string}
         val apiVersion = _apiVersions.map {it.string}
@@ -74,10 +110,13 @@ class WhConfBuilder {
         val scope = _scope.string
         val namespaceSelector = _namespaceSelector
         val failurePolicy = _failurePolicy
+        val _name = validateName(name)
+        val _path = validatePath(path)
 
-        return WhConf(
+        return Webhook(
             operations, apiGroups, apiVersion, resources, scope,
-            namespaceSelector.selectorRule.rules, failurePolicy.string
+            namespaceSelector.selectorRule.rules, failurePolicy.string,
+            _name, _path, behavior
         )
     }
 }
@@ -130,7 +169,7 @@ object ANY : Type("*")
 @DslMarkerConstant
 class CUSTOM(string: String) : Type(string)
 
-class WhConf(
+class Webhook (
     val operations: List<String>,
     val apiGroups: List<String>,
     val apiVersion: List<String>,
@@ -138,4 +177,7 @@ class WhConf(
     val scope: String,
     val namespaceSelector: Map<String, String>,
     val failurePolicy: String,
-)
+    val path: String,
+    name: String,
+    val provider: (JsonObject) -> RuleInstance,
+) : Component(name)

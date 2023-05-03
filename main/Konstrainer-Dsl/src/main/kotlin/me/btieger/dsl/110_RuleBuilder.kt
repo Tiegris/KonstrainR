@@ -1,59 +1,9 @@
 package me.btieger.dsl
 
 import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonObject
-
-open class RuleBuilder {
-    @DslMarkerVerb5
-    var name: String by setOnce()
-    @DslMarkerVerb5
-    var path: String by setOnce()
-
-    @DslMarkerVerb5
-    var behavior: (JsonObject) -> RuleInstance by setOnce()
-
-    @DslMarkerBlock
-    fun withContext(setup: RuleBehaviorBuilder.()->Unit): RuleInstance {
-        val provider = RuleBehaviorBuilder()
-        provider.setup()
-        return provider.build()
-    }
-
-    internal open fun build(): Rule {
-        val _name = validateName(name)
-        val _path = validatePath(path)
-
-        return Rule(_name, _path, behavior)
-    }
-
-    private fun validateName(name: String): String {
-        val name = name.split(' ', '.').joinToString(separator = "-")
-        for (c in name) {
-            if (!(c in 'A'..'Z' || c in 'a'..'z' || c == '-' || c == '_'))
-                // TODO
-                throw Exception()
-        }
-        return name
-    }
-
-    private fun validatePath(path: String): String {
-        var path = path
-        if (path.first() != '/')
-            path = "/$path"
-        path.trimEnd('/')
-        for (c in path) {
-            if (c !in 'a'..'z' && c != '/')// TODO
-                throw Exception()
-        }
-        return path
-    }
-}
-
-typealias Provider = (JsonObject) -> RuleInstance
-class Rule(val name: String, val path: String, val provider: (JsonObject) -> RuleInstance)
 
 class RuleInstance(val allowed: Boolean, val patch: JsonArray, val warnings: List<Warning>, val status: Status)
-class RuleBehaviorBuilder() {
+class RuleBehaviorBuilder {
     private var _allowed: Boolean by setOnce(true)
     private var _patch: JsonArray by setOnce()
     private val _warnings = mutableListOf<Warning>()

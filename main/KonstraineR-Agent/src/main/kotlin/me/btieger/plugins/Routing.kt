@@ -17,16 +17,16 @@ fun Application.configureRouting(ruleset: Server) {
         get("/") {
             call.respondText("OK")
         }
-        ruleset.rules.forEach {
-            val rule = it
-            post(rule.path) {
+        ruleset.components.filterIsInstance<Webhook>().forEach {
+            val component = it
+            post(component.path) {
                 val body: JsonObject = call.receive()
                 println(body.toJsonString())
                 val apiVersion = body["apiVersion"]?.jsonPrimitive?.content!!
                 val kind = body["kind"]?.jsonPrimitive?.content!!
                 val request = body["request"]?.jsonObject!!
 
-                val provider = rule.provider.invoke(request)
+                val provider = component.provider.invoke(request)
 
                 val response = buildJsonObject {
                     put("apiVersion", apiVersion)

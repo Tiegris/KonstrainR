@@ -1,12 +1,12 @@
 package me.btieger.example
 
-
 import kotlinx.serialization.json.*
 import me.btieger.dsl.*
 
+/*
 val server2 = server {
     whName = "example"
-    serverBaseImage = ""
+
     whconf {
         operations(CREATE, UPDATE, DELETE, CONNECT)
         apiGroups(CORE)
@@ -58,3 +58,4 @@ val server2 = server {
     }
 
 }
+*/

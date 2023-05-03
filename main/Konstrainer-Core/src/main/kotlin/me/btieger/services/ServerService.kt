@@ -72,11 +72,11 @@ class ServerServiceImpl(
                 val server = Loader("me.btieger.DslInstanceKt").loadServer(dsl)
                 //val server = me.btieger.server
 
-                val cname = "${server.whName}.${config.namespace}.svc"
+                val cname = "${server.name}.${config.namespace}.svc"
                 val altnames = listOf(
-                    "${server.whName}.${config.namespace}.svc",
-                    "${server.whName}.${config.namespace}",
-                    server.whName
+                    "${server.name}.${config.namespace}.svc",
+                    "${server.name}.${config.namespace}",
+                    server.name
                 )
 
                 val cert = sslService.deriveCert(cname, altnames)

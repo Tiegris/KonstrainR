@@ -1,13 +1,11 @@
-package me.btieger
+package me.btieger.example
 
 import kotlinx.serialization.json.*
 import me.btieger.dsl.*
 
-
-val server = server {
-    whName = "example"
-    serverBaseImage = ""
-    whconf {
+val server = server("example-server") {
+    webhook("example-rule") {
+        path = "/create-pod"
         operations(CREATE, UPDATE, DELETE, CONNECT)
         apiGroups(CORE)
         apiVersions(ANY)
@@ -16,45 +14,37 @@ val server = server {
         namespaceSelector {
             matchLabels {
                 "managed" eq "true"
-                "istio-injection" eq "false"
             }
         }
         failurePolicy(FAIL)
-    }
+        behavior = fun (context) = withContext {
+            val rejectLabel = context jqx "/object/metadata/labels/reject" parseAs bool
+            val podName = context jqx "/object/metadata/name" parseAs string
 
-    rules {
-        rule {
-            name = "valami"
-            path = "/inject"
-
-            behavior = fun (context) = withContext {
-                val rejectLabel = context jqx "/object/metadata/labels/reject" parseAs bool
-                val podName = context jqx "/object/metadata/name" parseAs string
-
-                allowed {
-                    rejectLabel != true
-                }
-                status {
-                    code = 403
-                    message = "You cannot do this because rejection set to $rejectLabel"
-                }
-                patch {
-                    add("/metadata/labels/app", podName ?: "nil")
-                    add("/spec/containers/-",
-                        buildJsonObject {
-                            put("name", "$podName-sidecar")
-                            put("image", "debian:11")
-                            putJsonArray("command") {
-                                add("sleep")
-                                add("infinity")
-                            }
-                        }
-                    )
-                }
+            allowed {
+                rejectLabel != true
             }
-
+            status {
+                code = 403
+                message = "You cannot do this because rejection set to $rejectLabel"
+            }
+            patch {
+                add("/metadata/labels/app", podName)
+                add("/spec/containers/-",
+                    buildJsonObject {
+                        put("name", "$podName-sidecar")
+                        put("image", "debian:11")
+                        putJsonArray("command") {
+                            add("sleep")
+                            add("infinity")
+                        }
+                    }
+                )
+            }
         }
 
     }
+
+
 
 }
