@@ -38,7 +38,7 @@ class WebhookBuilder {
             path = "/$path"
         path.trimEnd('/')
         for (c in path) {
-            if (c !in 'a'..'z' && c != '/')// TODO
+            if (c !in 'a'..'z' && c != '/' && c != '-' && c != '_')// TODO
                 throw Exception()
         }
         return path
