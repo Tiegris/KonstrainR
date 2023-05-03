@@ -64,8 +64,9 @@ suspend fun main() {
 }
 
 fun Application.module() {
+    val ruleset = Loader("me.btieger.DslInstanceKt").loadServer(Paths.get("/app/libs/agentdsl.jar"))
     configureHTTP()
     configureSerialization()
     configureAdministration()
-    configureRouting(server)
+    configureRouting(ruleset)
 }

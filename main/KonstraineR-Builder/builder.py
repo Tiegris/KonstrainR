@@ -36,14 +36,14 @@ class Compilation():
         dsl_text.replace('\r','')
         logger.info("CR characters removed")
         
-        with open("/app/compiler/src/main/kotlin/me/btieger/AgentDsl.kt", "w") as f:
+        with open("/app/framework/lib/src/main/kotlin/me/btieger/DslInstance.kt", "w") as f:
             f.write(dsl_text)
         logger.info("File saved")
 
     def compile(self):
-        os.chdir('/app/compiler')
+        os.chdir('/app/framework')
         logger.info("Compilation started")
-        result = subprocess.run(['./gradlew', 'classes'], stdout=subprocess.PIPE)
+        result = subprocess.run(['./gradlew', 'jar'], stdout=subprocess.PIPE)
         if result.returncode != 0:
             logger.error("Compilation failed")
             raise Exception(f"Compilation failed, gradle output: {result.stdout}")
@@ -51,7 +51,7 @@ class Compilation():
             logger.info("Compilation done")
 
     def read_jar(self) -> bytes:
-        with open("/app/compiler/lib/build/libs/lib.jar", "rb") as f:
+        with open("/app/framework/lib/build/libs/lib.jar", "rb") as f:
             file_bytes = f.read()
         logger.info(f"Loaded JAR file to memory. Bytes loaded: {len(file_bytes)}")
         return file_bytes
