@@ -9,6 +9,7 @@ import kotlinx.serialization.json.*
 
 import me.btieger.dsl.*
 import me.btieger.toBase64
+import me.btieger.toJsonString
 
 fun Application.configureRouting(ruleset: Server) {
 
@@ -20,6 +21,7 @@ fun Application.configureRouting(ruleset: Server) {
             val rule = it
             post(rule.path) {
                 val body: JsonObject = call.receive()
+                println(body.toJsonString())
                 val apiVersion = body["apiVersion"]?.jsonPrimitive?.content!!
                 val kind = body["kind"]?.jsonPrimitive?.content!!
                 val request = body["request"]?.jsonObject!!
@@ -45,7 +47,7 @@ fun Application.configureRouting(ruleset: Server) {
                         }
                     }
                 }
-
+                println(response.toJsonString())
                 call.respond(HttpStatusCode.OK, response)
             }
         }
