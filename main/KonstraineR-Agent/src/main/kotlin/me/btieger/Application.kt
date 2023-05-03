@@ -4,11 +4,13 @@ import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
+import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.JsonObject
 import me.btieger.loader.Loader
 import me.btieger.plugins.configureAdministration
 import me.btieger.plugins.configureHTTP
@@ -21,6 +23,7 @@ import java.io.FileOutputStream
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.security.KeyStore
+import kotlin.system.exitProcess
 
 class Config : EnvVarSettings("KSR_") {
     val coreBaseUrl by string()
@@ -34,6 +37,7 @@ class Config : EnvVarSettings("KSR_") {
 private val config = Config()
 
 suspend fun main() {
+    val logger = LoggerFactory.getLogger("ktor.application")
     val passwd = "foobar".toCharArray()
     val keyStoreFilePath = "${config.rootDir}/keystore.jks"
     val keyStoreFile = File(keyStoreFilePath)
@@ -45,13 +49,19 @@ suspend fun main() {
     HttpClient(CIO).use {
         val url = "http://${config.coreBaseUrl}:8080/api/v1/dsls"
         val response: HttpResponse = it.request("$url/${config.dslId}/jar")
-        FileOutputStream("${config.rootDir}/ruleset.jar").use {
-            it.write(response.readBytes())
+
+        if (response.status == HttpStatusCode.OK) {
+            FileOutputStream("${config.rootDir}/ruleset.jar").use {
+                it.write(response.readBytes())
+            }
+        } else {
+            logger.error("Could not fetch ruleset.jar")
+            exitProcess(1)
         }
     }
 
     val environment = applicationEngineEnvironment {
-        log = LoggerFactory.getLogger("ktor.application")
+        log = logger
         connector {
             port = 8080
         }
@@ -71,6 +81,9 @@ suspend fun main() {
 
 fun Application.module() {
     val ruleset = Loader("me.btieger.DslInstanceKt").loadServer(Paths.get("${config.rootDir}/ruleset.jar"))
+
+    ruleset.rules[0].provider.invoke(JsonObject(mapOf()))
+
     configureHTTP()
     configureSerialization()
     configureAdministration()
