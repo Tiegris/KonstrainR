@@ -3,17 +3,21 @@ function watch_k8s() {
 }
 
 function fwd_core() {
-    clear && k port-forward service/konstrainr-core 8080:8080
+    clear && k port-forward service/konstrainr-core 8080:8080 -n konstrainer-ns
 }
 
 function fwd_agent() {
-    clear && k port-forward service/konstrainr-core 8081:8081
+    clear && k port-forward service/konstrainr-core 8081:8081 -n konstrainer-ns
 }
 
 function logs_core() {
     clear && k logs -f service/konstrainr-core -n konstrainer-ns
 }
 
+function logs_builder() {
+    clear && k logs -f job.batch/dsl-build-job-1 -n konstrainer-ns
+}
+
 function logs_agent() {
-    clear && k logs -f service/example
+    clear && k logs -f service/example -n konstrainer-ns
 }

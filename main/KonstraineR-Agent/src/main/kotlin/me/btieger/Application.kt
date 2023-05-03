@@ -70,7 +70,7 @@ suspend fun main() {
 }
 
 fun Application.module() {
-    val ruleset = Loader("DslInstanceKt").loadServer(Paths.get("${config.rootDir}/ruleset.jar"))
+    val ruleset = Loader("me.btieger.DslInstanceKt").loadServer(Paths.get("${config.rootDir}/ruleset.jar"))
     configureHTTP()
     configureSerialization()
     configureAdministration()
