@@ -7,7 +7,7 @@ fun server(name: String, setup: ServerBuilder.() -> Unit): Server {
 }
 
 class ServerBuilder {
-    private var _components: List<Component> by setOnce()
+    private var _components: List<Component> = mutableListOf()
 
     @DslMarkerBlock
     fun webhook(name: String, setup: WebhookBuilder.() -> Unit) {
