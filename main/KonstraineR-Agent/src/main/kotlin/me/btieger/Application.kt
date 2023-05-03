@@ -64,6 +64,10 @@ suspend fun main() {
 }
 
 fun Application.module() {
+    install(CallLogging) {
+        level = Level.INFO
+    }
+
     val ruleset = Loader("me.btieger.DslInstanceKt").loadServer(Paths.get("/app/libs/agentdsl.jar"))
     configureHTTP()
     configureSerialization()
