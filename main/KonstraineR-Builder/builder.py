@@ -43,7 +43,7 @@ class Compilation():
     def compile(self):
         os.chdir('/app/compiler')
         logger.info("Compilation started")
-        result = subprocess.run(['./gradlew', 'jar'], stdout=subprocess.PIPE)
+        result = subprocess.run(['./gradlew', 'classes'], stdout=subprocess.PIPE)
         if result.returncode != 0:
             logger.error("Compilation failed")
             raise Exception(f"Compilation failed, gradle output: {result.stdout}")
