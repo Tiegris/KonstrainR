@@ -26,8 +26,6 @@ import java.security.KeyStore
 import kotlin.system.exitProcess
 
 class Config : EnvVarSettings("KSR_") {
-    val coreBaseUrl by string()
-    val dslId by int()
     val rootDir by string("/app")
 
     init {
@@ -44,20 +42,6 @@ suspend fun main() {
     val keyStore = KeyStore.getInstance(KeyStore.getDefaultType())
     withContext(Dispatchers.IO) {
         FileInputStream(keyStoreFile).use { fis -> keyStore.load(fis, passwd) }
-    }
-
-    HttpClient(CIO).use {
-        val url = "http://${config.coreBaseUrl}:8080/api/v1/dsls"
-        val response: HttpResponse = it.request("$url/${config.dslId}/jar")
-
-        if (response.status == HttpStatusCode.OK) {
-            FileOutputStream("${config.rootDir}/ruleset.jar").use {
-                it.write(response.readBytes())
-            }
-        } else {
-            logger.error("Could not fetch ruleset.jar")
-            exitProcess(1)
-        }
     }
 
     val environment = applicationEngineEnvironment {
@@ -80,12 +64,8 @@ suspend fun main() {
 }
 
 fun Application.module() {
-    val ruleset = Loader("me.btieger.DslInstanceKt").loadServer(Paths.get("${config.rootDir}/ruleset.jar"))
-
-    ruleset.rules[0].provider.invoke(JsonObject(mapOf()))
-
     configureHTTP()
     configureSerialization()
     configureAdministration()
-    configureRouting(ruleset)
+    configureRouting(server)
 }
