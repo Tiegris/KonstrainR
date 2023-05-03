@@ -24,6 +24,8 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import java.security.KeyStore
 import kotlin.system.exitProcess
+import io.ktor.server.plugins.callloging.*
+import org.slf4j.event.Level
 
 class Config : EnvVarSettings("KSR_") {
     val rootDir by string("/app")
