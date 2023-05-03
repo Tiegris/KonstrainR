@@ -32,6 +32,7 @@ class Compilation():
         
         dsl_text = "package me.btieger\n\n" + dsl_text
         logger.info("Package added")
+        
         with open("/app/framework/lib/src/main/kotlin/me/btieger/DslInstance.kt", "w") as f:
             f.write(dsl_text)
         logger.info("File saved")
