@@ -69,7 +69,7 @@ class ServerServiceImpl(
         GlobalScope.launch {
             try {
                 // read server conf from db
-                val server = Loader("DslInstanceKt").loadServer(dsl)
+                val server = Loader("me.btieger.DslInstanceKt").loadServer(dsl)
                 //val server = me.btieger.server
 
                 val cname = "${server.whName}.${config.namespace}.svc"

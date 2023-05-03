@@ -6,8 +6,14 @@ import java.nio.file.Paths
 
 fun main(args: Array<String>) {
 
-    val x = Loader("me.btieger.example.ExampleKt").loadServer(Paths.get("C:\\Users\\btieger\\Documents\\KonstrainR\\main\\KonstraineR-Builder\\framework\\lib\\build\\libs\\lib.jar"))
-    val k = x.rules[0].provider.invoke(JsonObject(mapOf()))
+    val k = buildJsonObject {
+        putJsonArray("dat") {
+            addJsonObject {
+                put("asd", "true")
+            }
+        }
+    } jqx "/dat/0/asd" parseAs bool
 
-    println(x)
+    println()
+
 }

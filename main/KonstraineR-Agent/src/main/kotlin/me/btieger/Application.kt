@@ -1,15 +1,10 @@
 package me.btieger
 
-import io.ktor.client.*
-import io.ktor.client.engine.cio.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import me.btieger.loader.Loader
 import me.btieger.plugins.configureAdministration
 import me.btieger.plugins.configureHTTP
 import me.btieger.plugins.configureRouting
@@ -17,52 +12,48 @@ import me.btieger.plugins.configureSerialization
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.nio.file.Path
-import java.nio.file.Paths
 import java.security.KeyStore
+import io.ktor.server.plugins.callloging.*
+import me.btieger.loader.Loader
+import org.slf4j.event.Level
+import java.nio.file.Paths
 
 class Config : EnvVarSettings("KSR_") {
-    val coreBaseUrl by string()
-    val dslId by int()
     val rootDir by string("/app")
+    val development by boolean(false)
 
     init {
         loadAll()
     }
 }
-private val config = Config()
+private val _config = Config()
 
 suspend fun main() {
+    val logger = LoggerFactory.getLogger("ktor.application")
     val passwd = "foobar".toCharArray()
-    val keyStoreFilePath = "${config.rootDir}/keystore.jks"
+    val keyStoreFilePath = "${_config.rootDir}/keystore.jks"
     val keyStoreFile = File(keyStoreFilePath)
     val keyStore = KeyStore.getInstance(KeyStore.getDefaultType())
     withContext(Dispatchers.IO) {
         FileInputStream(keyStoreFile).use { fis -> keyStore.load(fis, passwd) }
     }
 
-    HttpClient(CIO).use {
-        val url = "http://${config.coreBaseUrl}:8080/api/v1/dsls"
-        val response: HttpResponse = it.request("$url/${config.dslId}/jar")
-        FileOutputStream("${config.rootDir}/ruleset.jar").use {
-            it.write(response.readBytes())
-        }
-    }
-
     val environment = applicationEngineEnvironment {
-        log = LoggerFactory.getLogger("ktor.application")
-        connector {
-            port = 8080
-        }
-        sslConnector(
-            keyStore = keyStore,
-            keyAlias = "AgentCert",
-            keyStorePassword = { passwd },
-            privateKeyPassword = { passwd }) {
-            keyStorePath = keyStoreFile
-            port = 8443
-            host = "0.0.0.0"
+        log = logger
+        if (_config.development) {
+            connector {
+                port = 8081
+            }
+        } else {
+            sslConnector(
+                keyStore = keyStore,
+                keyAlias = "AgentCert",
+                keyStorePassword = { passwd },
+                privateKeyPassword = { passwd }) {
+                keyStorePath = keyStoreFile
+                port = 8443
+                host = "0.0.0.0"
+            }
         }
         module(Application::module)
     }
@@ -70,7 +61,11 @@ suspend fun main() {
 }
 
 fun Application.module() {
-    val ruleset = Loader("DslInstanceKt").loadServer(Paths.get("${config.rootDir}/ruleset.jar"))
+    install(CallLogging) {
+        level = Level.INFO
+    }
+
+    val ruleset = if (_config.development) server else Loader("me.btieger.DslInstanceKt").loadServer(Paths.get("/app/libs/agentdsl.jar"))
     configureHTTP()
     configureSerialization()
     configureAdministration()
