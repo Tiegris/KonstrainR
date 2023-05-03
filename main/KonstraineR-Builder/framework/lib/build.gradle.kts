@@ -9,6 +9,6 @@ repositories {
 }
 
 dependencies {
-    api(files("/app/dsl.jar"))
+    api(files("/app/libs/KonstrainerDsl-0.0.1-SNAPSHOT.jar"))
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
 }
