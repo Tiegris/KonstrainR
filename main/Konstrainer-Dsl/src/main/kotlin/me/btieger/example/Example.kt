@@ -13,6 +13,8 @@ val defaults = webhookConfigBundle {
         }
     }
     failurePolicy(FAIL)
+    logRequest = true
+    logResponse = true
 }
 
 val server = server("example-server") {
@@ -48,7 +50,7 @@ val server = server("example-server") {
     }
 
     webhook("delete-pod", defaults) {
-        path = "/create-pod"
+        path = "/delete-pod"
         failurePolicy(IGNORE)
         operations(DELETE)
         behavior = fun (context) = withContext {
