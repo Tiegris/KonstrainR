@@ -54,6 +54,9 @@ val server = server("example-server") {
         behavior = fun (context) = withContext {
             val podName = context jqx "/oldObject/metadata/name" parseAs string
             println(podName)
+            warnings {
+                warning("$podName deletion was logged by ksr")
+            }
         }
 
     }

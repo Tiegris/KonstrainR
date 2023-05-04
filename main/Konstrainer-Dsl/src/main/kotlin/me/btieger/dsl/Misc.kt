@@ -10,11 +10,11 @@ annotation class DslMarkerConstant
 @DslMarker
 annotation class DslMarkerVerb5
 
-
 abstract class DslException(message: String) : Exception(message)
 
 class MultipleSetException(message: String) : DslException(message)
 class FieldNotSetException(message: String) : DslException(message)
+class InvalidArgumentException(message: String) : DslException(message)
 class InvalidUnitException(message: String) : DslException(message)
 
 class setExactlyOnce<T : Any>() : ReadWriteProperty<Any, T> {

@@ -65,7 +65,7 @@ fun Application.module() {
         level = Level.INFO
     }
 
-    val ruleset = if (_config.development) server else Loader("me.btieger.DslInstanceKt").loadServer(Paths.get("/app/libs/agentdsl.jar"))
+    val ruleset = if (_config.development) me.btieger.example.server else Loader("me.btieger.DslInstanceKt").loadServer(Paths.get("/app/libs/agentdsl.jar"))
     configureHTTP()
     configureSerialization()
     configureAdministration()

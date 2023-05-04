@@ -35,6 +35,11 @@ fun Application.configureRouting(ruleset: Server) {
                     putJsonObject("response") {
                         put("uid", uid)
                         put("allowed", provider.allowed)
+                        provider.warnings?.let { warnings ->
+                            putJsonArray("warnings") {
+                                warnings.forEach(::add)
+                            }
+                        }
                         if (!provider.allowed) {
                             putJsonObject("status") {
                                 put("code", provider.status.code)

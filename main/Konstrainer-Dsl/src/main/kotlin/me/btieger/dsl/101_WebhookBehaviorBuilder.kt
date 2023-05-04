@@ -2,11 +2,11 @@ package me.btieger.dsl
 
 import kotlinx.serialization.json.JsonArray
 
-class WebhookDecision(val allowed: Boolean, val patch: JsonArray?, val warnings: List<Warning>, val status: Status)
+class WebhookDecision(val allowed: Boolean, val patch: JsonArray?, val warnings: List<String>?, val status: Status)
 class WebhookBehaviorBuilder {
     private var _allowed: Boolean by setExactlyOnce(true)
-    private val _warnings = mutableListOf<Warning>()
-    private var _patch: JsonArray? = null
+    private var _warnings: List<String>? by setMaxOnce()
+    private var _patch: JsonArray? by setMaxOnce()
     private var _status: Status by setExactlyOnce(StatusBuilder().build())
 
     @DslMarkerBlock
@@ -16,8 +16,6 @@ class WebhookBehaviorBuilder {
 
     @DslMarkerBlock
     fun patch(setup: PatchBuilder.() -> Unit) {
-        if (_patch != null)
-            throw MultipleSetException("Patch can only be set once!")
         val builder = PatchBuilder().apply(setup)
         _patch = builder.build()
     }
@@ -25,7 +23,7 @@ class WebhookBehaviorBuilder {
     @DslMarkerBlock
     fun warnings(setup: WarningsBuilder.() -> Unit) {
         val builder = WarningsBuilder().apply(setup)
-        TODO()
+        _warnings = builder.build()
     }
 
     @DslMarkerBlock
