@@ -2,7 +2,6 @@ package me.btieger.services
 
 import io.fabric8.kubernetes.client.KubernetesClient
 import io.fabric8.kubernetes.client.KubernetesClientTimeoutException
-import io.ktor.server.application.*
 import io.ktor.server.plugins.*
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
