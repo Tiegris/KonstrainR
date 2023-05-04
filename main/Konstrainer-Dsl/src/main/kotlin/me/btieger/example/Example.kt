@@ -18,26 +18,6 @@ val defaults = webhookConfigBundle {
 }
 
 val server = server("example-server") {
-    webhook("logger") {
-        path = "/logger"
-        operations(ANY)
-        apiGroups(ANY)
-        apiVersions(ANY)
-        resources(ANY)
-        namespaceSelector {
-            matchLabels {
-                "managed" eq "true"
-            }
-        }
-        failurePolicy(FAIL)
-        logRequest = true
-        logResponse = true
-        behavior = fun (req) = withContext {
-            warnings {
-                warning("This action is logged by KSR.")
-            }
-        }
-    }
 
     webhook("create-pod", defaults) {
         path = "/create-pod"
@@ -72,7 +52,6 @@ val server = server("example-server") {
 
     webhook("delete-pod", defaults) {
         path = "/delete-pod"
-        failurePolicy(IGNORE)
         operations(DELETE)
         behavior = fun (context) = withContext {
             val podName = context jqx "/oldObject/metadata/name" parseAs string
