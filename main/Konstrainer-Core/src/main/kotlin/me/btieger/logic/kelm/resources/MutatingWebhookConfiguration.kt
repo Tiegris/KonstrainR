@@ -19,7 +19,7 @@ fun HelmService.mutatingWebhookConfiguration(server: Server, cert: String, agent
                 clientConfig {
                     caBundle = cert.encodeBase64()
                     service {
-                        name = it.name
+                        name = server.name
                         namespace = config.namespace
                         path = it.path
                     }
