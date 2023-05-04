@@ -10,15 +10,21 @@ class WebhookBuilder {
     private var _scope: Type by setOnce(ANY)
     private var _namespaceSelector: NamespaceSelector by setOnce()
     private var _failurePolicy: FailurePolicy by setOnce(FAIL)
+
+    @DslMarkerVerb5
+    var logRequest by setOnce(false)
+    @DslMarkerVerb5
+    var logResponse by setOnce(false)
+
     @DslMarkerVerb5
     var path: String by setOnce()
 
     @DslMarkerVerb5
-    var behavior: (JsonObject) -> RuleInstance by setOnce()
+    var behavior: (JsonObject) -> WebhookDecision by setOnce()
 
     @DslMarkerBlock
-    fun withContext(setup: RuleBehaviorBuilder.()->Unit): RuleInstance {
-        val provider = RuleBehaviorBuilder().apply(setup)
+    fun withContext(setup: WebhookBehaviorBuilder.()->Unit): WebhookDecision {
+        val provider = WebhookBehaviorBuilder().apply(setup)
         return provider.build()
     }
 
@@ -116,7 +122,7 @@ class WebhookBuilder {
         return Webhook(
             operations, apiGroups, apiVersion, resources, scope,
             namespaceSelector.selectorRule.rules, failurePolicy.string,
-            _path, _name, behavior
+            _path, _name, behavior, logRequest, logResponse
         )
     }
 }
@@ -179,5 +185,7 @@ class Webhook (
     val failurePolicy: String,
     val path: String,
     name: String,
-    val provider: (JsonObject) -> RuleInstance,
+    val provider: (JsonObject) -> WebhookDecision,
+    val logRequest: Boolean,
+    val logResponse: Boolean,
 ) : Component(name)

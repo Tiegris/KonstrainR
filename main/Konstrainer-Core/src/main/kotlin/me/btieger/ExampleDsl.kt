@@ -46,7 +46,7 @@ val server = server("example-server") {
     }
 
     webhook("delete-pod") {
-        path = "/create-pod"
+        path = "/delete-pod"
         operations(DELETE)
         apiGroups(CORE)
         apiVersions(ANY)

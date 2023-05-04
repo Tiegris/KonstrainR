@@ -8,6 +8,8 @@ fun main(args: Array<String>) {
 
     val k = me.btieger.example.server
 
+    (k.components[0] as Webhook).provider(JsonObject(mapOf()))
+
     println()
 
 }

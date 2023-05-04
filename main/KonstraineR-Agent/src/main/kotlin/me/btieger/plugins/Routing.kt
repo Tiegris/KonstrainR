@@ -17,11 +17,11 @@ fun Application.configureRouting(ruleset: Server) {
         get("/") {
             call.respondText("OK")
         }
-        ruleset.components.filterIsInstance<Webhook>().forEach {
-            val component = it
+        ruleset.components.filterIsInstance<Webhook>().forEach { component ->
             post(component.path) {
                 val body: JsonObject = call.receive()
-                println(body.toJsonString())
+                if (component.logRequest)
+                    println(body.toJsonString())
                 val apiVersion = body["apiVersion"]?.jsonPrimitive?.content!!
                 val kind = body["kind"]?.jsonPrimitive?.content!!
                 val request = body["request"]?.jsonObject!!
@@ -41,13 +41,16 @@ fun Application.configureRouting(ruleset: Server) {
                                 put("message", provider.status.message)
                             }
                         }
-                        if (provider.allowed) {
-                            put("patchType", "JSONPatch")
-                            put("patch", provider.patch.toBase64())
+                        provider.patch?.let { patch ->
+                            if (provider.allowed) {
+                                put("patchType", "JSONPatch")
+                                put("patch", patch.toBase64())
+                            }
                         }
                     }
                 }
-                println(response.toJsonString())
+                if (component.logResponse)
+                    println(response.toJsonString())
                 call.respond(HttpStatusCode.OK, response)
             }
         }

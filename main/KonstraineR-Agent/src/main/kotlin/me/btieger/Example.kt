@@ -4,12 +4,14 @@ import kotlinx.serialization.json.*
 import me.btieger.dsl.*
 
 val server = server("example-server") {
-    webhook("example-rule") {
+    webhook("create-pod") {
+        logResponse = true
+        logRequest = true
         path = "/create-pod"
-        operations(CREATE, UPDATE, DELETE, CONNECT)
+        operations(CREATE, UPDATE)
         apiGroups(CORE)
         apiVersions(ANY)
-        resources(PODS, DEPLOYMENTS, REPLICASETS)
+        resources(PODS)
         scope(ANY)
         namespaceSelector {
             matchLabels {
@@ -45,6 +47,24 @@ val server = server("example-server") {
 
     }
 
+    webhook("delete-pod") {
+        path = "/delete-pod"
+        operations(DELETE)
+        apiGroups(CORE)
+        apiVersions(ANY)
+        resources(PODS)
+        scope(ANY)
+        namespaceSelector {
+            matchLabels {
+                "managed" eq "true"
+            }
+        }
+        failurePolicy(FAIL)
+        behavior = fun (context) = withContext {
+            val podName = context jqx "/oldObject/metadata/name" parseAs string
+            println(podName)
+        }
 
+    }
 
 }
