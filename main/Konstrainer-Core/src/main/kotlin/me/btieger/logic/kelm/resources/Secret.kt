@@ -8,7 +8,7 @@ import me.btieger.services.ssl.SecretBundle
 
 fun HelmService.secret(server: Server, cert: SecretBundle, agentId: Int) =
     Secret().apply {
-        metadata(server.whName, config.namespace, agentId)
+        metadata(server.name, config.namespace, agentId)
         data = mapOf(
             "key.pem" to cert.keyPair.encodeBase64(),
             "cert.pem" to cert.certificate.encodeBase64(),

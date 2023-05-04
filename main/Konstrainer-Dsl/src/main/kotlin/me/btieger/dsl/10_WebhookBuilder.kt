@@ -1,13 +1,55 @@
 package me.btieger.dsl
 
-class WhConfBuilder {
-    private var _operations: Array<out Type> by setOnce()
-    private var _apiGroups: Array<out Type> by setOnce()
-    private var _apiVersions: Array<out Type> by setOnce()
-    private var _resources: Array<out Type> by setOnce()
-    private var _scope: Type by setOnce(ANY)
-    private var _namespaceSelector: NamespaceSelector by setOnce()
-    private var _failurePolicy: FailurePolicy by setOnce(FAIL)
+import kotlinx.serialization.json.JsonObject
+
+class WebhookBuilder(val defaults: WebhookConfigBundle) {
+    private var _operations: Array<out Type> by setExactlyOnce(defaults.operations)
+    private var _apiGroups: Array<out Type> by setExactlyOnce(defaults.apiGroups)
+    private var _apiVersions: Array<out Type> by setExactlyOnce(defaults.apiVersion)
+    private var _resources: Array<out Type> by setExactlyOnce(defaults.resources)
+    private var _scope: Type by setExactlyOnce(defaults.scope ?: ANY)
+    private var _namespaceSelector: NamespaceSelector by setExactlyOnce(defaults.namespaceSelector)
+    private var _failurePolicy: FailurePolicy by setExactlyOnce(defaults.failurePolicy ?: FAIL)
+
+    @DslMarkerVerb5
+    var logRequest by setExactlyOnce(defaults.logRequest ?: false)
+    @DslMarkerVerb5
+    var logResponse by setExactlyOnce(defaults.logResponse ?: false)
+
+    @DslMarkerVerb5
+    var path: String by setExactlyOnce()
+
+    @DslMarkerVerb5
+    var behavior: (JsonObject) -> WebhookDecision by setExactlyOnce()
+
+    @DslMarkerBlock
+    fun withContext(setup: WebhookBehaviorBuilder.()->Unit): WebhookDecision {
+        val provider = WebhookBehaviorBuilder().apply(setup)
+        return provider.build()
+    }
+
+    private fun validateName(name: String): String {
+        val name = name.split(' ', '.').joinToString(separator = "-")
+        for (c in name) {
+            if (!(c in 'A'..'Z' || c in 'a'..'z' || c == '-' || c == '_'))
+            // TODO
+                throw Exception()
+        }
+        return name
+    }
+
+    private fun validatePath(path: String): String {
+        var path = path
+        if (path.first() != '/')
+            path = "/$path"
+        path.trimEnd('/')
+        for (c in path) {
+            if (c !in 'a'..'z' && c != '/' && c != '-' && c != '_')// TODO
+                throw Exception()
+        }
+        return path
+    }
+
 
     @DslMarkerVerb5
     fun operations(vararg args: Operation) {
@@ -66,7 +108,7 @@ class WhConfBuilder {
         _failurePolicy = failurePolicy
     }
 
-    internal fun build(): WhConf {
+    internal fun build(name: String): Webhook {
         val operations = _operations.map {it.string}
         val apiGroups = _apiGroups.map {it.string}
         val apiVersion = _apiVersions.map {it.string}
@@ -74,10 +116,13 @@ class WhConfBuilder {
         val scope = _scope.string
         val namespaceSelector = _namespaceSelector
         val failurePolicy = _failurePolicy
+        val _name = validateName(name)
+        val _path = validatePath(path)
 
-        return WhConf(
+        return Webhook(
             operations, apiGroups, apiVersion, resources, scope,
-            namespaceSelector.selectorRule.rules, failurePolicy.string
+            namespaceSelector.selectorRule.rules, failurePolicy.string,
+            _path, _name, behavior, logRequest, logResponse
         )
     }
 }
@@ -130,7 +175,7 @@ object ANY : Type("*")
 @DslMarkerConstant
 class CUSTOM(string: String) : Type(string)
 
-class WhConf(
+class Webhook (
     val operations: List<String>,
     val apiGroups: List<String>,
     val apiVersion: List<String>,
@@ -138,4 +183,9 @@ class WhConf(
     val scope: String,
     val namespaceSelector: Map<String, String>,
     val failurePolicy: String,
-)
+    val path: String,
+    name: String,
+    val provider: (JsonObject) -> WebhookDecision,
+    val logRequest: Boolean,
+    val logResponse: Boolean,
+) : Component(name)

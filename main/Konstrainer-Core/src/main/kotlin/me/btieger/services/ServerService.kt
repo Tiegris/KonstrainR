@@ -2,7 +2,6 @@ package me.btieger.services
 
 import io.fabric8.kubernetes.client.KubernetesClient
 import io.fabric8.kubernetes.client.KubernetesClientTimeoutException
-import io.ktor.server.application.*
 import io.ktor.server.plugins.*
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -72,11 +71,11 @@ class ServerServiceImpl(
                 val server = Loader("me.btieger.DslInstanceKt").loadServer(dsl)
                 //val server = me.btieger.server
 
-                val cname = "${server.whName}.${config.namespace}.svc"
+                val cname = "${server.name}.${config.namespace}.svc"
                 val altnames = listOf(
-                    "${server.whName}.${config.namespace}.svc",
-                    "${server.whName}.${config.namespace}",
-                    server.whName
+                    "${server.name}.${config.namespace}.svc",
+                    "${server.name}.${config.namespace}",
+                    server.name
                 )
 
                 val cert = sslService.deriveCert(cname, altnames)

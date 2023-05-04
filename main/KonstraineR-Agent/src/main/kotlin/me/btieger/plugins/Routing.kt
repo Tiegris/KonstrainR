@@ -17,16 +17,16 @@ fun Application.configureRouting(ruleset: Server) {
         get("/") {
             call.respondText("OK")
         }
-        ruleset.rules.forEach {
-            val rule = it
-            post(rule.path) {
+        ruleset.components.filterIsInstance<Webhook>().forEach { component ->
+            post(component.path) {
                 val body: JsonObject = call.receive()
-                println(body.toJsonString())
+                if (component.logRequest)
+                    println(body.toJsonString())
                 val apiVersion = body["apiVersion"]?.jsonPrimitive?.content!!
                 val kind = body["kind"]?.jsonPrimitive?.content!!
                 val request = body["request"]?.jsonObject!!
 
-                val provider = rule.provider.invoke(request)
+                val provider = component.provider.invoke(request)
 
                 val response = buildJsonObject {
                     put("apiVersion", apiVersion)
@@ -35,19 +35,27 @@ fun Application.configureRouting(ruleset: Server) {
                     putJsonObject("response") {
                         put("uid", uid)
                         put("allowed", provider.allowed)
+                        provider.warnings?.let { warnings ->
+                            putJsonArray("warnings") {
+                                warnings.forEach(::add)
+                            }
+                        }
                         if (!provider.allowed) {
                             putJsonObject("status") {
                                 put("code", provider.status.code)
                                 put("message", provider.status.message)
                             }
                         }
-                        if (provider.allowed) {
-                            put("patchType", "JSONPatch")
-                            put("patch", provider.patch.toBase64())
+                        provider.patch?.let { patch ->
+                            if (provider.allowed) {
+                                put("patchType", "JSONPatch")
+                                put("patch", patch.toBase64())
+                            }
                         }
                     }
                 }
-                println(response.toJsonString())
+                if (component.logResponse)
+                    println(response.toJsonString())
                 call.respond(HttpStatusCode.OK, response)
             }
         }

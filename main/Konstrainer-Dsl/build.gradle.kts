@@ -15,7 +15,7 @@ repositories {
     mavenCentral()
 }
 
-// gradle build publishToMavenLocal
+// ./gradlew build publishToMavenLocal
 publishing {
     publications {
         register("mavenJava", MavenPublication::class) {

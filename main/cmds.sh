@@ -7,7 +7,7 @@ function fwd_core() {
 }
 
 function fwd_agent() {
-    clear && k port-forward service/konstrainr-core 8081:8081 -n konstrainer-ns
+    clear && k port-forward service/example-server 8081:8081 -n konstrainer-ns
 }
 
 function logs_core() {
@@ -19,5 +19,5 @@ function logs_builder() {
 }
 
 function logs_agent() {
-    clear && k logs -f service/example -n konstrainer-ns
+    clear && k logs -f service/example-server -n konstrainer-ns
 }

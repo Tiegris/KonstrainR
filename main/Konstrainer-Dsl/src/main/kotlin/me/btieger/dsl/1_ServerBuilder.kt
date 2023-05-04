@@ -1,42 +1,30 @@
 package me.btieger.dsl
 
-import kotlinx.serialization.json.JsonObject
-
 @DslMarkerBlock
-fun server(setup: ServerBuilder.() -> Unit): Server {
-    val builder = ServerBuilder()
-    builder.setup()
-    return builder.build()
+fun server(name: String, setup: ServerBuilder.() -> Unit): Server {
+    val builder = ServerBuilder().apply(setup)
+    return builder.build(name)
 }
 
 class ServerBuilder {
-    private var _rules: List<Rule> by setOnce()
-    private var _whconf: WhConf by setOnce()
+    private var _components: List<Component> = mutableListOf()
 
     @DslMarkerBlock
-    var whName: String by setOnce()
-
-    @DslMarkerBlock
-    var serverBaseImage: String by setOnce()
-
-    @DslMarkerBlock
-    fun whconf(setup: WhConfBuilder.() -> Unit) {
-        val builder = WhConfBuilder()
-        builder.setup()
-        _whconf = builder.build()
+    fun webhook(name: String, defaults: WebhookConfigBundle? = null, setup: WebhookBuilder.() -> Unit) {
+        val builder = WebhookBuilder(defaults ?: WebhookConfigBundleBuilder().build()).apply(setup)
+        _components += builder.build(name)
     }
 
     @DslMarkerBlock
-    fun rules(setup: RulesBuilder.() -> Unit) {
-        val builder = RulesBuilder()
-        builder.setup()
-        _rules = builder.build()
+    fun warningAggregator(setup: () -> Unit) {
+
     }
 
-    internal fun build(): Server {
+    internal fun build(name: String): Server {
         // assert no null
-        return Server(whName, serverBaseImage, _rules, _whconf)
+        return Server(name, _components)
     }
 }
 
-class Server(val whName: String, val serverBaseImage: String, val rules: List<Rule>, val whConf: WhConf)
+open class Component(val name: String)
+class Server(val name: String, val components: List<Component>)

@@ -2,7 +2,7 @@ package me.btieger.dsl
 
 class NamespaceSelectorBuilder {
 
-    private var _selctorRule: MatchLabel by setOnce()
+    private var _selctorRule: MatchLabel by setExactlyOnce()
 
     @DslMarkerBlock
     fun matchLabels(setup: MatchLabelBuilder.() -> Unit) {

@@ -11,16 +11,16 @@ import me.btieger.logic.kelm.HelmService
 
 fun HelmService.deployment(server: Server, agentId: Int) =
     Deployment().apply {
-        metadata(server.whName, config.namespace, agentId)
+        metadata(server.name, config.namespace, agentId)
         spec {
             replicas = 1
             selector {
-                matchLabels = myLabels(server.whName, agentId)
+                matchLabels = myLabels(server.name, agentId)
             }
             template {
                 metadata {
                     namespace = config.namespace
-                    labels = myLabels(server.whName, agentId)
+                    labels = myLabels(server.name, agentId)
                 }
                 spec {
                     containers = listOf(
@@ -55,7 +55,7 @@ fun HelmService.deployment(server: Server, agentId: Int) =
                         newVolume {
                             name = "tls-cert"
                             secret {
-                                secretName = server.whName
+                                secretName = server.name
                             }
                         }
                     )

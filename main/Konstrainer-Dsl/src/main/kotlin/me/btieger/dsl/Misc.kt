@@ -10,15 +10,15 @@ annotation class DslMarkerConstant
 @DslMarker
 annotation class DslMarkerVerb5
 
-
 abstract class DslException(message: String) : Exception(message)
 
 class MultipleSetException(message: String) : DslException(message)
 class FieldNotSetException(message: String) : DslException(message)
+class InvalidArgumentException(message: String) : DslException(message)
 class InvalidUnitException(message: String) : DslException(message)
 
-class setOnce<T : Any>() : ReadWriteProperty<Any, T> {
-    constructor(default: T) : this() {
+class setExactlyOnce<T : Any>() : ReadWriteProperty<Any, T> {
+    constructor(default: T?) : this() {
         _value = default
     }
 
@@ -30,6 +30,26 @@ class setOnce<T : Any>() : ReadWriteProperty<Any, T> {
     }
 
     override fun setValue(thisRef: Any, property: KProperty<*>, value: T) {
+        if (_alreadySet)
+            throw MultipleSetException("Property ${property.name} can only be set once.")
+        _alreadySet = true
+        _value = value;
+    }
+}
+
+class setMaxOnce<T>() : ReadWriteProperty<Any, T?> {
+    constructor(default: T?) : this() {
+        _value = default
+    }
+
+    private var _alreadySet = false
+    private var _value: T? = null
+
+    override fun getValue(thisRef: Any, property: KProperty<*>): T? {
+        return _value
+    }
+
+    override fun setValue(thisRef: Any, property: KProperty<*>, value: T?) {
         if (_alreadySet)
             throw MultipleSetException("Property ${property.name} can only be set once.")
         _alreadySet = true
