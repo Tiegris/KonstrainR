@@ -4,9 +4,9 @@ class Status(val code: Int, val message: String)
 class StatusBuilder {
 
     @DslMarkerVerb5
-    var code: Int by setOnce(403)
+    var code: Int by setExactlyOnce(403)
     @DslMarkerVerb5
-    var message: String by setOnce("Denied by Konstrainer webhook")
+    var message: String by setExactlyOnce("Denied by Konstrainer webhook")
 
     internal fun build() = Status(code, message)
 }

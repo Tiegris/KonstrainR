@@ -4,10 +4,10 @@ import kotlinx.serialization.json.JsonArray
 
 class WebhookDecision(val allowed: Boolean, val patch: JsonArray?, val warnings: List<Warning>, val status: Status)
 class WebhookBehaviorBuilder {
-    private var _allowed: Boolean by setOnce(true)
+    private var _allowed: Boolean by setExactlyOnce(true)
     private val _warnings = mutableListOf<Warning>()
     private var _patch: JsonArray? = null
-    private var _status: Status by setOnce(StatusBuilder().build())
+    private var _status: Status by setExactlyOnce(StatusBuilder().build())
 
     @DslMarkerBlock
     fun allowed(script: () -> Boolean) {

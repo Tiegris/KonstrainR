@@ -3,20 +3,22 @@ package me.btieger.example
 import kotlinx.serialization.json.*
 import me.btieger.dsl.*
 
+val defaults = webhookConfigBundle {
+    apiGroups(CORE)
+    apiVersions(ANY)
+    resources(PODS)
+    namespaceSelector {
+        matchLabels {
+            "managed" eq "true"
+        }
+    }
+    failurePolicy(FAIL)
+}
+
 val server = server("example-server") {
-    webhook("create-pod") {
+    webhook("create-pod", defaults) {
         path = "/create-pod"
         operations(CREATE, UPDATE)
-        apiGroups(CORE)
-        apiVersions(ANY)
-        resources(PODS)
-        scope(ANY)
-        namespaceSelector {
-            matchLabels {
-                "managed" eq "true"
-            }
-        }
-        failurePolicy(FAIL)
         behavior = fun (context) = withContext {
             val rejectLabel = context jqx "/object/metadata/labels/reject" parseAs bool
             val podName = context jqx "/object/metadata/name" parseAs string
@@ -45,19 +47,10 @@ val server = server("example-server") {
 
     }
 
-    webhook("delete-pod") {
+    webhook("delete-pod", defaults) {
         path = "/create-pod"
+        failurePolicy(IGNORE)
         operations(DELETE)
-        apiGroups(CORE)
-        apiVersions(ANY)
-        resources(PODS)
-        scope(ANY)
-        namespaceSelector {
-            matchLabels {
-                "managed" eq "true"
-            }
-        }
-        failurePolicy(FAIL)
         behavior = fun (context) = withContext {
             val podName = context jqx "/oldObject/metadata/name" parseAs string
             println(podName)

@@ -2,25 +2,25 @@ package me.btieger.dsl
 
 import kotlinx.serialization.json.JsonObject
 
-class WebhookBuilder {
-    private var _operations: Array<out Type> by setOnce()
-    private var _apiGroups: Array<out Type> by setOnce()
-    private var _apiVersions: Array<out Type> by setOnce()
-    private var _resources: Array<out Type> by setOnce()
-    private var _scope: Type by setOnce(ANY)
-    private var _namespaceSelector: NamespaceSelector by setOnce()
-    private var _failurePolicy: FailurePolicy by setOnce(FAIL)
+class WebhookBuilder(val defaults: WebhookConfigBundle) {
+    private var _operations: Array<out Type> by setExactlyOnce(defaults.operations)
+    private var _apiGroups: Array<out Type> by setExactlyOnce(defaults.apiGroups)
+    private var _apiVersions: Array<out Type> by setExactlyOnce(defaults.apiVersion)
+    private var _resources: Array<out Type> by setExactlyOnce(defaults.resources)
+    private var _scope: Type by setExactlyOnce(defaults.scope ?: ANY)
+    private var _namespaceSelector: NamespaceSelector by setExactlyOnce(defaults.namespaceSelector)
+    private var _failurePolicy: FailurePolicy by setExactlyOnce(defaults.failurePolicy ?: FAIL)
 
     @DslMarkerVerb5
-    var logRequest by setOnce(false)
+    var logRequest by setExactlyOnce(defaults.logRequest ?: false)
     @DslMarkerVerb5
-    var logResponse by setOnce(false)
+    var logResponse by setExactlyOnce(defaults.logResponse ?: false)
 
     @DslMarkerVerb5
-    var path: String by setOnce()
+    var path: String by setExactlyOnce()
 
     @DslMarkerVerb5
-    var behavior: (JsonObject) -> WebhookDecision by setOnce()
+    var behavior: (JsonObject) -> WebhookDecision by setExactlyOnce()
 
     @DslMarkerBlock
     fun withContext(setup: WebhookBehaviorBuilder.()->Unit): WebhookDecision {

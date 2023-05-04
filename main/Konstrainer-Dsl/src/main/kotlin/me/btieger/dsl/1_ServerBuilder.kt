@@ -10,8 +10,8 @@ class ServerBuilder {
     private var _components: List<Component> = mutableListOf()
 
     @DslMarkerBlock
-    fun webhook(name: String, setup: WebhookBuilder.() -> Unit) {
-        val builder = WebhookBuilder().apply(setup)
+    fun webhook(name: String, defaults: WebhookConfigBundle? = null, setup: WebhookBuilder.() -> Unit) {
+        val builder = WebhookBuilder(defaults ?: WebhookConfigBundleBuilder().build()).apply(setup)
         _components += builder.build(name)
     }
 
