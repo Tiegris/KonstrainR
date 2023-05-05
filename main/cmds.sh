@@ -7,7 +7,7 @@ function fwd_core() {
 }
 
 function fwd_agent() {
-    clear && k port-forward service/example-server 8081:8081 -n konstrainer-ns
+    clear && k port-forward service/example-server 8443:443 -n konstrainer-ns
 }
 
 function logs_core() {
