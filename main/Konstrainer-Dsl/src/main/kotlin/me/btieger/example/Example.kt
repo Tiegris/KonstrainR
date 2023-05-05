@@ -17,7 +17,29 @@ val defaults = webhookConfigBundle {
     logResponse = true
 }
 
-val server = server("example-server") {
+val permissions =  permissions {
+    rule {
+        apiGroups("")
+        resources("pods")
+        verbs("get")
+    }
+    rule {
+        apiGroups()
+        resources()
+        verbs()
+    }
+}
+
+val server = server("example-server", permissions) {
+
+    aggregation("No resource definitions") {
+        val deployments = kubectl.apps().deployments().inNamespace("demo-ns").list()
+        forEach(deployments) {
+            if (spec.template.spec.containers.any { it.resources?.limits == null || it.resources?.requests == null }) {
+                mark(YELLOW, "No resource definition")
+            }
+        }
+    }
 
     webhook("create-pod", defaults) {
         path = "/create-pod"
@@ -34,7 +56,7 @@ val server = server("example-server") {
                 message = "You cannot do this because rejection set to $rejectLabel"
             }
             patch {
-                add("/metadata/labels/app", podName)
+                add("/metadata/labels/app", podName ?: "null")
                 add("/spec/containers/-",
                     buildJsonObject {
                         put("name", "$podName-sidecar")

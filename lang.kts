@@ -13,13 +13,14 @@ val server = warningServer {
             verbs()
         }
     }
-    loop {
-        type = "deployment"
+    watch {
+        group = "deployments"
         val resources = k8s.get().deployments()
         onEach(resources) {
             predicate {
                 resource.hasNoResourcesLimit()
             }
+            mark(YELLOW)
             message = "${resource.name} is bad!"
         }
     }

@@ -23,6 +23,7 @@ fun HelmService.deployment(server: Server, agentId: Int) =
                     labels = myLabels(server.name, agentId)
                 }
                 spec {
+                    serviceAccountName = ""
                     containers = listOf(
                         newContainer {
                             name = "agent-server"

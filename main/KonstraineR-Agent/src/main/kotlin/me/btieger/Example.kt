@@ -1,10 +1,8 @@
 package me.btieger
 
-import kotlinx.serialization.json.add
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.put
-import kotlinx.serialization.json.putJsonArray
+import kotlinx.serialization.json.*
 import me.btieger.dsl.*
+
 
 val defaults = webhookConfigBundle {
     apiGroups(CORE)
@@ -20,10 +18,23 @@ val defaults = webhookConfigBundle {
     logResponse = true
 }
 
-val server = server("example-server") {
+val permissions =  permissions {
+    rule {
+        apiGroups("apps")
+        resources("deployments")
+        verbs("get")
+    }
+}
 
-    warningAggregator {
+val server = server("example-server", permissions) {
 
+    aggregation("No resource definitions") {
+        val deployments = kubectl.apps().deployments().inNamespace("demo-ns").list()
+        forEach(deployments) {
+            if (spec.template.spec.containers.any { it.resources.limits.isEmpty() || it.resources.requests.isEmpty() }) {
+                mark(YELLOW, "No resource definition")
+            }
+        }
     }
 
     webhook("create-pod", defaults) {
@@ -41,7 +52,7 @@ val server = server("example-server") {
                 message = "You cannot do this because rejection set to $rejectLabel"
             }
             patch {
-                add("/metadata/labels/app", podName)
+                add("/metadata/labels/app", podName ?: "null")
                 add("/spec/containers/-",
                     buildJsonObject {
                         put("name", "$podName-sidecar")

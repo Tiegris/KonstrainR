@@ -28,29 +28,6 @@ class WebhookBuilder(val defaults: WebhookConfigBundle) {
         return provider.build()
     }
 
-    private fun validateName(name: String): String {
-        val name = name.split(' ', '.').joinToString(separator = "-")
-        for (c in name) {
-            if (!(c in 'A'..'Z' || c in 'a'..'z' || c == '-' || c == '_'))
-            // TODO
-                throw Exception()
-        }
-        return name
-    }
-
-    private fun validatePath(path: String): String {
-        var path = path
-        if (path.first() != '/')
-            path = "/$path"
-        path.trimEnd('/')
-        for (c in path) {
-            if (c !in 'a'..'z' && c != '/' && c != '-' && c != '_')// TODO
-                throw Exception()
-        }
-        return path
-    }
-
-
     @DslMarkerVerb5
     fun operations(vararg args: Operation) {
         _operations = args
@@ -116,7 +93,7 @@ class WebhookBuilder(val defaults: WebhookConfigBundle) {
         val scope = _scope.string
         val namespaceSelector = _namespaceSelector
         val failurePolicy = _failurePolicy
-        val _name = validateName(name)
+        val _name = validateWhName(name)
         val _path = validatePath(path)
 
         return Webhook(
@@ -184,8 +161,8 @@ class Webhook (
     val namespaceSelector: Map<String, String>,
     val failurePolicy: String,
     val path: String,
-    name: String,
+    val name: String,
     val provider: (JsonObject) -> WebhookDecision,
     val logRequest: Boolean,
     val logResponse: Boolean,
-) : Component(name)
+)

@@ -39,6 +39,7 @@ dependencies {
     implementation("io.ktor:ktor-client-cio:$ktor_version")
 
     implementation("me.btieger:KonstrainerDsl:0.0.1-SNAPSHOT")
+    implementation("io.fabric8:kubernetes-client:${kubernetes_client_version}")
 
     testImplementation("io.ktor:ktor-server-tests-jvm:$ktor_version")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")

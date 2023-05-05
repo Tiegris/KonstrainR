@@ -1,5 +1,6 @@
 package me.btieger.plugins
 
+import io.fabric8.kubernetes.client.KubernetesClient
 import io.ktor.server.routing.*
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -11,22 +12,50 @@ import me.btieger.dsl.*
 import me.btieger.toBase64
 import me.btieger.toJsonString
 
-fun Application.configureRouting(ruleset: Server) {
+fun Application.configureRouting(server: Server, k8s: KubernetesClient) {
 
     routing {
         get("/") {
             call.respondText("OK")
         }
-        ruleset.components.filterIsInstance<Webhook>().forEach { component ->
-            post(component.path) {
+        if (server.aggregations.isNotEmpty()) {
+            get("/aggregator") {
+                val response = buildJsonObject {
+                    put("server", server.name)
+                    server.aggregations.forEach {
+                        putJsonArray("aggregations") {
+                            addJsonObject {
+                                put("name", it.name)
+                                AggregationRunner(k8s).let { runner ->
+                                    it.runner.invoke(runner)
+                                    putJsonArray("markings") {
+                                        runner.markings.forEach { marking ->
+                                            addJsonObject {
+                                                put("named", marking.named)
+                                                put("namespace", marking.namespace)
+                                                put("status", marking.status.string)
+                                                put("comment", marking.comment)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                call.respond(HttpStatusCode.OK, response)
+            }
+        }
+        server.webhooks.forEach { webhook ->
+            post(webhook.path) {
                 val body: JsonObject = call.receive()
-                if (component.logRequest)
+                if (webhook.logRequest)
                     println(body.toJsonString())
                 val apiVersion = body["apiVersion"]?.jsonPrimitive?.content!!
                 val kind = body["kind"]?.jsonPrimitive?.content!!
                 val request = body["request"]?.jsonObject!!
 
-                val provider = component.provider.invoke(request)
+                val provider = webhook.provider.invoke(request)
 
                 val response = buildJsonObject {
                     put("apiVersion", apiVersion)
@@ -54,7 +83,7 @@ fun Application.configureRouting(ruleset: Server) {
                         }
                     }
                 }
-                if (component.logResponse)
+                if (webhook.logResponse)
                     println(response.toJsonString())
                 call.respond(HttpStatusCode.OK, response)
             }

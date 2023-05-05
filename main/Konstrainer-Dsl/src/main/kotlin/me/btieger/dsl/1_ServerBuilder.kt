@@ -1,30 +1,36 @@
 package me.btieger.dsl
 
 @DslMarkerBlock
-fun server(name: String, setup: ServerBuilder.() -> Unit): Server {
-    val builder = ServerBuilder().apply(setup)
-    return builder.build(name)
+fun server(uniqueName: String, permissions: Permissions? = null, setup: ServerBuilder.() -> Unit): Server {
+    val builder = ServerBuilder(permissions).apply(setup)
+    return builder.build(uniqueName)
 }
 
-class ServerBuilder {
-    private var _components: List<Component> = mutableListOf()
+class ServerBuilder(permissions: Permissions?) {
+    private var _webhooks: List<Webhook> = mutableListOf()
+    private var _aggregations: List<Aggregation> = mutableListOf()
+    private var _permission: Permissions? by setMaxOnce(permissions)
 
     @DslMarkerBlock
-    fun webhook(name: String, defaults: WebhookConfigBundle? = null, setup: WebhookBuilder.() -> Unit) {
+    fun webhook(uniqueName: String, defaults: WebhookConfigBundle? = null, setup: WebhookBuilder.() -> Unit) {
         val builder = WebhookBuilder(defaults ?: WebhookConfigBundleBuilder().build()).apply(setup)
-        _components += builder.build(name)
+        _webhooks += builder.build(uniqueName)
     }
 
     @DslMarkerBlock
-    fun warningAggregator(setup: () -> Unit) {
+    fun permissions(setup: PermissionsBuilder.() -> Unit) {
+        val builder = PermissionsBuilder().apply(setup)
+        _permission = builder.build()
+    }
 
+    @DslMarkerBlock
+    fun aggregation(name: String, runner: AggregationRunnerFunction) {
+        _aggregations += Aggregation(name, runner)
     }
 
     internal fun build(name: String): Server {
-        // assert no null
-        return Server(name, _components)
+        return Server(name, _webhooks, _aggregations, _permission)
     }
 }
 
-open class Component(val name: String)
-class Server(val name: String, val components: List<Component>)
+class Server(val name: String, val webhooks: List<Webhook>, val aggregations: List<Aggregation>, val permissions: Permissions?)

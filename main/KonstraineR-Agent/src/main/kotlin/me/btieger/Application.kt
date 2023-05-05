@@ -1,5 +1,6 @@
 package me.btieger
 
+import io.fabric8.kubernetes.client.KubernetesClientBuilder
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
@@ -65,10 +66,10 @@ fun Application.module() {
         level = Level.INFO
     }
     val debugServer = server
-    //val debugServer = me.btieger.example.server
+    //val debugServer = me.btieger.getServer
     val ruleset = if (_config.development) debugServer else Loader("me.btieger.DslInstanceKt").loadServer(Paths.get("/app/libs/agentdsl.jar"))
     configureHTTP()
     configureSerialization()
     configureAdministration()
-    configureRouting(ruleset)
+    configureRouting(ruleset, KubernetesClientBuilder().build())
 }
