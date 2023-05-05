@@ -11,7 +11,7 @@ import me.btieger.logic.kelm.HelmService
 fun HelmService.mutatingWebhookConfiguration(server: Server, cert: String, agentId: Int) =
     MutatingWebhookConfiguration().apply {
         metadata("${server.name}.btieger.me", config.namespace, agentId)
-        webhooks = server.components.filterIsInstance<Webhook>().map {
+        webhooks = server.webhooks.map {
             newMutatingWebhook {
                 name = "${it.name}.btieger.me"
                 admissionReviewVersions = listOf("v1", "v1beta1")
