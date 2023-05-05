@@ -16,8 +16,11 @@ rules:
     resources: ["mutatingwebhookconfigurations"]
     verbs: ["*"]
   - apiGroups: ["rbac.authorization.k8s.io"]
-    resources: ["ClusterRole", "ClusterRoleBinding"]
-    verbs: ["*"]
+    resources: ["rolebindings"]
+    verbs: ["create"]
+  - apiGroups: ["rbac.authorization.k8s.io"]
+    resources: ["clusterroles"]
+    verbs: ["bind", "create"]
 
 ---
 
