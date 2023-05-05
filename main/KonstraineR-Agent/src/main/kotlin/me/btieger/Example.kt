@@ -22,7 +22,7 @@ val permissions =  permissions {
     rule {
         apiGroups("apps")
         resources("deployments")
-        verbs("get")
+        verbs("get", "list")
     }
 }
 

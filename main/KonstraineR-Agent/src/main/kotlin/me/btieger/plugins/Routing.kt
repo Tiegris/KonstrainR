@@ -31,7 +31,7 @@ fun Application.configureRouting(server: Server, k8s: KubernetesClient) {
                                     putJsonArray("markings") {
                                         runner.markings.forEach { marking ->
                                             addJsonObject {
-                                                put("named", marking.named)
+                                                put("name", marking.named)
                                                 put("namespace", marking.namespace)
                                                 put("status", marking.status.string)
                                                 put("comment", marking.comment)
