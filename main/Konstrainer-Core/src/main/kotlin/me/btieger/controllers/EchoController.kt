@@ -18,9 +18,6 @@ fun Application.echoController() {
             call.respond("got it")
         }
         get("/debug") {
-            SslServiceMockImpl().getRootCaAsPem()
-
-
             call.respond("ok")
         }
     }
