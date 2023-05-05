@@ -24,7 +24,7 @@ fun HelmService.rbac(server: Server, agentId: Int) =
             metadata(server.name, config.namespace, agentId)
             subjects = listOf(
                 newSubject {
-                    kind = "ClusterRole"
+                    kind = "ServiceAccount"
                     name = server.name
                     namespace = config.namespace
                 }
