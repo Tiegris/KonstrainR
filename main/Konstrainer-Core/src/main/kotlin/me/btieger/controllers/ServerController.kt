@@ -39,6 +39,12 @@ fun Application.serverController() {
                         respond(HttpStatusCode.OK)
                     }
                 }
+                post("stopall") {
+                    exceptionGuard {
+                        serverService.stopAll()
+                        respond(HttpStatusCode.OK)
+                    }
+                }
             }
         }
     }
