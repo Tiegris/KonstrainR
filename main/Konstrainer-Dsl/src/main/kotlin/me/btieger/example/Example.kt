@@ -17,16 +17,11 @@ val defaults = webhookConfigBundle {
     logResponse = true
 }
 
-val permissions =  permissions {
+val permissions = permissions {
     rule {
-        apiGroups("")
-        resources("pods")
+        apiGroups("apps")
+        resources("deployments")
         verbs("get")
-    }
-    rule {
-        apiGroups()
-        resources()
-        verbs()
     }
 }
 

@@ -12,3 +12,5 @@ function error_report() {
 
     exit 1
 }
+
+try_do || error_report
