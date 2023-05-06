@@ -30,7 +30,7 @@ val server = server("example-server", permissions) {
     aggregation("No resource definitions") {
         val deployments = kubectl.apps().deployments().inNamespace("demo-ns").list()
         forEach(deployments) {
-            if (spec.template.spec.containers.any { it.resources?.limits == null || it.resources?.requests == null }) {
+            if (spec.template.spec.containers.any { it.resources.limits.isEmpty() || it.resources.requests.isEmpty() }) {
                 mark(YELLOW, "No resource definition")
             }
         }
