@@ -1,9 +1,10 @@
 package me.btieger.dsl
 
 import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
 
 class WebhookDecision(val allowed: Boolean, val patch: JsonArray?, val warnings: List<String>?, val status: Status)
-class WebhookBehaviorBuilder {
+class WebhookBehaviorBuilder(@DslMarkerConstant val request: JsonObject) {
     private var _allowed: Boolean by setExactlyOnce(true)
     private var _warnings: List<String>? by setMaxOnce()
     private var _patch: JsonArray? by setMaxOnce()

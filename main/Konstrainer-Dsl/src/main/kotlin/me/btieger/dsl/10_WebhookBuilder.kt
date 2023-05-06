@@ -2,7 +2,8 @@ package me.btieger.dsl
 
 import kotlinx.serialization.json.JsonObject
 
-class WebhookBuilder(val defaults: WebhookConfigBundle) {
+typealias WebhookBehaviorProvider = WebhookBehaviorBuilder.()->Unit
+class WebhookBuilder(defaults: WebhookConfigBundle) {
     private var _operations: Array<out Type> by setExactlyOnce(defaults.operations)
     private var _apiGroups: Array<out Type> by setExactlyOnce(defaults.apiGroups)
     private var _apiVersions: Array<out Type> by setExactlyOnce(defaults.apiVersion)
@@ -19,13 +20,11 @@ class WebhookBuilder(val defaults: WebhookConfigBundle) {
     @DslMarkerVerb5
     var path: String by setExactlyOnce()
 
-    @DslMarkerVerb5
-    var behavior: (JsonObject) -> WebhookDecision by setExactlyOnce()
+    private var behavior: WebhookBehaviorProvider by setExactlyOnce()
 
     @DslMarkerBlock
-    fun withContext(setup: WebhookBehaviorBuilder.()->Unit): WebhookDecision {
-        val provider = WebhookBehaviorBuilder().apply(setup)
-        return provider.build()
+    fun behavior(setup: WebhookBehaviorProvider) {
+        behavior = setup
     }
 
     @DslMarkerVerb5
@@ -104,7 +103,6 @@ class WebhookBuilder(val defaults: WebhookConfigBundle) {
     }
 }
 
-
 abstract class Type(val string: String)
 
 abstract class Operation(string: String) : Type(string)
@@ -162,7 +160,7 @@ class Webhook (
     val failurePolicy: String,
     val path: String,
     val name: String,
-    val provider: (JsonObject) -> WebhookDecision,
+    val provider: WebhookBehaviorProvider,
     val logRequest: Boolean,
     val logResponse: Boolean,
 )

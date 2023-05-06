@@ -55,7 +55,7 @@ fun Application.configureRouting(server: Server, k8s: KubernetesClient) {
                 val kind = body["kind"]?.jsonPrimitive?.content!!
                 val request = body["request"]?.jsonObject!!
 
-                val provider = webhook.provider.invoke(request)
+                val decision = WebhookBehaviorBuilder(request).apply(webhook.provider).build()
 
                 val response = buildJsonObject {
                     put("apiVersion", apiVersion)
@@ -63,20 +63,20 @@ fun Application.configureRouting(server: Server, k8s: KubernetesClient) {
                     val uid = request["uid"]?.jsonPrimitive?.content!!
                     putJsonObject("response") {
                         put("uid", uid)
-                        put("allowed", provider.allowed)
-                        provider.warnings?.let { warnings ->
+                        put("allowed", decision.allowed)
+                        decision.warnings?.let { warnings ->
                             putJsonArray("warnings") {
                                 warnings.forEach(::add)
                             }
                         }
-                        if (!provider.allowed) {
+                        if (!decision.allowed) {
                             putJsonObject("status") {
-                                put("code", provider.status.code)
-                                put("message", provider.status.message)
+                                put("code", decision.status.code)
+                                put("message", decision.status.message)
                             }
                         }
-                        provider.patch?.let { patch ->
-                            if (provider.allowed) {
+                        decision.patch?.let { patch ->
+                            if (decision.allowed) {
                                 put("patchType", "JSONPatch")
                                 put("patch", patch.toBase64())
                             }

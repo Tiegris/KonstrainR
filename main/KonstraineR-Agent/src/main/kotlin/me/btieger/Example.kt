@@ -37,12 +37,12 @@ val server = server("example-server", permissions) {
         }
     }
 
-    webhook("create-pod", defaults) {
+    webhook("create-pod", me.btieger.example.defaults) {
         path = "/create-pod"
         operations(CREATE, UPDATE)
-        behavior = fun (context) = withContext {
-            val rejectLabel = context jqx "/object/metadata/labels/reject" parseAs bool
-            val podName = context jqx "/object/metadata/name" parseAs string
+        behavior {
+            val rejectLabel = request jqx "/object/metadata/labels/reject" parseAs bool
+            val podName = request jqx "/object/metadata/name" parseAs string
 
             allowed {
                 rejectLabel != true
@@ -53,32 +53,20 @@ val server = server("example-server", permissions) {
             }
             patch {
                 add("/metadata/labels/app", podName ?: "null")
-                add("/spec/containers/-",
-                    buildJsonObject {
-                        put("name", "$podName-sidecar")
-                        put("image", "debian:11")
-                        putJsonArray("command") {
-                            add("sleep")
-                            add("infinity")
-                        }
-                    }
-                )
             }
         }
-
     }
 
-    webhook("delete-pod", defaults) {
+    webhook("delete-pod", me.btieger.example.defaults) {
         path = "/delete-pod"
         operations(DELETE)
-        behavior = fun (context) = withContext {
-            val podName = context jqx "/oldObject/metadata/name" parseAs string
+        behavior {
+            val podName = request jqx "/oldObject/metadata/name" parseAs string
             println(podName)
             warnings {
                 warning("$podName deletion was logged by ksr")
             }
         }
-
     }
 
 }
