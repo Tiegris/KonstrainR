@@ -23,7 +23,7 @@ val permissions = permissions {
     }
 }
 
-val server = server("example-server", permissions) {
+val server = server("basic-diagnostics", permissions) {
 
     watch("deployments") {
         kubectl.apps().deployments().list()
