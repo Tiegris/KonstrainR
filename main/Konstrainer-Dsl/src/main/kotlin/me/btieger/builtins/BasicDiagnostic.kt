@@ -26,15 +26,15 @@ val permissions = permissions {
 val server = server("basic-diagnostics", permissions) {
 
     watch("deployments") {
-        kubectl.apps().deployments().list()
+        kubectl.apps().deployments().inAnyNamespace().list()
     }
 
     watch("services") {
-        kubectl.services().list()
+        kubectl.services().inAnyNamespace().list()
     }
 
     watch("pods") {
-        kubectl.pods().list()
+        kubectl.pods().inAnyNamespace().list()
     }
 
     aggregation("No resource definitions") {

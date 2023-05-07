@@ -16,7 +16,7 @@ val permissions = permissions {
 val server = server("example-server", permissions) {
 
     watch("deployments") {
-        kubectl.apps().deployments().list()
+        kubectl.apps().deployments().inAnyNamespace().list()
     }
 
     aggregation("No resource definitions") {

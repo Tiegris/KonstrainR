@@ -17,7 +17,7 @@ fun DIV.aggregations(aggregations: MutableList<AggregationsDto>) {
                                         div("card m-1") {
                                             div("card-header") {
                                                 if (m.status == "yellow") classes += "bg-warning"
-                                                if (m.status == "red") classes += "bg-error"
+                                                if (m.status == "red") classes += "bg-danger text-white"
                                                 if (m.status == "green") classes += "bg-success"
                                                 +"${m.name}${m.namespace?.let{".$it"}}"
                                             }
