@@ -20,9 +20,9 @@ class AggregationDto(val name: String, val markings: List<MarkingDto>)
 @Serializable
 class MarkingDto(
     val name: String,
-    val namespace: String,
+    val namespace: String?,
     val status: String,
-    val comment: String,
+    val comment: String?,
 )
 
 fun Application.configureAggregationsPageController() {
@@ -38,6 +38,7 @@ fun Application.configureAggregationsPageController() {
                 }.use { client ->
                     aggregators.forEach { item ->
                         val response = client.get("https://$item/aggregator")
+                        //val response = client.get("https://localhost:8443/aggregator")
                         aggregations += response.body<AggregationsDto>()
                     }
                 }
@@ -50,3 +51,44 @@ fun Application.configureAggregationsPageController() {
         }
     }
 }
+
+val mockResult = mutableListOf(
+    AggregationsDto(
+        "s1",
+        listOf(
+            AggregationDto(
+                "a1",
+                listOf(
+                    MarkingDto("myDep", "demo-ns","yellow","alma"),
+                    MarkingDto("myDep", "demo-ns","yellow","alma"),
+                )
+            ),
+            AggregationDto(
+                "a2",
+                listOf(
+                    MarkingDto("myDep", "demo-ns","yellow","alma"),
+                    MarkingDto("myDep", "demo-ns","yellow","alma"),
+                )
+            ),
+        )
+    ),
+    AggregationsDto(
+        "s2",
+        listOf(
+            AggregationDto(
+                "a1",
+                listOf(
+                    MarkingDto("myDep", "demo-ns","yellow","alma"),
+                    MarkingDto("myDep", "demo-ns","yellow","alma"),
+                )
+            ),
+            AggregationDto(
+                "a2",
+                listOf(
+                    MarkingDto("myDep", "demo-ns","yellow","alma"),
+                    MarkingDto("myDep", "demo-ns","yellow","alma"),
+                )
+            ),
+        )
+    ),
+)
