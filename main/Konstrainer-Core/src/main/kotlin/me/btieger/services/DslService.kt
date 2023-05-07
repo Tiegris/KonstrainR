@@ -103,6 +103,7 @@ class DslServiceImpl(
         val server = Loader("me.btieger.DslInstanceKt").loadServer(jarBytes)
 
         val success = Dsls.update({ Dsls.id eq id and Dsls.jar.isNull() /*and (Dsls.jobSecret eq secretBytes) */ }) {
+            it[name] = server.name
             it[jar] = ExposedBlob(jarBytes)
             it[buildSubmissionTime] = null
             it[errorMessage] = null
