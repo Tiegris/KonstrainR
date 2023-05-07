@@ -1,9 +1,9 @@
-package me.btieger.logic.kelm.resources
+package me.btieger.services.helm.resources
 
 import io.fabric8.kubernetes.api.model.Secret
 import io.ktor.util.*
 import me.btieger.dsl.Server
-import me.btieger.logic.kelm.HelmService
+import me.btieger.services.helm.HelmService
 import me.btieger.services.ssl.SecretBundle
 
 fun HelmService.secret(server: Server, cert: SecretBundle, agentId: Int) =

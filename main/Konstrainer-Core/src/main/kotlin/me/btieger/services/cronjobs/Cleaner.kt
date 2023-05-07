@@ -5,7 +5,7 @@ import io.ktor.server.application.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import me.btieger.Config
-import me.btieger.logic.kelm.resources.makeJobName
+import me.btieger.services.helm.resources.makeJobName
 import me.btieger.persistance.DatabaseFactory
 import me.btieger.persistance.tables.Dsl
 import me.btieger.persistance.tables.Dsls

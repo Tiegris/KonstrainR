@@ -4,7 +4,7 @@ import io.fabric8.kubernetes.client.KubernetesClient
 import io.fabric8.kubernetes.client.KubernetesClientBuilder
 import io.ktor.server.application.*
 import me.btieger.Config
-import me.btieger.logic.kelm.HelmService
+import me.btieger.services.helm.HelmService
 import me.btieger.services.DslService
 import me.btieger.services.DslServiceImpl
 import me.btieger.services.ServerService

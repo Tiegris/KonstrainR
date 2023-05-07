@@ -1,11 +1,10 @@
-package me.btieger.logic.kelm.resources
+package me.btieger.services.helm.resources
 
 import com.fkorotkov.kubernetes.admissionregistration.v1.*
 import me.btieger.dsl.*
 import io.fabric8.kubernetes.api.model.admissionregistration.v1.MutatingWebhookConfiguration
 import io.ktor.util.*
-import me.btieger.Config
-import me.btieger.logic.kelm.HelmService
+import me.btieger.services.helm.HelmService
 
 
 fun HelmService.mutatingWebhookConfiguration(server: Server, cert: String, agentId: Int) =

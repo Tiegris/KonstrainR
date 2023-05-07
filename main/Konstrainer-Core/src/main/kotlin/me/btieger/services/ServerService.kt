@@ -9,14 +9,14 @@ import kotlinx.coroutines.launch
 import me.btieger.Config
 import me.btieger.bytesStable
 import me.btieger.loader.Loader
-import me.btieger.logic.kelm.HelmService
+import me.btieger.services.helm.HelmService
 import me.btieger.persistance.DatabaseFactory
-import me.btieger.logic.kelm.create
-import me.btieger.logic.kelm.resources.*
+import me.btieger.services.helm.create
 import me.btieger.persistance.tables.Dsl
 import me.btieger.persistance.tables.ServerStatus
 import me.btieger.persistance.tables.BuildStatus
 import me.btieger.persistance.tables.Dsls
+import me.btieger.services.helm.resources.*
 import me.btieger.services.ssl.SslService
 import org.jetbrains.exposed.sql.update
 import org.slf4j.Logger

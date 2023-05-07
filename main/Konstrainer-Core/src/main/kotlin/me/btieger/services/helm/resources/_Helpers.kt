@@ -1,8 +1,7 @@
-package me.btieger.logic.kelm.resources
+package me.btieger.services.helm.resources
 
 import io.fabric8.kubernetes.api.model.HasMetadata
 import io.fabric8.kubernetes.api.model.ObjectMeta
-import me.btieger.Config
 
 fun myLabels(_name: String, _id: Int) = mapOf(
     "app" to _name,

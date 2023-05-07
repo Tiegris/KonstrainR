@@ -28,6 +28,7 @@ repositories {
     mavenCentral()
     mavenLocal()
     maven { url = uri("https://jitpack.io") }
+    maven { url = uri("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/kotlin-js-wrappers") }
 }
 
 dependencies {
@@ -61,7 +62,15 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-java-time:$exposed_version")
     implementation("com.h2database:h2:$h2_version")
 
-    implementation("org.bouncycastle:bcpkix-jdk18on:1.72")
+    implementation("io.ktor:ktor-server-auth-jvm:$ktor_version")
+    implementation("io.ktor:ktor-server-host-common-jvm:$ktor_version")
+
+    implementation("io.ktor:ktor-server-html-builder-jvm:$ktor_version")
+    implementation("org.jetbrains:kotlin-css-jvm:1.0.0-pre.129-kotlin-1.4.20")
+
+    implementation("io.ktor:ktor-server-webjars:$ktor_version")
+    implementation("org.webjars:jquery:3.6.4")
+    implementation("org.webjars:bootstrap:4.6.2")
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {

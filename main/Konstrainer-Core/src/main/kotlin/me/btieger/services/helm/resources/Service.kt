@@ -1,11 +1,11 @@
-package me.btieger.logic.kelm.resources
+package me.btieger.services.helm.resources
 
 import com.fkorotkov.kubernetes.newServicePort
 import com.fkorotkov.kubernetes.spec
 import me.btieger.dsl.*
 import io.fabric8.kubernetes.api.model.IntOrString
 import io.fabric8.kubernetes.api.model.Service
-import me.btieger.logic.kelm.HelmService
+import me.btieger.services.helm.HelmService
 
 fun HelmService.service(server: Server, agentId: Int) =
     Service().apply {
