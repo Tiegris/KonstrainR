@@ -4,9 +4,14 @@ import com.lordcodes.turtle.ShellScript
 import com.lordcodes.turtle.shellRun
 import java.io.BufferedWriter
 import java.io.File
+import java.io.FileInputStream
 import java.io.FileWriter
 import java.nio.file.Files
+import java.security.KeyStore
 import java.util.concurrent.ThreadLocalRandom
+import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManagerFactory
+import javax.net.ssl.X509TrustManager
 import kotlin.streams.asSequence
 
 class SslServiceOpenSslWrapperImpl : SslService {
@@ -37,6 +42,27 @@ class SslServiceOpenSslWrapperImpl : SslService {
                     "-subj", "/C=HU/O=me.btieger/CN=konstrainer-core",
                     "-addext", "subjectAltName=DNS:konstrainer-core",
                 )
+            }
+
+        if (!File(pwd, "keystore.jks").exists())
+            shell {
+                openssl(
+                    "pkcs12", "-export",
+                    "-in", "rootCA.crt",
+                    "-inkey", "rootCA.key",
+                    "-out", "keystore.p12",
+                    "-name", "RootCA",
+                    "-password", "pass:foobar",
+                )
+                command("keytool", listOf(
+                    "-importkeystore",
+                    "-srckeystore", "keystore.p12",
+                    "-srcstoretype", "pkcs12",
+                    "-destkeystore", "keystore.jks",
+                    "-deststorepass", "foobar",
+                    "-srcstorepass", "foobar",
+                ))
+                command("rm", listOf("keystore.p12"))
             }
 
         rootCA = getFile("rootCA.crt")
@@ -83,6 +109,24 @@ class SslServiceOpenSslWrapperImpl : SslService {
         val key = getFile(keyName)
         val cert = getFile(certName)
         return SecretBundle(cert, key)
+    }
+
+    private fun getKeyStore(): KeyStore {
+        val keyStoreFile = FileInputStream("${pwd.path}/keystore.jks")
+        val keyStorePassword = "foobar".toCharArray()
+        val keyStore: KeyStore = KeyStore.getInstance(KeyStore.getDefaultType())
+        keyStore.load(keyStoreFile, keyStorePassword)
+        return keyStore
+    }
+
+    private fun getTrustManagerFactory(): TrustManagerFactory? {
+        val trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm())
+        trustManagerFactory.init(getKeyStore())
+        return trustManagerFactory
+    }
+
+    override fun getTrustManager(): X509TrustManager {
+        return getTrustManagerFactory()?.trustManagers?.first { it is X509TrustManager } as X509TrustManager
     }
 
     private fun getFile(fileName: String) = File(pwd, fileName).readText(Charsets.US_ASCII)

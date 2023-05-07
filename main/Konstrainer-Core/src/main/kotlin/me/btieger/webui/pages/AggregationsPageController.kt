@@ -10,6 +10,7 @@ import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
 import me.btieger.services.DslService
 import me.btieger.services.ServerService
+import me.btieger.services.ssl.SslService
 import me.btieger.webui.siteLayout
 import org.koin.ktor.ext.inject
 
@@ -28,6 +29,7 @@ class MarkingDto(
 fun Application.configureAggregationsPageController() {
     val serverService by inject<ServerService>()
     val dslService by inject<DslService>()
+    val sslService by inject<SslService>()
 
     routing {
         route("/ui/aggregations") {
@@ -35,6 +37,11 @@ fun Application.configureAggregationsPageController() {
                 val aggregators = dslService.allWithAggregators()
                 val aggregations = mutableListOf<AggregationsDto>()
                 HttpClient(CIO) {
+                    engine {
+                        https {
+                            trustManager = sslService.getTrustManager()
+                        }
+                    }
                 }.use { client ->
                     aggregators.forEach { item ->
                         val response = client.get("https://$item/aggregator")
