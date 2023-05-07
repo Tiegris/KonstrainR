@@ -1,5 +1,6 @@
 package me.btieger.example
 
+import io.fabric8.kubernetes.api.model.apps.DeploymentList
 import kotlinx.serialization.json.*
 import me.btieger.dsl.*
 
@@ -26,15 +27,6 @@ val permissions = permissions {
 }
 
 val server = server("example-server", permissions) {
-
-    aggregation("No resource definitions") {
-        val deployments = kubectl.apps().deployments().inNamespace("demo-ns").list()
-        forEach(deployments) {
-            if (spec.template.spec.containers.any { it.resources.limits.isEmpty() || it.resources.requests.isEmpty() }) {
-                mark(YELLOW, "No resource definition")
-            }
-        }
-    }
 
     webhook("create-pod", defaults) {
         path = "/create-pod"

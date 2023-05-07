@@ -1,5 +1,7 @@
 package me.btieger.dsl
 
+import io.fabric8.kubernetes.api.model.HasMetadata
+
 @DslMarkerBlock
 fun server(uniqueName: String, permissions: Permissions? = null, setup: ServerBuilder.() -> Unit): Server {
     val builder = ServerBuilder(permissions).apply(setup)
@@ -7,8 +9,9 @@ fun server(uniqueName: String, permissions: Permissions? = null, setup: ServerBu
 }
 
 class ServerBuilder(permissions: Permissions?) {
-    private var _webhooks: List<Webhook> = mutableListOf()
-    private var _aggregations: List<Aggregation> = mutableListOf()
+    private var _webhooks: MutableList<Webhook> = mutableListOf()
+    private var _aggregations: MutableList<Aggregation> = mutableListOf()
+    private var _watches: MutableMap<String, WatchRunnerFunction> = mutableMapOf()
     private var _permission: Permissions? by setMaxOnce(permissions)
 
     @DslMarkerBlock
@@ -28,9 +31,20 @@ class ServerBuilder(permissions: Permissions?) {
         _aggregations += Aggregation(name, runner)
     }
 
+    @DslMarkerBlock
+    fun watch(name: String, runner: WatchRunnerFunction) {
+        _watches[name] = runner
+    }
+
     internal fun build(name: String): Server {
-        return Server(name, _webhooks, _aggregations, _permission)
+        return Server(name, _webhooks, _aggregations, _permission, _watches)
     }
 }
 
-class Server(val name: String, val webhooks: List<Webhook>, val aggregations: List<Aggregation>, val permissions: Permissions?)
+class Server(
+    val name: String,
+    val webhooks: List<Webhook>,
+    val aggregations: List<Aggregation>,
+    val permissions: Permissions?,
+    val watches: MutableMap<String, WatchRunnerFunction>
+)
