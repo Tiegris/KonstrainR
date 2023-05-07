@@ -51,7 +51,7 @@ class DslServiceImpl(
     }
 
     override suspend fun allWithAggregators() = DatabaseFactory.dbQuery {
-        Dsl.all().filter {( it.hasAggregators == true) /*and (it.serverStatus == ServerStatus.Up)*/ }.map { it.name }
+        Dsl.all().filter {( it.hasAggregators == true) and (it.serverStatus == ServerStatus.Up) }.map { it.name }
     }
 
     override suspend fun getJar(id: Int) = DatabaseFactory.dbQuery {

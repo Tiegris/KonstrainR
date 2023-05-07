@@ -4,19 +4,16 @@ import com.lordcodes.turtle.ShellScript
 import com.lordcodes.turtle.shellRun
 import java.io.BufferedWriter
 import java.io.File
-import java.io.FileInputStream
 import java.io.FileWriter
 import java.nio.file.Files
-import java.security.KeyStore
 import java.util.concurrent.ThreadLocalRandom
-import javax.net.ssl.SSLContext
-import javax.net.ssl.TrustManagerFactory
 import javax.net.ssl.X509TrustManager
 import kotlin.streams.asSequence
 
-class SslServiceOpenSslWrapperImpl : SslService {
-    private val pwd = File("/app/ssl")
+class SslServiceOpenSslWrapperImpl : SslService(File("/app/ssl")) {
+
     private val rootCA: String
+
     init {
         if (pwd.exists() && !pwd.isDirectory)
             throw ExceptionInInitializerError("Ssl root dir exists, but is not a directory!")
@@ -109,20 +106,6 @@ class SslServiceOpenSslWrapperImpl : SslService {
         val key = getFile(keyName)
         val cert = getFile(certName)
         return SecretBundle(cert, key)
-    }
-
-    private fun getKeyStore(): KeyStore {
-        val keyStoreFile = FileInputStream("${pwd.path}/keystore.jks")
-        val keyStorePassword = "foobar".toCharArray()
-        val keyStore: KeyStore = KeyStore.getInstance(KeyStore.getDefaultType())
-        keyStore.load(keyStoreFile, keyStorePassword)
-        return keyStore
-    }
-
-    private fun getTrustManagerFactory(): TrustManagerFactory? {
-        val trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm())
-        trustManagerFactory.init(getKeyStore())
-        return trustManagerFactory
     }
 
     override fun getTrustManager(): X509TrustManager {

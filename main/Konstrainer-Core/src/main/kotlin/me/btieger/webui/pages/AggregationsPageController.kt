@@ -6,6 +6,8 @@ import io.ktor.client.engine.cio.*
 import io.ktor.client.request.*
 import io.ktor.server.application.*
 import io.ktor.server.html.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
 import me.btieger.services.DslService
@@ -16,8 +18,10 @@ import org.koin.ktor.ext.inject
 
 @Serializable
 class AggregationsDto(val server: String, val aggregations: List<AggregationDto>)
+
 @Serializable
 class AggregationDto(val name: String, val markings: List<MarkingDto>)
+
 @Serializable
 class MarkingDto(
     val name: String,
@@ -25,6 +29,7 @@ class MarkingDto(
     val status: String,
     val comment: String?,
 )
+
 
 fun Application.configureAggregationsPageController() {
     val serverService by inject<ServerService>()
@@ -35,8 +40,12 @@ fun Application.configureAggregationsPageController() {
         route("/ui/aggregations") {
             get {
                 val aggregators = dslService.allWithAggregators()
+                //val aggregators = listOf<String>("localhost:8443")
                 val aggregations = mutableListOf<AggregationsDto>()
                 HttpClient(CIO) {
+                    install(ContentNegotiation) {
+                        json()
+                    }
                     engine {
                         https {
                             trustManager = sslService.getTrustManager()
@@ -45,7 +54,7 @@ fun Application.configureAggregationsPageController() {
                 }.use { client ->
                     aggregators.forEach { item ->
                         val response = client.get("https://$item/aggregator")
-                        //val response = client.get("https://localhost:8443/aggregator")
+                        val x: AggregationsDto = response.body()
                         aggregations += response.body<AggregationsDto>()
                     }
                 }
@@ -66,15 +75,15 @@ val mockResult = mutableListOf(
             AggregationDto(
                 "a1",
                 listOf(
-                    MarkingDto("myDep", "demo-ns","yellow","alma"),
-                    MarkingDto("myDep", "demo-ns","yellow","alma"),
+                    MarkingDto("myDep", "demo-ns", "yellow", "alma"),
+                    MarkingDto("myDep", "demo-ns", "yellow", "alma"),
                 )
             ),
             AggregationDto(
                 "a2",
                 listOf(
-                    MarkingDto("myDep", "demo-ns","yellow","alma"),
-                    MarkingDto("myDep", "demo-ns","yellow","alma"),
+                    MarkingDto("myDep", "demo-ns", "yellow", "alma"),
+                    MarkingDto("myDep", "demo-ns", "yellow", "alma"),
                 )
             ),
         )
@@ -85,15 +94,15 @@ val mockResult = mutableListOf(
             AggregationDto(
                 "a1",
                 listOf(
-                    MarkingDto("myDep", "demo-ns","yellow","alma"),
-                    MarkingDto("myDep", "demo-ns","yellow","alma"),
+                    MarkingDto("myDep", "demo-ns", "yellow", "alma"),
+                    MarkingDto("myDep", "demo-ns", "yellow", "alma"),
                 )
             ),
             AggregationDto(
                 "a2",
                 listOf(
-                    MarkingDto("myDep", "demo-ns","yellow","alma"),
-                    MarkingDto("myDep", "demo-ns","yellow","alma"),
+                    MarkingDto("myDep", "demo-ns", "yellow", "alma"),
+                    MarkingDto("myDep", "demo-ns", "yellow", "alma"),
                 )
             ),
         )
