@@ -2,7 +2,8 @@ package me.btieger.dsl
 
 import kotlinx.serialization.json.JsonObject
 
-class WebhookBuilder(val defaults: WebhookConfigBundle) {
+typealias WebhookBehaviorProvider = WebhookBehaviorBuilder.()->Unit
+class WebhookBuilder(defaults: WebhookConfigBundle) {
     private var _operations: Array<out Type> by setExactlyOnce(defaults.operations)
     private var _apiGroups: Array<out Type> by setExactlyOnce(defaults.apiGroups)
     private var _apiVersions: Array<out Type> by setExactlyOnce(defaults.apiVersion)
@@ -19,37 +20,12 @@ class WebhookBuilder(val defaults: WebhookConfigBundle) {
     @DslMarkerVerb5
     var path: String by setExactlyOnce()
 
-    @DslMarkerVerb5
-    var behavior: (JsonObject) -> WebhookDecision by setExactlyOnce()
+    private var behavior: WebhookBehaviorProvider by setExactlyOnce()
 
     @DslMarkerBlock
-    fun withContext(setup: WebhookBehaviorBuilder.()->Unit): WebhookDecision {
-        val provider = WebhookBehaviorBuilder().apply(setup)
-        return provider.build()
+    fun behavior(setup: WebhookBehaviorProvider) {
+        behavior = setup
     }
-
-    private fun validateName(name: String): String {
-        val name = name.split(' ', '.').joinToString(separator = "-")
-        for (c in name) {
-            if (!(c in 'A'..'Z' || c in 'a'..'z' || c == '-' || c == '_'))
-            // TODO
-                throw Exception()
-        }
-        return name
-    }
-
-    private fun validatePath(path: String): String {
-        var path = path
-        if (path.first() != '/')
-            path = "/$path"
-        path.trimEnd('/')
-        for (c in path) {
-            if (c !in 'a'..'z' && c != '/' && c != '-' && c != '_')// TODO
-                throw Exception()
-        }
-        return path
-    }
-
 
     @DslMarkerVerb5
     fun operations(vararg args: Operation) {
@@ -116,7 +92,7 @@ class WebhookBuilder(val defaults: WebhookConfigBundle) {
         val scope = _scope.string
         val namespaceSelector = _namespaceSelector
         val failurePolicy = _failurePolicy
-        val _name = validateName(name)
+        val _name = validateWhName(name)
         val _path = validatePath(path)
 
         return Webhook(
@@ -126,7 +102,6 @@ class WebhookBuilder(val defaults: WebhookConfigBundle) {
         )
     }
 }
-
 
 abstract class Type(val string: String)
 
@@ -184,8 +159,8 @@ class Webhook (
     val namespaceSelector: Map<String, String>,
     val failurePolicy: String,
     val path: String,
-    name: String,
-    val provider: (JsonObject) -> WebhookDecision,
+    val name: String,
+    val provider: WebhookBehaviorProvider,
     val logRequest: Boolean,
     val logResponse: Boolean,
-) : Component(name)
+)

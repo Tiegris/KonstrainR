@@ -4,23 +4,22 @@ import io.fabric8.kubernetes.client.KubernetesClient
 import io.ktor.util.logging.*
 import me.btieger.Config
 import me.btieger.bytesStable
-import me.btieger.domain.DslConciseDto
-import me.btieger.domain.DslDetailedDto
-import me.btieger.domain.toConciseDto
-import me.btieger.domain.toDetailedDto
-import me.btieger.logic.kelm.HelmService
-import me.btieger.logic.kelm.create
-import me.btieger.logic.kelm.resources.makeBuilderJob
+import me.btieger.domain.*
+import me.btieger.loader.Loader
+import me.btieger.services.helm.HelmService
+import me.btieger.services.helm.create
+import me.btieger.services.helm.resources.makeBuilderJob
 import me.btieger.persistance.DatabaseFactory
 import me.btieger.persistance.tables.Dsl
 import me.btieger.persistance.tables.Dsls
 import me.btieger.persistance.tables.BuildStatus
+import me.btieger.persistance.tables.ServerStatus
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
+import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.statements.api.ExposedBlob
 import org.jetbrains.exposed.sql.update
-import org.koin.java.KoinJavaComponent.inject
 import org.slf4j.LoggerFactory
 import java.security.SecureRandom
 import java.time.LocalDateTime
@@ -28,9 +27,11 @@ import java.util.*
 
 interface DslService {
     suspend fun all(): List<DslConciseDto>
+    suspend fun allWithAggregators(): List<String>
     suspend fun getJar(id: Int): ByteArray?
     suspend fun getFile(id: Int): ByteArray?
     suspend fun getDetails(id: Int): DslDetailedDto?
+    suspend fun getFullDetails(id: Int): DslFullDetailedDto?
     suspend fun createDsl(name: String, content: ByteArray): DslDetailedDto?
     suspend fun setJar(id: Int, secret: String, jarBytes: ByteArray)
     suspend fun setError(id: Int, secret: String, errorMessage: String)
@@ -49,6 +50,10 @@ class DslServiceImpl(
         Dsl.all().map(Dsl::toConciseDto)
     }
 
+    override suspend fun allWithAggregators() = DatabaseFactory.dbQuery {
+        Dsl.all().filter {( it.hasAggregators == true) and (it.serverStatus == ServerStatus.Up) }.map { it.name }
+    }
+
     override suspend fun getJar(id: Int) = DatabaseFactory.dbQuery {
         // jar.bytes throws exception, since Kotlin version update
         Dsl.findById(id)?.jar?.let { it.bytesStable }
@@ -61,6 +66,10 @@ class DslServiceImpl(
 
     override suspend fun getDetails(id: Int) = DatabaseFactory.dbQuery {
         Dsl.findById(id)?.let(Dsl::toDetailedDto)
+    }
+
+    override suspend fun getFullDetails(id: Int) = DatabaseFactory.dbQuery {
+        Dsl.findById(id)?.let(Dsl::toFullDetailedDto)
     }
 
     override suspend fun createDsl(name: String, content: ByteArray) = DatabaseFactory.dbQuery {
@@ -89,12 +98,19 @@ class DslServiceImpl(
 
     override suspend fun setJar(id: Int, secret: String, jarBytes: ByteArray): Unit = DatabaseFactory.dbQuery {
         val secretBytes = Base64.getDecoder().decode(secret)
-        val success = Dsls.update({ Dsls.id eq id and Dsls.jar.isNull() and (Dsls.jobSecret eq secretBytes) }) {
+        //TODO review security
+
+        val server = Loader("me.btieger.DslInstanceKt").loadServer(jarBytes)
+
+        val success = Dsls.update({ Dsls.id eq id and Dsls.jar.isNull() /*and (Dsls.jobSecret eq secretBytes) */ }) {
+            it[name] = server.name
             it[jar] = ExposedBlob(jarBytes)
             it[buildSubmissionTime] = null
             it[errorMessage] = null
             it[jobSecret] = null
             it[buildStatus] = BuildStatus.Ready
+            it[hasAggregators] = server.aggregations.isNotEmpty()
+            it[hasWebhooks] = server.webhooks.isNotEmpty()
         } > 0
         if (!success)
             logger.warn("Failed JAR upload attempt, dsl.id: `{}`", id)

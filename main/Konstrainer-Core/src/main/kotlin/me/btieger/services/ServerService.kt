@@ -9,17 +9,14 @@ import kotlinx.coroutines.launch
 import me.btieger.Config
 import me.btieger.bytesStable
 import me.btieger.loader.Loader
-import me.btieger.logic.kelm.HelmService
-import me.btieger.logic.kelm.resources.secret
+import me.btieger.services.helm.HelmService
 import me.btieger.persistance.DatabaseFactory
-import me.btieger.logic.kelm.create
-import me.btieger.logic.kelm.resources.deployment
-import me.btieger.logic.kelm.resources.mutatingWebhookConfiguration
-import me.btieger.logic.kelm.resources.service
+import me.btieger.services.helm.create
 import me.btieger.persistance.tables.Dsl
 import me.btieger.persistance.tables.ServerStatus
 import me.btieger.persistance.tables.BuildStatus
 import me.btieger.persistance.tables.Dsls
+import me.btieger.services.helm.resources.*
 import me.btieger.services.ssl.SslService
 import org.jetbrains.exposed.sql.update
 import org.slf4j.Logger
@@ -67,9 +64,7 @@ class ServerServiceImpl(
         logger.info("Launching server spawner coroutine, dsl.id: `{}`", id)
         GlobalScope.launch {
             try {
-                // read server conf from db
                 val server = Loader("me.btieger.DslInstanceKt").loadServer(dsl)
-                //val server = me.btieger.server
 
                 val cname = "${server.name}.${config.namespace}.svc"
                 val altnames = listOf(
@@ -84,6 +79,13 @@ class ServerServiceImpl(
 
                 val dep = helm.deployment(server, id)
                 val svc = helm.service(server, id)
+                val rbac = helm.rbac(server, id)
+                rbac?.let {
+                    k8sclient.create(it.serviceAccount)
+                    k8sclient.create(it.clusterRole)
+                    k8sclient.create(it.clusterRoleBinding)
+                    dep.spec.template.spec.serviceAccountName = server.name
+                }
 
                 k8sclient.create(dep)
                 k8sclient.create(svc)
@@ -125,6 +127,9 @@ class ServerServiceImpl(
             k8sclient.secrets().inNamespace(config.namespace).withLabel("agentId", "$id").delete()
             k8sclient.apps().deployments().inNamespace(config.namespace).withLabel("agentId", "$id").delete()
             k8sclient.services().inNamespace(config.namespace).withLabel("agentId", "$id").delete()
+            k8sclient.serviceAccounts().inNamespace(config.namespace).withLabel("agentId", "$id").delete()
+            k8sclient.rbac().clusterRoles().withLabel("agentId", "$id").delete()
+            k8sclient.rbac().clusterRoleBindings().withLabel("agentId", "$id").delete()
             k8sclient.admissionRegistration().v1().mutatingWebhookConfigurations().withLabel("agentId", "$id").delete()
             true
         } catch (e: Throwable) {
@@ -145,10 +150,13 @@ class ServerServiceImpl(
 
     override suspend fun stopAll() {
         logger.info("All rules deleted.")
-        k8sclient.secrets().inNamespace(config.namespace).withLabel("agentId", "konstrainer").delete()
-        k8sclient.apps().deployments().inNamespace(config.namespace).withLabel("agentId", "konstrainer").delete()
-        k8sclient.services().inNamespace(config.namespace).withLabel("agentId", "konstrainer").delete()
-        k8sclient.admissionRegistration().v1().mutatingWebhookConfigurations().withLabel("agentId", "konstrainer").delete()
+        k8sclient.secrets().inNamespace(config.namespace).withLabel("managedBy", "konstrainer").delete()
+        k8sclient.apps().deployments().inNamespace(config.namespace).withLabel("managedBy", "konstrainer").delete()
+        k8sclient.services().inNamespace(config.namespace).withLabel("managedBy", "konstrainer").delete()
+        k8sclient.serviceAccounts().inNamespace(config.namespace).withLabel("managedBy", "konstrainer").delete()
+        k8sclient.rbac().clusterRoles().withLabel("managedBy", "konstrainer").delete()
+        k8sclient.rbac().clusterRoleBindings().withLabel("managedBy", "konstrainer").delete()
+        k8sclient.admissionRegistration().v1().mutatingWebhookConfigurations().withLabel("managedBy", "konstrainer").delete()
         setAllDown()
     }
 

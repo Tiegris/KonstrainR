@@ -1,5 +1,6 @@
 package me.btieger.plugins
 
+import io.fabric8.kubernetes.client.KubernetesClient
 import io.ktor.server.routing.*
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -11,22 +12,52 @@ import me.btieger.dsl.*
 import me.btieger.toBase64
 import me.btieger.toJsonString
 
-fun Application.configureRouting(ruleset: Server) {
+fun Application.configureRouting(server: Server, k8s: KubernetesClient) {
 
     routing {
         get("/") {
             call.respondText("OK")
         }
-        ruleset.components.filterIsInstance<Webhook>().forEach { component ->
-            post(component.path) {
+        if (server.aggregations.isNotEmpty()) {
+            get("/aggregator") {
+                val watches: Watches =
+                    server.watches.mapValues { WatchRunner(k8s).run(it.value) }
+                val response = buildJsonObject {
+                    put("server", server.name)
+                    putJsonArray("aggregations") {
+                        server.aggregations.forEach {
+                            addJsonObject {
+                                put("name", it.name)
+                                AggregationRunner(k8s, watches).let { runner ->
+                                    it.runner.invoke(runner)
+                                    putJsonArray("markings") {
+                                        runner.markings.forEach { marking ->
+                                            addJsonObject {
+                                                put("name", marking.named)
+                                                put("namespace", marking.namespace)
+                                                put("status", marking.status.string)
+                                                put("comment", marking.comment)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                call.respond(HttpStatusCode.OK, response)
+            }
+        }
+        server.webhooks.forEach { webhook ->
+            post(webhook.path) {
                 val body: JsonObject = call.receive()
-                if (component.logRequest)
+                if (webhook.logRequest)
                     println(body.toJsonString())
                 val apiVersion = body["apiVersion"]?.jsonPrimitive?.content!!
                 val kind = body["kind"]?.jsonPrimitive?.content!!
                 val request = body["request"]?.jsonObject!!
 
-                val provider = component.provider.invoke(request)
+                val decision = WebhookBehaviorBuilder(request).apply(webhook.provider).build()
 
                 val response = buildJsonObject {
                     put("apiVersion", apiVersion)
@@ -34,27 +65,27 @@ fun Application.configureRouting(ruleset: Server) {
                     val uid = request["uid"]?.jsonPrimitive?.content!!
                     putJsonObject("response") {
                         put("uid", uid)
-                        put("allowed", provider.allowed)
-                        provider.warnings?.let { warnings ->
+                        put("allowed", decision.allowed)
+                        decision.warnings?.let { warnings ->
                             putJsonArray("warnings") {
                                 warnings.forEach(::add)
                             }
                         }
-                        if (!provider.allowed) {
+                        if (!decision.allowed) {
                             putJsonObject("status") {
-                                put("code", provider.status.code)
-                                put("message", provider.status.message)
+                                put("code", decision.status.code)
+                                put("message", decision.status.message)
                             }
                         }
-                        provider.patch?.let { patch ->
-                            if (provider.allowed) {
+                        decision.patch?.let { patch ->
+                            if (decision.allowed) {
                                 put("patchType", "JSONPatch")
                                 put("patch", patch.toBase64())
                             }
                         }
                     }
                 }
-                if (component.logResponse)
+                if (webhook.logResponse)
                     println(response.toJsonString())
                 call.respond(HttpStatusCode.OK, response)
             }

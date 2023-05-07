@@ -7,14 +7,6 @@ fun webhookConfigBundle(setup: WebhookConfigBundleBuilder.() -> Unit): WebhookCo
 }
 
 class WebhookConfigBundleBuilder {
-    internal fun build(): WebhookConfigBundle {
-        return WebhookConfigBundle(
-            _operations, _apiGroups, _apiVersions, _resources, _scope,
-            _namespaceSelector, _failurePolicy,
-            logRequest, logResponse
-        )
-    }
-
     private var _operations: Array<out Type>? by setMaxOnce()
     private var _apiGroups: Array<out Type>? by setMaxOnce()
     private var _apiVersions: Array<out Type>? by setMaxOnce()
@@ -83,6 +75,14 @@ class WebhookConfigBundleBuilder {
     @DslMarkerVerb5
     fun failurePolicy(failurePolicy: FailurePolicy) {
         _failurePolicy = failurePolicy
+    }
+
+    internal fun build(): WebhookConfigBundle {
+        return WebhookConfigBundle(
+            _operations, _apiGroups, _apiVersions, _resources, _scope,
+            _namespaceSelector, _failurePolicy,
+            logRequest, logResponse
+        )
     }
 }
 

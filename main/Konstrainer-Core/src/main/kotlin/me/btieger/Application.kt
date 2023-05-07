@@ -2,10 +2,12 @@ package me.btieger
 
 import io.fabric8.kubernetes.client.KubernetesClient
 import io.fabric8.kubernetes.client.KubernetesClientBuilder
+import io.ktor.client.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.callloging.*
+import io.ktor.server.webjars.*
 import me.btieger.controllers.dslController
 import me.btieger.controllers.echoController
 import me.btieger.controllers.serverController
@@ -17,6 +19,10 @@ import me.btieger.services.cronjobs.launchCleaner
 import me.btieger.services.ssl.SslServiceOpenSslWrapperImpl
 import me.btieger.services.ssl.SslService
 import me.btieger.services.ssl.SslServiceMockImpl
+import me.btieger.webui.configureCSS
+import me.btieger.webui.configurePagesRouting
+import me.btieger.webui.pages.configureAggregationsPageController
+import me.btieger.webui.pages.configureServersPageController
 import org.koin.dsl.module
 import org.koin.ktor.plugin.Koin
 import org.slf4j.event.Level
@@ -33,6 +39,7 @@ class Config : EnvVarSettings("KSR_") {
     val agentImage by string("tiegris/konstrainer-agent:0.0.1")
     val agentSpawnWaitSeconds by long(5L)
     val agentSpawnWaitMaxRetries by int(5)
+    val enableWebUi by boolean(true)
 
     init {
         loadAll()
@@ -50,7 +57,6 @@ fun main() {
 
 
 fun Application.startup() {
-
     install(CallLogging) {
         level = Level.INFO
     }
@@ -63,6 +69,15 @@ fun Application.startup() {
     serverController()
 
     DatabaseFactory.init()
+
+    if (config.enableWebUi) {
+        install(Webjars) {
+            path = "assets"
+        }
+
+        configureCSS()
+        configurePagesRouting()
+    }
 
     launchCleaner()
 }

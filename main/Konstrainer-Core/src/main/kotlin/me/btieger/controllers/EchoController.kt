@@ -10,17 +10,11 @@ import me.btieger.services.ssl.SslServiceOpenSslWrapperImpl
 import org.koin.ktor.ext.inject
 
 fun Application.echoController() {
-    val dslService: DslService by inject()
-    val kubectl: KubernetesClient by inject()
-
     routing {
         get("/") {
             call.respond("got it")
         }
         get("/debug") {
-            SslServiceMockImpl().getRootCaAsPem()
-
-
             call.respond("ok")
         }
     }

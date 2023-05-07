@@ -39,4 +39,4 @@ fun <T> JsonElement.guard(fn: JsonElement.()->T) : T? {
 @DslMarkerBlock infix fun JsonElement.parseAs(type :int): Int? = guard { this.jsonPrimitive.content.toIntOrNull() }
 @DslMarkerBlock infix fun JsonElement.parseAs(type :bool): Boolean? = guard { this.jsonPrimitive.content.toBooleanStrictOrNull() }
 @DslMarkerBlock infix fun JsonElement.parseAs(type: double): Double? = guard { this.jsonPrimitive.content.toDoubleOrNull() }
-@DslMarkerBlock infix fun JsonElement.parseAs(type :string): String = guard { this.jsonPrimitive.content } ?: "null"
+@DslMarkerBlock infix fun JsonElement.parseAs(type :string): String? = guard { this.jsonPrimitive.content }

@@ -11,4 +11,5 @@ repositories {
 dependencies {
     api(files("/app/libs/KonstrainerDsl-0.0.1-SNAPSHOT.jar"))
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
+    implementation("io.fabric8:kubernetes-client:6.6.0")
 }

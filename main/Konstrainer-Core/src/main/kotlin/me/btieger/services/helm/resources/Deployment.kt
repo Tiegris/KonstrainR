@@ -1,4 +1,4 @@
-package me.btieger.logic.kelm.resources
+package me.btieger.services.helm.resources
 
 import com.fkorotkov.kubernetes.*
 import com.fkorotkov.kubernetes.apps.selector
@@ -6,8 +6,7 @@ import com.fkorotkov.kubernetes.apps.spec
 import com.fkorotkov.kubernetes.apps.template
 import me.btieger.dsl.*
 import io.fabric8.kubernetes.api.model.apps.Deployment
-import me.btieger.Config
-import me.btieger.logic.kelm.HelmService
+import me.btieger.services.helm.HelmService
 
 fun HelmService.deployment(server: Server, agentId: Int) =
     Deployment().apply {
@@ -23,6 +22,7 @@ fun HelmService.deployment(server: Server, agentId: Int) =
                     labels = myLabels(server.name, agentId)
                 }
                 spec {
+                    serviceAccountName = ""
                     containers = listOf(
                         newContainer {
                             name = "agent-server"

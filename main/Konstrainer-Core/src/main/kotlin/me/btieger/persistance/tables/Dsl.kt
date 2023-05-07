@@ -17,6 +17,9 @@ class Dsl(id: EntityID<Int>) : Entity<Int>(id) {
     var file by Dsls.file
     var jar by Dsls.jar
     var serverStatus by Dsls.serverStatus
+
+    var hasAggregators by Dsls.hasAggregators
+    var hasWebhooks by Dsls.hasWebhooks
 }
 
 object Dsls : IntIdTable() {
@@ -28,6 +31,9 @@ object Dsls : IntIdTable() {
     val errorMessage = text("error").nullable()
     val jar = blob("jar").nullable()
     val serverStatus = enumeration("serverStatus", ServerStatus::class).default(ServerStatus.Down)
+
+    val hasAggregators = bool("hasAggregators").nullable()
+    val hasWebhooks = bool("hasWebhooks").nullable()
 }
 
 enum class ServerStatus {

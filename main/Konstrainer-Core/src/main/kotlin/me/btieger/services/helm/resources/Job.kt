@@ -1,9 +1,9 @@
-package me.btieger.logic.kelm.resources
+package me.btieger.services.helm.resources
 
 import com.fkorotkov.kubernetes.batch.v1.*
 import com.fkorotkov.kubernetes.*
 import io.fabric8.kubernetes.api.model.batch.v1.Job
-import me.btieger.logic.kelm.HelmService
+import me.btieger.services.helm.HelmService
 
 fun makeJobName(dslId: Int) = "dsl-build-job-$dslId"
 

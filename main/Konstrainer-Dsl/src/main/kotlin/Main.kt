@@ -1,14 +1,26 @@
-import kotlinx.serialization.encodeToString
+import io.fabric8.kubernetes.api.model.HasMetadata
+import io.fabric8.kubernetes.api.model.KubernetesResourceList
+import io.fabric8.kubernetes.client.KubernetesClient
+import io.fabric8.kubernetes.client.KubernetesClientBuilder
 import kotlinx.serialization.json.*
 import me.btieger.dsl.*
-import me.btieger.loader.Loader
-import java.nio.file.Paths
 
 fun main(args: Array<String>) {
 
     val k = me.btieger.example.server
 
-    (k.components[0] as Webhook).provider(JsonObject(mapOf()))
+    val k8s: KubernetesClient = KubernetesClientBuilder().build()
+
+    val map = mutableMapOf<String, KubernetesResourceList<out HasMetadata>>()
+    k.watches.forEach {
+        map[it.key] = WatchRunner(k8s).run(it.value)
+    }
+
+    val x =
+    k.watches.mapValues {
+        WatchRunner(k8s).run(it.value)
+    }
+
 
     println()
 
