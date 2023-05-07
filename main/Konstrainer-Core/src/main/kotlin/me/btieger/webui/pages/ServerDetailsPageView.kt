@@ -23,12 +23,12 @@ fun DIV.serverDetails(model: DslFullDetailedDto) {
             model.serverStatus?.let {
                 li("list-group-item") {
                     p { +"Server status $it" }
-                }
-                model.hasWebhooks?.let {
-                    p { +"Has Webhooks $it" }
-                }
-                model.hasAggregators?.let {
-                    p { +"Has Aggregators $it" }
+                    model.hasWebhooks?.let {
+                        p { +"Has Webhooks $it" }
+                    }
+                    model.hasAggregators?.let {
+                        p { +"Has Aggregators $it" }
+                    }
                 }
             }
         }
