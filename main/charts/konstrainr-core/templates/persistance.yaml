@@ -9,19 +9,18 @@ spec:
   resources:
     requests:
       storage: 50Mi
-#---
-#apiVersion: v1
-#kind: PersistentVolume
-#metadata:
-#  name: {{ include "konstrainr-core.fullname" . }}-volume
-#  labels:
-#    type: local
-#spec:
-#  storageClassName: manual
-#  capacity:
-#    storage: 50Mi
-#  accessModes:
-#    - ReadWriteOnce
-#  hostPath:
-#    path: "/mnt/data"
-#
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ include "konstrainr-core.fullname" . }}-volume
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 50Mi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/kubedata"
