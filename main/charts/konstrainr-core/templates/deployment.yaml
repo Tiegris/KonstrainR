@@ -53,14 +53,14 @@ spec:
           volumeMounts:
             - name: {{ include "konstrainr-core.fullname" . }}-data
               mountPath: /app/home
-          #livenessProbe:
-          #  httpGet:
-          #    path: /
-          #    port: http
-          #readinessProbe:
-          #  httpGet:
-          #    path: /
-          #    port: http
+          livenessProbe:
+            httpGet:
+              path: /echo
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /echo
+              port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
