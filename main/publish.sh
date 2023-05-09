@@ -37,6 +37,7 @@ cd $home/KonstraineR-Agent
 version="0.0.1"
 cd docker
 docker build -t tiegris/konstrainer-agent:$version .
+docker push tiegris/konstrainer-agent:$version
 
 #################################
 #
