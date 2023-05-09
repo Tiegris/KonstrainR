@@ -46,7 +46,7 @@ spec:
               containerPort: {{ .Values.service.port }}
               protocol: TCP
           volumeMounts:
-            - name: {{ include "konstrainr-core.fullname" . }}-data
+            - name: {{ include "konstrainr-core.fullname" . }}-storage
               mountPath: /app/home
           livenessProbe:
             httpGet:
