@@ -40,6 +40,7 @@ class Config : EnvVarSettings("KSR_") {
     val agentSpawnWaitSeconds by long(5L)
     val agentSpawnWaitMaxRetries by int(5)
     val enableWebUi by boolean(true)
+    val home by string("/app/home")
 
     init {
         loadAll()
@@ -68,7 +69,7 @@ fun Application.startup() {
     dslController()
     serverController()
 
-    DatabaseFactory.init()
+    DatabaseFactory.init(config)
 
     if (config.enableWebUi) {
         install(Webjars) {

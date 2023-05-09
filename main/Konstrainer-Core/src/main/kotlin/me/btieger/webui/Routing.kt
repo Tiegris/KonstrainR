@@ -14,9 +14,11 @@ fun Application.configurePagesRouting() {
 
     routing {
         get {
-            call.respondRedirect("/servers",true)
+            call.respondRedirect("/ui/servers",true)
         }
-
+        get("/ui") {
+            call.respondRedirect("/ui/servers",true)
+        }
     }
 }
 

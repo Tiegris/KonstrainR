@@ -27,7 +27,7 @@ fun Application.configureKoin(config: Config) {
                 if (environment.developmentMode) {
                     single<SslService>(createdAtStart = true) { SslServiceMockImpl() }
                 } else {
-                    single<SslService>(createdAtStart = true) { SslServiceOpenSslWrapperImpl() }
+                    single<SslService>(createdAtStart = true) { SslServiceOpenSslWrapperImpl(get()) }
                 }
             }
         )

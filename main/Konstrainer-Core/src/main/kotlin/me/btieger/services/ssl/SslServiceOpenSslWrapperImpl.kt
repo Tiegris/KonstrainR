@@ -2,6 +2,7 @@ package me.btieger.services.ssl
 
 import com.lordcodes.turtle.ShellScript
 import com.lordcodes.turtle.shellRun
+import me.btieger.Config
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
@@ -10,7 +11,7 @@ import java.util.concurrent.ThreadLocalRandom
 import javax.net.ssl.X509TrustManager
 import kotlin.streams.asSequence
 
-class SslServiceOpenSslWrapperImpl : SslService(File("/app/ssl")) {
+class SslServiceOpenSslWrapperImpl(config: Config) : SslService(File("${config.home}/ssl")) {
 
     private val rootCA: String
 

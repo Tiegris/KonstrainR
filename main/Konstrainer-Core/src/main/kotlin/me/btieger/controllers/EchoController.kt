@@ -11,11 +11,8 @@ import org.koin.ktor.ext.inject
 
 fun Application.echoController() {
     routing {
-        get("/") {
+        get("/echo") {
             call.respond("got it")
-        }
-        get("/debug") {
-            call.respond("ok")
         }
     }
 }
