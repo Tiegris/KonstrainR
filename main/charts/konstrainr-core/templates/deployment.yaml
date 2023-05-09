@@ -10,6 +10,15 @@ spec:
   selector:
     matchLabels:
       {{- include "konstrainr-core.selectorLabels" . | nindent 6 }}
+  volumeClaimTemplates:
+    - metadata:
+        name: {{ include "konstrainr-core.fullname" . }}-data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 50Mi
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -41,6 +50,9 @@ spec:
             - name: http
               containerPort: {{ .Values.service.port }}
               protocol: TCP
+          volumeMounts:
+            - name: {{ include "konstrainr-core.fullname" . }}-data
+              mountPath: /app/home
           #livenessProbe:
           #  httpGet:
           #    path: /
