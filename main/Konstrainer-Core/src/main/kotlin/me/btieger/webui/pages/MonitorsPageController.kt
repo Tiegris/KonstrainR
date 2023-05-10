@@ -24,6 +24,7 @@ class MonitorDto(val name: String, val markedResources: List<MarkingDto>)
 
 @Serializable
 class MarkingDto(
+    val fullResourceName: String,
     val name: String,
     val namespace: String?,
     val marks: List<String>,
@@ -42,7 +43,6 @@ fun Application.configureMonitorsPageController() {
                 val aggregators = dslService.allWithAggregators()
 //                val aggregators = listOf<String>("localhost:8443")
                 val monitors = mutableListOf<MonitorsDto>()
-//                val monitors = mockResult
                 HttpClient(CIO) {
                     install(ContentNegotiation) {
                         json()
@@ -68,44 +68,3 @@ fun Application.configureMonitorsPageController() {
         }
     }
 }
-
-val mockResult = mutableListOf(
-    MonitorsDto(
-        "s1",
-        listOf(
-            MonitorDto(
-                "Pods",
-                listOf(
-                    MarkingDto("demo","demo-ns", listOf("Alma", "körte")),
-                    MarkingDto("demo","demo-ns", listOf("Alma", "körte")),
-                )
-            ),
-            MonitorDto(
-                "Pods",
-                listOf(
-                    MarkingDto("demo","demo-ns", listOf("Alma", "körte")),
-                    MarkingDto("demo","demo-ns", listOf("Alma", "körte")),
-                )
-            ),
-        )
-    ),
-    MonitorsDto(
-        "s1",
-        listOf(
-            MonitorDto(
-                "Pods",
-                listOf(
-                    MarkingDto("demo","demo-ns", listOf("Alma", "körte")),
-                    MarkingDto("demo","demo-ns", listOf("Alma", "körte")),
-                )
-            ),
-            MonitorDto(
-                "Pods",
-                listOf(
-                    MarkingDto("demo","demo-ns", listOf("Alma", "körte")),
-                    MarkingDto("demo","demo-ns", listOf("Alma", "körte")),
-                )
-            ),
-        )
-    ),
-)

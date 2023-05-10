@@ -21,7 +21,7 @@ class WatchBehaviorProvider<T>(val item: T) {
 typealias WatchBehaviorFunction<T> = WatchBehaviorProvider<T>.() -> Unit
 
 @Serializable
-class Mark(val name: String, val namespace: String, val marks: List<String>)
+class Mark(val fullResourceName: String, val name: String, val namespace: String, val marks: List<String>)
 
 class Monitor<T : HasMetadata>(val monitorName: String, private val watch: WatchFunction<T>, private val behavior: WatchBehaviorFunction<T>) {
     fun evaluate(kubectl: KubernetesClient): List<Mark> {
@@ -38,7 +38,7 @@ class Monitor<T : HasMetadata>(val monitorName: String, private val watch: Watch
                 }
             }
             if (marks.isNotEmpty()) {
-                result += Mark(resource.fullResourceName, resource.metadata.namespace, marks)
+                result += Mark(resource.fullResourceName, resource.metadata.name, resource.metadata.namespace, marks)
             }
 
 
