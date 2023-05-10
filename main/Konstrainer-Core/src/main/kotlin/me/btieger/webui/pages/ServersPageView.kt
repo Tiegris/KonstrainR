@@ -1,10 +1,9 @@
 package me.btieger.webui.pages
 
 import kotlinx.html.*
-import me.btieger.controllers.apiVersion
 import me.btieger.persistance.tables.ServerStatus
 
-fun DIV.servers(model: ServersPageModel) {
+fun DIV.serversView(model: ServersPageModel) {
     div {
         div {
             form(action = SERVERS_PATH, method = FormMethod.post, encType=FormEncType.multipartFormData) {

@@ -17,31 +17,32 @@ import me.btieger.webui.siteLayout
 import org.koin.ktor.ext.inject
 
 @Serializable
-class AggregationsDto(val server: String, val aggregations: List<AggregationDto>)
+class MonitorsDto(val server: String, val monitors: List<MonitorDto>)
 
 @Serializable
-class AggregationDto(val name: String, val markings: List<MarkingDto>)
+class MonitorDto(val name: String, val markedResources: List<MarkingDto>)
 
 @Serializable
 class MarkingDto(
     val name: String,
     val namespace: String?,
-    val status: String,
-    val comment: String?,
+    val marks: List<String>,
 )
 
+const val MONITORS_PATH="/ui/monitors"
 
-fun Application.configureAggregationsPageController() {
+fun Application.configureMonitorsPageController() {
     val serverService by inject<ServerService>()
     val dslService by inject<DslService>()
     val sslService by inject<SslService>()
 
     routing {
-        route("/ui/aggregations") {
+        route(MONITORS_PATH) {
             get {
                 val aggregators = dslService.allWithAggregators()
-                //val aggregators = listOf<String>("localhost:8443")
-                val aggregations = mutableListOf<AggregationsDto>()
+//                val aggregators = listOf<String>("localhost:8443")
+                val monitors = mutableListOf<MonitorsDto>()
+//                val monitors = mockResult
                 HttpClient(CIO) {
                     install(ContentNegotiation) {
                         json()
@@ -54,13 +55,13 @@ fun Application.configureAggregationsPageController() {
                 }.use { client ->
                     aggregators.forEach { item ->
                         val response = client.get("https://$item/aggregator")
-                        val x: AggregationsDto = response.body()
-                        aggregations += response.body<AggregationsDto>()
+                        val x: MonitorsDto = response.body()
+                        monitors += response.body<MonitorsDto>()
                     }
                 }
                 call.respondHtml {
                     siteLayout {
-                        aggregations(aggregations)
+                        monitorsView(monitors)
                     }
                 }
             }
@@ -69,40 +70,40 @@ fun Application.configureAggregationsPageController() {
 }
 
 val mockResult = mutableListOf(
-    AggregationsDto(
+    MonitorsDto(
         "s1",
         listOf(
-            AggregationDto(
-                "a1",
+            MonitorDto(
+                "Pods",
                 listOf(
-                    MarkingDto("myDep", "demo-ns", "yellow", "alma"),
-                    MarkingDto("myDep", "demo-ns", "yellow", "alma"),
+                    MarkingDto("demo","demo-ns", listOf("Alma", "körte")),
+                    MarkingDto("demo","demo-ns", listOf("Alma", "körte")),
                 )
             ),
-            AggregationDto(
-                "a2",
+            MonitorDto(
+                "Pods",
                 listOf(
-                    MarkingDto("myDep", "demo-ns", "yellow", "alma"),
-                    MarkingDto("myDep", "demo-ns", "yellow", "alma"),
+                    MarkingDto("demo","demo-ns", listOf("Alma", "körte")),
+                    MarkingDto("demo","demo-ns", listOf("Alma", "körte")),
                 )
             ),
         )
     ),
-    AggregationsDto(
-        "s2",
+    MonitorsDto(
+        "s1",
         listOf(
-            AggregationDto(
-                "a1",
+            MonitorDto(
+                "Pods",
                 listOf(
-                    MarkingDto("myDep", "demo-ns", "yellow", "alma"),
-                    MarkingDto("myDep", "demo-ns", "yellow", "alma"),
+                    MarkingDto("demo","demo-ns", listOf("Alma", "körte")),
+                    MarkingDto("demo","demo-ns", listOf("Alma", "körte")),
                 )
             ),
-            AggregationDto(
-                "a2",
+            MonitorDto(
+                "Pods",
                 listOf(
-                    MarkingDto("myDep", "demo-ns", "yellow", "alma"),
-                    MarkingDto("myDep", "demo-ns", "yellow", "alma"),
+                    MarkingDto("demo","demo-ns", listOf("Alma", "körte")),
+                    MarkingDto("demo","demo-ns", listOf("Alma", "körte")),
                 )
             ),
         )

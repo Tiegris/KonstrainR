@@ -1,8 +1,5 @@
 package me.btieger
 
-import io.fabric8.kubernetes.client.KubernetesClient
-import io.fabric8.kubernetes.client.KubernetesClientBuilder
-import io.ktor.client.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
@@ -14,17 +11,9 @@ import me.btieger.controllers.serverController
 import me.btieger.persistance.DatabaseFactory
 import me.btieger.plugins.configureKoin
 import me.btieger.plugins.configureSerialization
-import me.btieger.services.*
 import me.btieger.services.cronjobs.launchCleaner
-import me.btieger.services.ssl.SslServiceOpenSslWrapperImpl
-import me.btieger.services.ssl.SslService
-import me.btieger.services.ssl.SslServiceMockImpl
 import me.btieger.webui.configureCSS
 import me.btieger.webui.configurePagesRouting
-import me.btieger.webui.pages.configureAggregationsPageController
-import me.btieger.webui.pages.configureServersPageController
-import org.koin.dsl.module
-import org.koin.ktor.plugin.Koin
 import org.slf4j.event.Level
 
 

@@ -28,7 +28,7 @@ fun Dsl.toDetailedDto() =
     DslDetailedDto(id.value, name, buildStatus.name, errorMessage,
         buildSubmissionTime?.toString(),
         serverStatus.name,
-        hasAggregators, hasWebhooks
+        hasMonitors, hasWebhooks
     )
 
 @Serializable
@@ -48,7 +48,7 @@ fun Dsl.toFullDetailedDto() =
     DslFullDetailedDto(id.value, name, buildStatus.name, errorMessage,
         buildSubmissionTime?.toString(), serverStatus.name,
         file.bytesStable.decodeToString(),
-        hasAggregators, hasWebhooks,
+        hasMonitors, hasWebhooks,
     )
 
 @Serializable

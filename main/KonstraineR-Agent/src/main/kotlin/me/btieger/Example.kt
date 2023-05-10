@@ -15,31 +15,30 @@ val permissions = permissions {
 
 val server = server("example-server", permissions) {
 
-    watch("deployments") {
-        kubectl.apps().deployments().inAnyNamespace().list()
-    }
-
-    aggregation("No resource definitions") {
-        forEach(watches["deployments"] as DeploymentList) {
-            if (spec.template.spec.containers.any { it.resources.limits.isEmpty() || it.resources.requests.isEmpty() }) {
-                mark(YELLOW)
-            }
+    monitor("Deployments", {kubectl.apps().deployments().inAnyNamespace().list()}) {
+        mark( "Has no resources") {
+            item.spec.template.spec.containers.any { it.resources.limits.isEmpty() || it.resources.requests.isEmpty() }
+        }
+        mark( "No node selector") {
+            item.spec.template.spec.nodeSelector.isEmpty()
+        }
+        mark( "No probes") {
+            item.spec.template.spec.containers.any {it.livenessProbe == null}
         }
     }
 
-    aggregation("No Node Selectors") {
-        forEach(watches["deployments"] as DeploymentList) {
-            if (spec.template.spec.nodeSelector.isEmpty()) {
-                mark(YELLOW)
-            }
+    monitor("Services", {kubectl.services().inAnyNamespace().list()}) {
+        mark( "Has external IP") {
+            item.spec.externalIPs.isNotEmpty()
         }
     }
 
-    aggregation("No probes") {
-        forEach(watches["deployments"] as DeploymentList) {
-            if (spec.template.spec.containers.any {it.livenessProbe == null}) {
-                mark(YELLOW)
-            }
+    monitor("Pods", {kubectl.pods().inAnyNamespace().list()}) {
+        mark( "Image pull backoff") {
+            item.status.containerStatuses.any { it.state.waiting?.reason == "ImagePullBackOff" }
+        }
+        mark( "Dangling pods") {
+            item.metadata.ownerReferences.isEmpty()
         }
     }
 

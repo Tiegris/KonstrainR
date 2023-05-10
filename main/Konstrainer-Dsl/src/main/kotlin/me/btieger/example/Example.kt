@@ -1,7 +1,10 @@
 package me.btieger.example
 
+import io.fabric8.kubernetes.api.model.HasMetadata
+import io.fabric8.kubernetes.api.model.KubernetesResourceList
 import io.fabric8.kubernetes.api.model.apps.DeploymentList
-import kotlinx.serialization.json.*
+import io.fabric8.kubernetes.client.KubernetesClient
+import io.fabric8.kubernetes.client.KubernetesClientBuilder
 import me.btieger.dsl.*
 
 val defaults = webhookConfigBundle {
@@ -27,6 +30,12 @@ val permissions = permissions {
 }
 
 val server = server("example-server", permissions) {
+
+    monitor("All deployments", {kubectl.apps().deployments().inAnyNamespace().list()}) {
+        mark( "Has no resources") {
+            item.spec.template.spec.containers.any { it.resources.limits.isEmpty() || it.resources.requests.isEmpty() }
+        }
+    }
 
     webhook("create-pod", defaults) {
         path = "/create-pod"

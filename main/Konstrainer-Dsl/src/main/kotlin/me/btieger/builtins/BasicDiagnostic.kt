@@ -25,55 +25,30 @@ val permissions = permissions {
 
 val server = server("basic-diagnostics", permissions) {
 
-    watch("deployments") {
-        kubectl.apps().deployments().inAnyNamespace().list()
-    }
-
-    watch("services") {
-        kubectl.services().inAnyNamespace().list()
-    }
-
-    watch("pods") {
-        kubectl.pods().inAnyNamespace().list()
-    }
-
-    aggregation("No resource definitions") {
-        forEach(watches["deployments"] as DeploymentList) {
-            if (spec.template.spec.containers.any { it.resources.limits.isEmpty() || it.resources.requests.isEmpty() }) {
-                mark(YELLOW)
-            }
+    monitor("Deployments", {kubectl.apps().deployments().inAnyNamespace().list()}) {
+        mark( "Has no resources") {
+            item.spec.template.spec.containers.any { it.resources.limits.isEmpty() || it.resources.requests.isEmpty() }
+        }
+        mark( "No node selector") {
+            item.spec.template.spec.nodeSelector.isEmpty()
+        }
+        mark( "No probes") {
+            item.spec.template.spec.containers.any {it.livenessProbe == null}
         }
     }
 
-    aggregation("No Node Selectors") {
-        forEach(watches["deployments"] as DeploymentList) {
-            if (spec.template.spec.nodeSelector.isEmpty()) {
-                mark(YELLOW)
-            }
+    monitor("Services", {kubectl.services().inAnyNamespace().list()}) {
+        mark( "Has external IP") {
+            item.spec.externalIPs.isNotEmpty()
         }
     }
 
-    aggregation("No livenessProbe") {
-        forEach(watches["deployments"] as DeploymentList) {
-            if (spec.template.spec.containers.any {it.livenessProbe == null}) {
-                mark(YELLOW)
-            }
+    monitor("Pods", {kubectl.pods().inAnyNamespace().list()}) {
+        mark( "Image pull backoff") {
+            item.status.containerStatuses.any { it.state.waiting?.reason == "ImagePullBackOff" }
         }
-    }
-
-    aggregation("Service has external IP") {
-        forEach(watches["services"] as ServiceList) {
-            if (spec.externalIPs.isNotEmpty()) {
-                mark(YELLOW)
-            }
-        }
-    }
-
-    aggregation("Dangling Pods") {
-        forEach(watches["pods"] as PodList) {
-            if (metadata.ownerReferences.isEmpty()) {
-                mark(RED)
-            }
+        mark( "Dangling pods") {
+            item.metadata.ownerReferences.isEmpty()
         }
     }
 

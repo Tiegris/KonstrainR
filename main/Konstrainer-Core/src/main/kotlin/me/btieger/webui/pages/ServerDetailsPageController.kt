@@ -22,7 +22,7 @@ fun Application.configureServerDetailsPageController() {
                     ?: return@get notFound()
                 call.respondHtml {
                     siteLayout {
-                        serverDetails(model)
+                        serverDetailsView(model)
                     }
                 }
             }

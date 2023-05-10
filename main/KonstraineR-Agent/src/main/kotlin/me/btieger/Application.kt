@@ -65,8 +65,8 @@ fun Application.module() {
     install(CallLogging) {
         level = Level.INFO
     }
-    //val debugServer = server
-    val debugServer = me.btieger.builtins.server
+    val debugServer = server
+    //val debugServer = me.btieger.builtins.server
     val ruleset = if (_config.development) debugServer else Loader("me.btieger.DslInstanceKt").loadServer(Paths.get("/app/libs/agentdsl.jar"))
     configureHTTP()
     configureSerialization()

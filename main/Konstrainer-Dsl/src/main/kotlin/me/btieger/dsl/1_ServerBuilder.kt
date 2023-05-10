@@ -10,8 +10,7 @@ fun server(uniqueName: String, permissions: Permissions? = null, setup: ServerBu
 
 class ServerBuilder(permissions: Permissions?) {
     private var _webhooks: MutableList<Webhook> = mutableListOf()
-    private var _aggregations: MutableList<Aggregation> = mutableListOf()
-    private var _watches: MutableMap<String, WatchRunnerFunction> = mutableMapOf()
+    private var _monitors: MutableList<Monitor<out HasMetadata>> = mutableListOf()
     private var _permission: Permissions? by setMaxOnce(permissions)
 
     @DslMarkerBlock
@@ -27,24 +26,18 @@ class ServerBuilder(permissions: Permissions?) {
     }
 
     @DslMarkerBlock
-    fun aggregation(name: String, runner: AggregationRunnerFunction) {
-        _aggregations += Aggregation(name, runner)
-    }
-
-    @DslMarkerBlock
-    fun watch(name: String, runner: WatchRunnerFunction) {
-        _watches[name] = runner
+    fun <T : HasMetadata> monitor(monitorName: String, watch: WatchFunction<T>, behavior: WatchBehaviorFunction<T>) {
+        _monitors += Monitor(monitorName, watch, behavior)
     }
 
     internal fun build(name: String): Server {
-        return Server(name, _webhooks, _aggregations, _permission, _watches)
+        return Server(name, _webhooks, _monitors, _permission)
     }
 }
 
 class Server(
     val name: String,
     val webhooks: List<Webhook>,
-    val aggregations: List<Aggregation>,
+    val monitors: List<Monitor<out HasMetadata>>,
     val permissions: Permissions?,
-    val watches: MutableMap<String, WatchRunnerFunction>
 )

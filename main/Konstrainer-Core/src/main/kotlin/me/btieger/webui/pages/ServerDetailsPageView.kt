@@ -4,7 +4,7 @@ import kotlinx.html.*
 
 import me.btieger.domain.DslFullDetailedDto
 
-fun DIV.serverDetails(model: DslFullDetailedDto) {
+fun DIV.serverDetailsView(model: DslFullDetailedDto) {
     div("card") {
         div("card-header") {
             +"${model.name}, ID: ${model.id.toString()}"

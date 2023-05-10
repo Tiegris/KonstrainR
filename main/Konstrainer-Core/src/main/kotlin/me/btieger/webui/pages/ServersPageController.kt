@@ -24,7 +24,7 @@ fun Application.configureServersPageController() {
                 val model = ServersPageModel(dslService.all())
                 call.respondHtml {
                     siteLayout {
-                        servers(model)
+                        serversView(model)
                     }
                 }
             }

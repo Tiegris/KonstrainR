@@ -1,6 +1,8 @@
 package me.btieger.webui
 
 import kotlinx.html.*
+import me.btieger.webui.pages.MONITORS_PATH
+import me.btieger.webui.pages.SERVERS_PATH
 
 fun HTML.siteLayout(renderBody: DIV.()->Unit) {
     head {
@@ -16,13 +18,13 @@ fun HTML.siteLayout(renderBody: DIV.()->Unit) {
             nav(classes = "navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3") {
                 ul(classes = "navbar-nav flex-grow-1") {
                     li(classes = "nav-item") {
-                        a(classes = "nav-link text-dark", href = "/ui/servers") {
+                        a(classes = "nav-link text-dark", href = SERVERS_PATH) {
                             +"Servers"
                         }
                     }
                     li(classes = "nav-item") {
-                        a(classes = "nav-link text-dark", href = "/ui/aggregations") {
-                            +"Aggregations"
+                        a(classes = "nav-link text-dark", href = MONITORS_PATH) {
+                            +"Monitors"
                         }
                     }
                 }

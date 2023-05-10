@@ -16,7 +16,6 @@ import io.ktor.server.testing.*
 import me.btieger.dsl.Rule
 import me.btieger.dsl.Server
 import me.btieger.dsl.Status
-import me.btieger.dsl.WhConf
 import me.btieger.plugins.*
 
 class ApplicationTest {

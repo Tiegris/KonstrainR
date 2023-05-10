@@ -18,29 +18,15 @@ fun Application.configureRouting(server: Server, k8s: KubernetesClient) {
         get("/") {
             call.respondText("OK")
         }
-        if (server.aggregations.isNotEmpty()) {
+        if (server.monitors.isNotEmpty()) {
             get("/aggregator") {
-                val watches: Watches =
-                    server.watches.mapValues { WatchRunner(k8s).run(it.value) }
                 val response = buildJsonObject {
                     put("server", server.name)
-                    putJsonArray("aggregations") {
-                        server.aggregations.forEach {
+                    putJsonArray("monitors") {
+                        server.monitors.forEach {
                             addJsonObject {
-                                put("name", it.name)
-                                AggregationRunner(k8s, watches).let { runner ->
-                                    it.runner.invoke(runner)
-                                    putJsonArray("markings") {
-                                        runner.markings.forEach { marking ->
-                                            addJsonObject {
-                                                put("name", marking.named)
-                                                put("namespace", marking.namespace)
-                                                put("status", marking.status.string)
-                                                put("comment", marking.comment)
-                                            }
-                                        }
-                                    }
-                                }
+                                put("name", it.monitorName)
+                                put("markedResources", Json.encodeToJsonElement(it.evaluate(k8s)))
                             }
                         }
                     }

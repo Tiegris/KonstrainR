@@ -18,7 +18,7 @@ class Dsl(id: EntityID<Int>) : Entity<Int>(id) {
     var jar by Dsls.jar
     var serverStatus by Dsls.serverStatus
 
-    var hasAggregators by Dsls.hasAggregators
+    var hasMonitors by Dsls.hasMonitors
     var hasWebhooks by Dsls.hasWebhooks
 }
 
@@ -32,7 +32,7 @@ object Dsls : IntIdTable() {
     val jar = blob("jar").nullable()
     val serverStatus = enumeration("serverStatus", ServerStatus::class).default(ServerStatus.Down)
 
-    val hasAggregators = bool("hasAggregators").nullable()
+    val hasMonitors = bool("hasAggregators").nullable()
     val hasWebhooks = bool("hasWebhooks").nullable()
 }
 

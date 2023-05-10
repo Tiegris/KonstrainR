@@ -17,7 +17,6 @@ import me.btieger.persistance.tables.ServerStatus
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
-import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.statements.api.ExposedBlob
 import org.jetbrains.exposed.sql.update
 import org.slf4j.LoggerFactory
@@ -51,7 +50,7 @@ class DslServiceImpl(
     }
 
     override suspend fun allWithAggregators() = DatabaseFactory.dbQuery {
-        Dsl.all().filter {( it.hasAggregators == true) and (it.serverStatus == ServerStatus.Up) }.map { it.name }
+        Dsl.all().filter {( it.hasMonitors == true) and (it.serverStatus == ServerStatus.Up) }.map { it.name }
     }
 
     override suspend fun getJar(id: Int) = DatabaseFactory.dbQuery {
@@ -109,7 +108,7 @@ class DslServiceImpl(
             it[errorMessage] = null
             it[jobSecret] = null
             it[buildStatus] = BuildStatus.Ready
-            it[hasAggregators] = server.aggregations.isNotEmpty()
+            it[hasMonitors] = server.monitors.isNotEmpty()
             it[hasWebhooks] = server.webhooks.isNotEmpty()
         } > 0
         if (!success)
