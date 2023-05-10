@@ -35,6 +35,9 @@ val server = server("basic-diagnostics", permissions) {
         mark( "No probes") {
             item.spec.template.spec.containers.any {it.livenessProbe == null}
         }
+        mark("Has long history") {
+            item.spec.revisionHistoryLimit > 4
+        }
     }
 
     monitor("Services", {kubectl.services().inAnyNamespace().list()}) {
