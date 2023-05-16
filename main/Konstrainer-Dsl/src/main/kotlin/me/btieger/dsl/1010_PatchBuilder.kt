@@ -19,7 +19,16 @@ class PatchBuilder {
     }
 
     @DslMarkerBlock
-    fun add(path: String, value: JsonObject) {
+    fun add(path: String, value: Number) {
+        _patches += buildJsonObject {
+            put("op", "add")
+            put("path", path)
+            put("value", value)
+        }
+    }
+
+    @DslMarkerBlock
+    fun add(path: String, value: JsonElement) {
         _patches += buildJsonObject {
             put("op", "add")
             put("path", path)
@@ -45,7 +54,16 @@ class PatchBuilder {
     }
 
     @DslMarkerBlock
-    fun replace(path: String, value: JsonObject) {
+    fun replace(path: String, value: Number) {
+        _patches += buildJsonObject {
+            put("op", "replace")
+            put("path", path)
+            put("value", value)
+        }
+    }
+
+    @DslMarkerBlock
+    fun replace(path: String, value: JsonElement) {
         _patches += buildJsonObject {
             put("op", "replace")
             put("path", path)

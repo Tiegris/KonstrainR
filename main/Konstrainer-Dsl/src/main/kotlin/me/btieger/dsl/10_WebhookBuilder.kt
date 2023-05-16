@@ -115,6 +115,8 @@ object CONNECT : Operation("CONNECT")
 abstract class ApiGroups(string: String) : Type(string)
 @DslMarkerConstant
 object CORE : ApiGroups("")
+@DslMarkerConstant
+object APPS : ApiGroups("apps")
 
 abstract class ApiVersions(string: String) : Type(string)
 @DslMarkerConstant
@@ -144,8 +146,7 @@ object FAIL : FailurePolicy("Fail")
 
 @DslMarkerConstant
 object ANY : Type("*")
-@DslMarkerConstant
-class CUSTOM(string: String) : Type(string)
+
 
 class Webhook (
     val operations: List<String>,

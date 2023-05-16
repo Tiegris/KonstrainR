@@ -1,9 +1,10 @@
 package me.btieger.builtins
 
+import kotlinx.serialization.json.JsonPrimitive
 import me.btieger.dsl.*
 
 val defaults = webhookConfigBundle {
-    apiGroups(CORE)
+    apiGroups(APPS)
     apiVersions(ANY)
     resources(DEPLOYMENTS)
     namespaceSelector {
@@ -25,7 +26,7 @@ val webhookServer = server("basic-webhook-rules") {
                 if (revisionHistoryLimit > 4) warning("RevisionHistoryLimit was set to 4, from original: $revisionHistoryLimit")
             }
             patch {
-                if (revisionHistoryLimit > 4) replace("spec/revisionHistoryLimit", "4")
+                if (revisionHistoryLimit > 4) replace("/spec/revisionHistoryLimit", 4)
             }
         }
     }
