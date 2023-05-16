@@ -8,7 +8,9 @@ class WarningsBuilder {
         _warnings += warning
     }
 
-    internal fun build(): List<String> {
-        return _warnings
+    internal fun build(): MutableList<String>? {
+        return if (_warnings.isNotEmpty())
+            _warnings
+        else null
     }
 }

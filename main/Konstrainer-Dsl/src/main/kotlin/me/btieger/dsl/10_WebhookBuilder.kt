@@ -17,9 +17,6 @@ class WebhookBuilder(defaults: WebhookConfigBundle) {
     @DslMarkerVerb5
     var logResponse by setExactlyOnce(defaults.logResponse ?: false)
 
-    @DslMarkerVerb5
-    var path: String by setExactlyOnce()
-
     private var behavior: WebhookBehaviorProvider by setExactlyOnce()
 
     @DslMarkerBlock
@@ -93,7 +90,7 @@ class WebhookBuilder(defaults: WebhookConfigBundle) {
         val namespaceSelector = _namespaceSelector
         val failurePolicy = _failurePolicy
         val _name = validateWhName(name)
-        val _path = validatePath(path)
+        val _path = validatePath(name)
 
         return Webhook(
             operations, apiGroups, apiVersion, resources, scope,

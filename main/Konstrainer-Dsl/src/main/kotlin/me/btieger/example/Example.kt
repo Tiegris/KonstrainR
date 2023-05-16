@@ -18,7 +18,7 @@ val defaults = webhookConfigBundle {
     }
     failurePolicy(FAIL)
     logRequest = true
-    logResponse = true
+    logResponse = false
 }
 
 val permissions = permissions {
@@ -31,14 +31,7 @@ val permissions = permissions {
 
 val server = server("example-server", permissions) {
 
-    monitor("All deployments", {kubectl.apps().deployments().inAnyNamespace().list()}) {
-        mark( "Has no resources") {
-            item.spec.template.spec.containers.any { it.resources.limits.isEmpty() || it.resources.requests.isEmpty() }
-        }
-    }
-
     webhook("create-pod", defaults) {
-        path = "/create-pod"
         operations(CREATE, UPDATE)
         behavior {
             val rejectLabel = request jqx "/object/metadata/labels/reject" parseAs bool
@@ -58,7 +51,6 @@ val server = server("example-server", permissions) {
     }
 
     webhook("delete-pod", defaults) {
-        path = "/delete-pod"
         operations(DELETE)
         behavior {
             val podName = request jqx "/oldObject/metadata/name" parseAs string

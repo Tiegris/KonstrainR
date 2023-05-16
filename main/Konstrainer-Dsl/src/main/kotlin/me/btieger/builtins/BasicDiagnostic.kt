@@ -23,7 +23,7 @@ val permissions = permissions {
     }
 }
 
-val server = server("basic-diagnostics", permissions) {
+val diagnosticsServer = server("basic-diagnostics", permissions) {
 
     monitor("Deployments", {kubectl.apps().deployments().inAnyNamespace().list()}) {
         mark( "Has no resources") {

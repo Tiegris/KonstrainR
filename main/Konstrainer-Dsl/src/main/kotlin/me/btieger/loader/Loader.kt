@@ -1,14 +1,16 @@
 package me.btieger.loader
 
 import me.btieger.dsl.Server
+import java.lang.reflect.Method
 import java.net.URL
 import java.net.URLClassLoader
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.io.path.deleteIfExists
 import kotlin.io.path.writeBytes
+import kotlin.reflect.typeOf
 
-class Loader(private val className: String, private val fieldGetterName: String = "getServer") {
+class Loader(private val className: String) {
 
     fun loadServer(jarPath: String) = loadServer(URL(jarPath))
 
@@ -19,8 +21,17 @@ class Loader(private val className: String, private val fieldGetterName: String 
         this.javaClass.classLoader
     ).use {
         val loadedClass = Class.forName(className, true, it)
-        val getServerMethod = loadedClass.getDeclaredMethod(fieldGetterName)
-        getServerMethod.invoke(null) as Server
+        var getServerMethod: Method? = null
+        for (item in loadedClass.methods) {
+            if (item.returnType == Server::class.javaObjectType) {
+                getServerMethod = item
+                break
+            }
+        }
+        if (getServerMethod != null)
+            getServerMethod.invoke(null) as Server
+        else
+            throw Exception("Could not load server from file.")
     }
 
     fun loadServer(jarBytes: ByteArray): Server {
