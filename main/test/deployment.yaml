@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: demo-myapp
-        image: depian:11
+        image: debian:11
         resources:
           limits:
             memory: "128Mi"
