@@ -15,7 +15,7 @@ val loggerDefaults = webhookConfigBundle {
 }
 
 val loggingServer = server("basic-webhook-rules") {
-    
+
     webhook("log-deployments") {
         apiGroups(APPS, CORE)
         apiVersions(ANY)

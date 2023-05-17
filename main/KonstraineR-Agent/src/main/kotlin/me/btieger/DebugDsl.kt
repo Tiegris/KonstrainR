@@ -1,7 +1,9 @@
-package me.btieger.builtins
+package me.btieger
 
-import kotlinx.serialization.json.*
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
 import me.btieger.dsl.*
+
 
 val defaults = webhookConfigBundle {
     operations(CREATE, UPDATE)
@@ -14,22 +16,10 @@ val defaults = webhookConfigBundle {
         }
     }
     failurePolicy(FAIL)
-    logRequest = true
-    logResponse = true
 }
 
-val webhookServer = server("basic-webhook-rules") {
-    webhook("cut-history", defaults) {
-        behavior {
-            val revisionHistoryLimit = (request jqx "/object/spec/revisionHistoryLimit" parseAs int) ?: 10
-            warnings {
-                if (revisionHistoryLimit > 4) warning("RevisionHistoryLimit was set to 4, from original: $revisionHistoryLimit")
-            }
-            patch {
-                if (revisionHistoryLimit > 4) replace("/spec/revisionHistoryLimit", 4)
-            }
-        }
-    }
+val debugServer = server("example-server") {
+
     webhook("deny-no-resources", defaults) {
         behavior {
             val containers = (request jqx "/object/spec/template/spec/containers").jsonArray

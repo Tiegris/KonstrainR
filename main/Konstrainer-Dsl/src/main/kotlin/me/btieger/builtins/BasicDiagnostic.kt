@@ -27,7 +27,7 @@ val diagnosticsServer = server("basic-diagnostics", permissions) {
 
     monitor("Deployments", {kubectl.apps().deployments().inAnyNamespace().list()}) {
         mark( "Has no resources") {
-            item.spec.template.spec.containers.any { it.resources.limits.isEmpty() || it.resources.requests.isEmpty() }
+            item.spec.template.spec.containers.any { it.resources.limits.isNullOrEmpty() || it.resources.requests.isNullOrEmpty() }
         }
         mark( "No node selector") {
             item.spec.template.spec.nodeSelector.isEmpty()
