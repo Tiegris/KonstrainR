@@ -1,28 +1,8 @@
-package me.btieger
+package me.btieger.commonLibrary
 
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.encodeToStream
-import java.io.ByteArrayOutputStream
-import java.util.*
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 import kotlin.reflect.full.memberProperties
-
-@OptIn(ExperimentalSerializationApi::class)
-fun JsonArray.toBase64(): String {
-    val os = ByteArrayOutputStream()
-    Json.encodeToStream(this, os)
-    return Base64.getEncoder().encodeToString(os.toByteArray())
-}
-
-fun JsonObject.toJsonString(): String {
-    return Json.encodeToString(this)
-}
-
 
 open class EnvVarSettings(private val prefix: String) {
     fun loadAll() {
@@ -61,14 +41,3 @@ open class EnvVarSettings(private val prefix: String) {
         }
     }
 }
-
-fun String.toScreamingCamelCase() = StringBuilder().apply {
-    for (c in this@toScreamingCamelCase) {
-        if (c.isUpperCase()) {
-            append('_')
-            append(c)
-        } else {
-            append(c.uppercaseChar())
-        }
-    }
-}.toString()

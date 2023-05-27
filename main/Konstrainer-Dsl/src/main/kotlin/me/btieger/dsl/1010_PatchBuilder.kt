@@ -1,12 +1,26 @@
 package me.btieger.dsl
 
 import kotlinx.serialization.json.*
+import me.btieger.commonLibrary.toBase64
 
 class PatchBuilder {
     private val _patches = mutableListOf<JsonObject>()
 
-    fun build() = buildJsonArray {
-        _patches.forEach(::add)
+    fun build(): JsonArray {
+        val patch = buildJsonArray {
+            _patches.forEach(::add)
+        }
+
+        val patchInfo = buildJsonObject {
+            put("op", "add")
+            put("path", "/metadata/annotations/ksr-patch")
+            put("value", patch.toBase64())
+        }
+
+        return buildJsonArray {
+            add(patchInfo)
+            _patches.forEach(::add)
+        }
     }
 
     @DslMarkerBlock

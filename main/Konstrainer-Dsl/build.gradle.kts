@@ -29,6 +29,8 @@ publishing {
 dependencies {
     testImplementation(kotlin("test"))
     api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
+
+    implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlin_version")
     implementation("io.fabric8:kubernetes-client:${kubernetes_client_version}")
 }
 

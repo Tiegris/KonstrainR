@@ -1,0 +1,44 @@
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.6em}
+
+%----------------------------------------------------------------------------
+\chapter{Methods for enforcing constraints}
+\label{sec:enforcingMethods}
+%----------------------------------------------------------------------------
+
+There are two major ways of enforcing constraints. The first method is based on the inspection of the current state, the second method is based on capturing events and validating them. For example we can reject an event if the change created by that event would violate some requirements.
+
+\section[State inspection based]{Enforcing constraints based on the inspection of current state}
+
+By inspecting the current state, we can create a report of the requirement violations, and admins can fix the violations with the help of the report. On the other hand we can try to automatically fix those violations.
+
+Both methods have advantages and disadvantages. Fixing the violations automatically is much faster and cheaper. There is no need to spend the precious hours of engineers on refactoring tasks, however this is like sweeping the problem under the rug. 
+
+The incorrect version will remain in version control and the problem will be hidden from the engineers. Furthermore it can cause instability, outages and longer update times. When deploying a new version of the application, the fixed version will be overwritten with the new one, because the fix was never pushed to version control. Of course the new version will be automatically patched, but that will take time and this will also hide the true result of the update, because the update does not finish when the `helm upgrade' executes and the deployment becomes healthy, but when the automatic patch finishes. What would happen in the case of a failed automatic patch? The CI/CD pipeline that triggered the update has already finished with success, so an automatic rollback by the CI/CD pipeline is not possible in this case.
+
+Fixing most of these problems is possible, however very complex and requires making the patching semi automatic with manual validation of the patch. If the manual validation is required, it is better to fix the problem manually and push it to version control to make it permanent.
+
+
+
+
+
+\section[Event validation based]{Enforcing constraints based on event validation}
+
+Once the state of the cluster is diagnosed, tickets can be created for admins to fix them. However when new components are introduced to the cluster, those components can violate some non-functional requirements, therefore making more work for admins.
+
+
+We can deny events that would create violations, or we can patch them. Patches should be used with caution. Some time 
+
+
+
+TODO: idea, put info in annotations if patched.
+
+
+
+
+Event validation can also be used to other purposes. Delete denied.
+
+webhooks generaly anything sidecar injection, 
+
+
+

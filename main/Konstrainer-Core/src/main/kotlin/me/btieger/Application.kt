@@ -5,6 +5,7 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.callloging.*
 import io.ktor.server.webjars.*
+import me.btieger.commonLibrary.EnvVarSettings
 import me.btieger.controllers.dslController
 import me.btieger.controllers.echoController
 import me.btieger.controllers.serverController
