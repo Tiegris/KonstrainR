@@ -4,9 +4,9 @@ function log() {
     echo "$1" >> $logsfile
 }
 
-export base_url="http://${KSR_CORE_BASE_URL}:8080/api/v1/dsls"
-export dsl_id="${KSR_DSL_ID}"
-export secret="${KSR_SECRET}"
+base_url="http://${KSR_CORE_BASE_URL}:8080/api/v1/dsls"
+dsl_id="${KSR_DSL_ID}"
+secret="${KSR_SECRET}"
 
 logsfile='/app/logs'
 file='/app/framework/lib/src/main/kotlin/me/btieger/DslInstance.kt'
@@ -16,15 +16,14 @@ echo "=== BEGIN ERROR REPORT ===" > $logsfile
 
 log "BASE_URL = $base_url"
 log "DSL_ID = $dsl_id"
-log "SECRET = $secret"
 
 function try_do() {
-    wget "${base_url}/${dsl_id}/file" -O "${file}" && log "Download done"
-    sed -i 's/package .*/package me.btieger/' "${file}" && log "Sed done"
+    wget "${base_url}/${dsl_id}/file" -O "${file}" && log "Download done" || log "Download failed" && return 1
+    sed -i 's/package .*/package me.btieger/' "${file}" && log "Sed done" || log "Sed failed" && return 1
     cd /app/framework
-    ./gradlew jar >> $logsfile
+    ./gradlew jar >> $logsfile && log "Build done" || log "Build failed" && return 1
     log "Compilation done"
-    curl -F filename="${jar}" -F upload=@${jar} -H "Authorization: ${secret}" -H "Content-Type: application/java-archive" "${base_url}/${dsl_id}/jar"
+    curl -F filename="${jar}" -F upload=@${jar} -H "Authorization: ${secret}" -H "Content-Type: application/java-archive" "${base_url}/${dsl_id}/jar" || log "Upload failed" && return 1
 }
 
 function error_report() {
