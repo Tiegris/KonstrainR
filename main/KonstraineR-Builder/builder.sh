@@ -18,12 +18,12 @@ log "BASE_URL = $base_url"
 log "DSL_ID = $dsl_id"
 
 function try_do() {
-    wget "${base_url}/${dsl_id}/file" -O "${file}" && log "Download done" || (log "Download failed" && error_report)
-    sed -i 's/package .*/package me.btieger/' "${file}" && log "Sed done" || (log "Sed failed" && error_report)
+    wget "${base_url}/${dsl_id}/file" -O "${file}" && log "Download done" || { log "Download failed" && error_report; }
+    sed -i 's/package .*/package me.btieger/' "${file}" && log "Sed done" || { log "Sed failed" && error_report; }
     cd /app/framework
-    ./gradlew jar >> $logsfile && log "Build done" || (log "Build failed" && error_report)
+    ./gradlew jar >> $logsfile 2>&1 && log "Build done" || { log "Build failed" && error_report; }
     log "Compilation done"
-    curl -F filename="${jar}" -F upload=@${jar} -H "Authorization: ${secret}" -H "Content-Type: application/java-archive" "${base_url}/${dsl_id}/jar" || (log "Upload failed" && error_report)
+    curl -F filename="${jar}" -F upload=@${jar} -H "Authorization: ${secret}" -H "Content-Type: application/java-archive" "${base_url}/${dsl_id}/jar" || { log "Upload failed" && error_report; }
 }
 
 function error_report() {
@@ -32,4 +32,4 @@ function error_report() {
     exit 1
 }
 
-try_do
+try_do || error_report
