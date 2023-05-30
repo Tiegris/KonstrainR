@@ -17,7 +17,7 @@ fun DIV.serverDetailsView(model: DslFullDetailedDto) {
                     p { +"Build start timestamp $it" }
                 }
                 model.buildError?.let {
-                    p { +"Build error $it" }
+                    p("multiline") { +it }
                 }
             }
             model.serverStatus?.let {
