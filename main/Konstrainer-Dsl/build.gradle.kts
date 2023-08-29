@@ -5,8 +5,8 @@ val kubernetes_client_version: String by project
 
 
 plugins {
-    kotlin("jvm") version "1.8.20"
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.8.20"
+    kotlin("jvm")
+    id("org.jetbrains.kotlin.plugin.serialization")
     `maven-publish`
 }
 

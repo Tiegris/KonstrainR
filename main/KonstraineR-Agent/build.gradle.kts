@@ -4,9 +4,9 @@ val logback_version: String by project
 val kubernetes_client_version: String by project
 
 plugins {
-    kotlin("jvm") version "1.8.20"
-    id("io.ktor.plugin") version "2.3.0"
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.8.20"
+    kotlin("jvm")
+    id("io.ktor.plugin")
+    id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 group = "me.btieger"
