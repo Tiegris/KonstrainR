@@ -49,18 +49,23 @@ open class KonstrainerTestBase : KoinTest {
     val koinTestRule = KoinTestRule.create {
         val config = Config().apply {
             mockEnvVar("KSR_SERVICE_NAME", "localhost:8080")
+            mockEnvVar("KSR_HOME", "./build")
         }.apply(Config::loadAll)
+
+        modules(myModules(config))
+        DatabaseFactory.init(config)
+    }
+
+    open fun myModules(config: Config) = module {
         val k8sMock = declareMock<KubernetesClient>()
         every { k8sMock.create(any()) } just runs
-        modules(module {
-            single(createdAtStart = true) { config }
-            single<KubernetesClient>(createdAtStart = true) { k8sMock }
-            single<ServerService>(createdAtStart = true) { ServerServiceImpl(get(), get(), get(), get()) }
-            single<DslService>(createdAtStart = true) { DslServiceImpl(get(), get(), get(), get()) }
-            single(createdAtStart = true) { HelmService(get()) }
-            single<SslService>(createdAtStart = true) { SslServiceMockImpl() }
-        })
-        DatabaseFactory.init(config)
+
+        single(createdAtStart = true) { config }
+        single<KubernetesClient>(createdAtStart = true) { k8sMock }
+        single<ServerService>(createdAtStart = true) { ServerServiceImpl(get(), get(), get(), get()) }
+        single<DslService>(createdAtStart = true) { DslServiceImpl(get(), get(), get(), get()) }
+        single(createdAtStart = true) { HelmService(get()) }
+        single<SslService>(createdAtStart = true) { SslServiceMockImpl() }
     }
 
 }
