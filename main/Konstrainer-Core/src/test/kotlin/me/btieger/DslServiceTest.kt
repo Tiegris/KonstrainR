@@ -7,7 +7,7 @@ import me.btieger.services.DslService
 
 import org.koin.test.inject
 
-class DslServiceTest : KonstrainerTest() {
+class DslServiceTest : KonstrainerTestBase() {
 
     private val dslService by inject<DslService>()
 

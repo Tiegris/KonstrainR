@@ -27,7 +27,7 @@ import org.koin.test.KoinTestRule
 import org.koin.test.mock.MockProviderRule
 import org.koin.test.mock.declareMock
 
-open class KonstrainerTest : KoinTest {
+open class KonstrainerTestBase : KoinTest {
 
     @KtorDsl
     fun konstrainerTest(block: suspend ApplicationTestBuilder.() -> Unit) = testApplication {

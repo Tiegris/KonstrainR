@@ -6,8 +6,8 @@ import io.ktor.client.statement.*
 import kotlin.test.*
 import me.btieger.controllers.apiVersion
 
-const val dslsUrlBase = "/api/$apiVersion/dsls"
-class ApplicationTest : KonstrainerTest() {
+class ApplicationTest : KonstrainerTestBase() {
+    val dslsUrlBase = "/api/$apiVersion/dsls"
 
     @Test
     fun testEcho() = konstrainerTest {
