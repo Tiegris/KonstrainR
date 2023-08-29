@@ -6,6 +6,7 @@ val h2_version: String by project
 val kubernetes_dsl_version: String by project
 val kubernetes_client_version: String by project
 val koin_version: String by project
+val mockkVersion: String by project
 
 plugins {
     kotlin("jvm") version "1.8.20"
@@ -58,6 +59,9 @@ dependencies {
 
     testImplementation("io.ktor:ktor-server-tests-jvm:$ktor_version")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
+    testImplementation("io.insert-koin:koin-test:$koin_version")
+    testImplementation("io.insert-koin:koin-test-junit4:$koin_version")
+    testImplementation("io.mockk:mockk:${mockkVersion}")
 
     implementation("org.jetbrains.exposed:exposed-core:$exposed_version")
     implementation("org.jetbrains.exposed:exposed-dao:$exposed_version")

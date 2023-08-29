@@ -5,6 +5,20 @@ import kotlin.reflect.KProperty
 import kotlin.reflect.full.memberProperties
 
 open class EnvVarSettings(private val prefix: String) {
+    private var getEnv: (String) -> String? = System::getenv
+
+    private val envVarMocks: MutableMap<String, String> = mutableMapOf()
+    private fun interceptedGetEnv(key: String): String? {
+        if (key in envVarMocks)
+            return envVarMocks[key]
+        return System.getenv(key)
+    }
+
+    fun mockEnvVar(key: String, value: String) {
+        getEnv = ::interceptedGetEnv
+        envVarMocks[key] = value
+    }
+
     fun loadAll() {
         this::class.memberProperties.forEach {
             it.call(this)
@@ -35,7 +49,7 @@ open class EnvVarSettings(private val prefix: String) {
         override fun getValue(thisRef: Any, property: KProperty<*>): T  {
             val _key = property.key()
             if (cache == null) {
-                cache = System.getenv(_key)?.transform() ?: default
+                cache = getEnv(_key)?.transform() ?: default
             }
             return cache ?: throw Exception("Env var: `${_key}` not set!")
         }

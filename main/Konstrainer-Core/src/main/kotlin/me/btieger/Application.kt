@@ -31,12 +31,9 @@ class Config : EnvVarSettings("KSR_") {
     val agentSpawnWaitMaxRetries by int(5)
     val enableWebUi by boolean(true)
     val home by string("/app/home")
-
-    init {
-        loadAll()
-    }
 }
-private val config = Config()
+
+private val config = Config().apply(Config::loadAll)
 
 fun main() {
     embeddedServer(Netty,

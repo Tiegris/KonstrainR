@@ -11,6 +11,7 @@ import me.btieger.bytesStable
 import me.btieger.loader.Loader
 import me.btieger.services.helm.HelmService
 import me.btieger.persistance.DatabaseFactory
+import me.btieger.persistance.DatabaseFactory.dbQuery
 import me.btieger.services.helm.create
 import me.btieger.persistance.tables.Dsl
 import me.btieger.persistance.tables.ServerStatus
@@ -37,7 +38,7 @@ class ServerServiceImpl(
 ) : ServerService {
     private val logger: Logger = LoggerFactory.getLogger("ServerService")!!
 
-    private suspend fun getDsl(id: Int) = DatabaseFactory.dbQuery {
+    private suspend fun getDsl(id: Int) = dbQuery {
         val dsl = Dsl.findById(id) ?: throw NotFoundException()
         if (dsl.buildStatus != BuildStatus.Ready || dsl.jar == null) throw IllegalStateException("Dsl not ready")
         if (dsl.serverStatus == ServerStatus.Up) throw IllegalStateException("Server is already up")
@@ -45,12 +46,12 @@ class ServerServiceImpl(
         return@dbQuery dsl.jar!!.bytesStable
     }
 
-    private suspend fun setDslStatus(id: Int, status: ServerStatus) = DatabaseFactory.dbQuery {
+    private suspend fun setDslStatus(id: Int, status: ServerStatus) = dbQuery {
         val dsl = Dsl.findById(id) ?: throw NotFoundException()
         dsl.serverStatus = status
     }
 
-    private suspend fun setAllDown() = DatabaseFactory.dbQuery {
+    private suspend fun setAllDown() = dbQuery {
         Dsls.update {
             it[Dsls.serverStatus] = ServerStatus.Down
         }

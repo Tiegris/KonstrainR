@@ -10,6 +10,7 @@ import me.btieger.services.helm.HelmService
 import me.btieger.services.helm.create
 import me.btieger.services.helm.resources.makeBuilderJob
 import me.btieger.persistance.DatabaseFactory
+import me.btieger.persistance.DatabaseFactory.dbQuery
 import me.btieger.persistance.tables.Dsl
 import me.btieger.persistance.tables.Dsls
 import me.btieger.persistance.tables.BuildStatus
@@ -45,33 +46,33 @@ class DslServiceImpl(
 ) : DslService {
     private val logger: Logger = LoggerFactory.getLogger("DslService")!!
 
-    override suspend fun all() = DatabaseFactory.dbQuery {
+    override suspend fun all() = dbQuery {
         Dsl.all().map(Dsl::toConciseDto)
     }
 
-    override suspend fun allWithAggregators() = DatabaseFactory.dbQuery {
+    override suspend fun allWithAggregators() = dbQuery {
         Dsl.all().filter {( it.hasMonitors == true) and (it.serverStatus == ServerStatus.Up) }.map { it.name }
     }
 
-    override suspend fun getJar(id: Int) = DatabaseFactory.dbQuery {
+    override suspend fun getJar(id: Int) = dbQuery {
         // jar.bytes throws exception, since Kotlin version update
         Dsl.findById(id)?.jar?.let { it.bytesStable }
     }
 
-    override suspend fun getFile(id: Int) = DatabaseFactory.dbQuery {
+    override suspend fun getFile(id: Int) = dbQuery {
         // jar.bytes throws exception, since Kotlin version update
         Dsl.findById(id)?.let { it.file.bytesStable }
     }
 
-    override suspend fun getDetails(id: Int) = DatabaseFactory.dbQuery {
+    override suspend fun getDetails(id: Int) = dbQuery {
         Dsl.findById(id)?.let(Dsl::toDetailedDto)
     }
 
-    override suspend fun getFullDetails(id: Int) = DatabaseFactory.dbQuery {
+    override suspend fun getFullDetails(id: Int) = dbQuery {
         Dsl.findById(id)?.let(Dsl::toFullDetailedDto)
     }
 
-    override suspend fun createDsl(name: String, content: ByteArray) = DatabaseFactory.dbQuery {
+    override suspend fun createDsl(name: String, content: ByteArray) = dbQuery {
         val secretBytes = ByteArray(64) // 512 bit token
         SecureRandom().nextBytes(secretBytes)
         val secretEncoded = String(Base64.getEncoder().encode(secretBytes))
@@ -95,7 +96,7 @@ class DslServiceImpl(
         result.toDetailedDto()
     }
 
-    override suspend fun setJar(id: Int, secret: String, jarBytes: ByteArray): Unit = DatabaseFactory.dbQuery {
+    override suspend fun setJar(id: Int, secret: String, jarBytes: ByteArray): Unit = dbQuery {
         val secretBytes = Base64.getDecoder().decode(secret)
         //TODO review security
 
@@ -117,7 +118,7 @@ class DslServiceImpl(
             logger.info("Successful JAR upload, dsl.id: `{}`", id)
     }
 
-    override suspend fun setError(id: Int, secret: String, errorMessage: String): Unit = DatabaseFactory.dbQuery {
+    override suspend fun setError(id: Int, secret: String, errorMessage: String): Unit = dbQuery {
         val secretBytes = Base64.getDecoder().decode(secret)
         val success= Dsls.update({ (Dsls.id eq id) and Dsls.jar.isNull() and (Dsls.jobSecret eq secretBytes) }) {
             it[Dsls.errorMessage] = errorMessage
@@ -130,7 +131,7 @@ class DslServiceImpl(
             logger.info("Successful build error report upload, dsl.id: `{}`", id)
     }
 
-    override suspend fun deleteDsl(id: Int) = DatabaseFactory.dbQuery {
+    override suspend fun deleteDsl(id: Int) = dbQuery {
         serverService.stop(id)
         val success = Dsls.deleteWhere { Dsls.id eq id } > 0
         if (!success)
