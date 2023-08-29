@@ -1,9 +1,7 @@
 package me.btieger.builtins
 
-import io.fabric8.kubernetes.api.model.PodList
-import io.fabric8.kubernetes.api.model.ServiceList
-import io.fabric8.kubernetes.api.model.apps.DeploymentList
-import me.btieger.dsl.*
+import me.btieger.dsl.permissions
+import me.btieger.dsl.server
 
 val permissions = permissions {
     rule {

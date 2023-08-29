@@ -90,7 +90,7 @@ class ServerServiceImpl(
                 k8sclient.create(dep)
                 k8sclient.create(svc)
                 logger.info("Waiting for agent to start, dsl.id: `{}`", id)
-                var retryCounter = 0;
+                var retryCounter = 0
                 while (true) {
                     try {
                         k8sclient.resource(dep).waitUntilCondition({
