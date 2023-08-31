@@ -9,17 +9,9 @@ import io.fabric8.kubernetes.api.model.rbac.ClusterRoleBinding
 import me.btieger.dsl.Server
 import me.btieger.services.helm.HelmService
 
-class RbacBundle(val clusterRole: ClusterRole, val clusterRoleBinding: ClusterRoleBinding, val serviceAccount: ServiceAccount)
+class RbacBundle(val clusterRoleBinding: ClusterRoleBinding, val serviceAccount: ServiceAccount)
 fun HelmService.rbac(server: Server, agentId: Int) =
-    server.permissions?.let {
-        val cr = ClusterRole().apply {
-            metadata(server.name, config.namespace, agentId)
-            rules = it.map { newPolicyRule {
-                apiGroups = it.apiGroups
-                resources = it.resources
-                verbs = it.verbs
-            } }
-        }
+    server.clusterRole?.let { clusterRoleName ->
         val crb = ClusterRoleBinding().apply {
             metadata(server.name, config.namespace, agentId)
             subjects = listOf(
@@ -31,14 +23,14 @@ fun HelmService.rbac(server: Server, agentId: Int) =
             )
             roleRef {
                 kind = "ClusterRole"
-                name = server.name
+                name = clusterRoleName
                 apiGroup = "rbac.authorization.k8s.io"
             }
         }
         val sa = ServiceAccount().apply {
             metadata(server.name, config.namespace, agentId)
         }
-        RbacBundle(cr, crb, sa)
+        RbacBundle(crb, sa)
     }
 
 

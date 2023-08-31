@@ -1,10 +1,5 @@
 package me.btieger.example
 
-import io.fabric8.kubernetes.api.model.HasMetadata
-import io.fabric8.kubernetes.api.model.KubernetesResourceList
-import io.fabric8.kubernetes.api.model.apps.DeploymentList
-import io.fabric8.kubernetes.client.KubernetesClient
-import io.fabric8.kubernetes.client.KubernetesClientBuilder
 import me.btieger.dsl.*
 
 val defaults = webhookConfigBundle {
@@ -21,15 +16,9 @@ val defaults = webhookConfigBundle {
     logResponse = false
 }
 
-val permissions = permissions {
-    rule {
-        apiGroups("apps")
-        resources("deployments")
-        verbs("get", "list")
-    }
-}
 
-val server = server("example-server", permissions) {
+val server = server("example-server") {
+    clusterRole = ReadAny
 
     webhook("create-pod", defaults) {
         operations(CREATE, UPDATE)

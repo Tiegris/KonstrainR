@@ -4,7 +4,6 @@ import io.fabric8.kubernetes.api.model.HasMetadata
 import io.fabric8.kubernetes.api.model.KubernetesResourceList
 import io.fabric8.kubernetes.client.KubernetesClient
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.*
 
 class WatchProvider(val kubectl: KubernetesClient)
 typealias WatchFunction<T> = WatchProvider.() -> KubernetesResourceList<T>
@@ -14,31 +13,31 @@ class WatchBehaviorProvider<T>(val item: T) {
     internal val markers = mutableListOf<MarkerObject>()
 
     @DslMarkerBlock
-    fun mark(status: String, condition: MarkCondition) {
+    fun tag(status: String, condition: MarkCondition) {
         markers += MarkerObject( status, condition)
     }
 }
 typealias WatchBehaviorFunction<T> = WatchBehaviorProvider<T>.() -> Unit
 
 @Serializable
-class Mark(val fullResourceName: String, val name: String, val namespace: String, val marks: List<String>)
+class Tag(val fullResourceName: String, val name: String, val namespace: String, val marks: List<String>)
 
 class Monitor<T : HasMetadata>(val monitorName: String, private val watch: WatchFunction<T>, private val behavior: WatchBehaviorFunction<T>) {
-    fun evaluate(kubectl: KubernetesClient): List<Mark> {
+    fun evaluate(kubectl: KubernetesClient): List<Tag> {
         val resources = WatchProvider(kubectl).run(watch)
 
-        val result = mutableListOf<Mark>()
+        val result = mutableListOf<Tag>()
 
         resources.items.forEach { resource ->
             val provider = WatchBehaviorProvider(resource).apply(behavior)
-            val marks = mutableListOf<String>()
+            val tags = mutableListOf<String>()
             provider.markers.forEach { b ->
                 if (b.condition()) {
-                    marks += b.status
+                    tags += b.status
                 }
             }
-            if (marks.isNotEmpty()) {
-                result += Mark(resource.fullResourceName, resource.metadata.name, resource.metadata.namespace, marks)
+            if (tags.isNotEmpty()) {
+                result += Tag(resource.fullResourceName, resource.metadata.name, resource.metadata.namespace, tags)
             }
 
 

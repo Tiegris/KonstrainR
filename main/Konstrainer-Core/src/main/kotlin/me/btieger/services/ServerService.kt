@@ -83,7 +83,6 @@ class ServerServiceImpl(
                 val rbac = helm.rbac(server, id)
                 rbac?.let {
                     k8sclient.create(it.serviceAccount)
-                    k8sclient.create(it.clusterRole)
                     k8sclient.create(it.clusterRoleBinding)
                     dep.spec.template.spec.serviceAccountName = server.name
                 }
@@ -129,7 +128,6 @@ class ServerServiceImpl(
             k8sclient.apps().deployments().inNamespace(config.namespace).withLabel("agentId", "$id").delete()
             k8sclient.services().inNamespace(config.namespace).withLabel("agentId", "$id").delete()
             k8sclient.serviceAccounts().inNamespace(config.namespace).withLabel("agentId", "$id").delete()
-            k8sclient.rbac().clusterRoles().withLabel("agentId", "$id").delete()
             k8sclient.rbac().clusterRoleBindings().withLabel("agentId", "$id").delete()
             k8sclient.admissionRegistration().v1().mutatingWebhookConfigurations().withLabel("agentId", "$id").delete()
             true
@@ -155,7 +153,6 @@ class ServerServiceImpl(
         k8sclient.apps().deployments().inNamespace(config.namespace).withLabel("managedBy", "konstrainer").delete()
         k8sclient.services().inNamespace(config.namespace).withLabel("managedBy", "konstrainer").delete()
         k8sclient.serviceAccounts().inNamespace(config.namespace).withLabel("managedBy", "konstrainer").delete()
-        k8sclient.rbac().clusterRoles().withLabel("managedBy", "konstrainer").delete()
         k8sclient.rbac().clusterRoleBindings().withLabel("managedBy", "konstrainer").delete()
         k8sclient.admissionRegistration().v1().mutatingWebhookConfigurations().withLabel("managedBy", "konstrainer").delete()
         setAllDown()

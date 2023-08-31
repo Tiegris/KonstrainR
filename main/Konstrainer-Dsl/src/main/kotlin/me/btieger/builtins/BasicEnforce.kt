@@ -1,6 +1,7 @@
 package me.btieger.builtins
 
-import kotlinx.serialization.json.*
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
 import me.btieger.dsl.*
 
 val defaults = webhookConfigBundle {
@@ -19,6 +20,7 @@ val defaults = webhookConfigBundle {
 }
 
 val webhookServer = server("basic-webhook-rules") {
+
     webhook("cut-history", defaults) {
         behavior {
             val revisionHistoryLimit = (request jqx "/object/spec/revisionHistoryLimit" parseAs int) ?: 10
