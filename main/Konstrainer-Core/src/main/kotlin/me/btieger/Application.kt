@@ -61,7 +61,7 @@ fun main() {
             log = LoggerFactory.getLogger("ktor.application")
             sslConnector(
                 keyStore = sslClient.keyStore,
-                keyAlias = "RootCa",
+                keyAlias = "RootCA",
                 keyStorePassword = { sslClient.passwd },
                 privateKeyPassword = { sslClient.passwd }) {
                 keyStorePath = sslClient.keyStoreFile
