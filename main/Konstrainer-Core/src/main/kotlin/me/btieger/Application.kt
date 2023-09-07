@@ -1,5 +1,6 @@
 package me.btieger
 
+import io.fabric8.kubernetes.client.KubernetesClient
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.engine.*
@@ -16,8 +17,13 @@ import me.btieger.plugins.configureKoin
 import me.btieger.plugins.configureSerialization
 import me.btieger.plugins.configureAuthentication
 import me.btieger.services.cronjobs.launchCleaner
+import me.btieger.services.helm.HelmService
+import me.btieger.services.helm.create
+import me.btieger.services.helm.resources.rootCaSecret
+import me.btieger.services.ssl.SslService
 import me.btieger.webui.configureCSS
 import me.btieger.webui.configurePagesRouting
+import org.koin.ktor.ext.inject
 import org.slf4j.event.Level
 
 
@@ -58,6 +64,16 @@ fun Application.startup() {
 
     configureKoin(config)
     DatabaseFactory.init(config)
+
+    val helm by inject<HelmService>()
+    val ssl by inject<SslService>()
+    val k8s by inject<KubernetesClient>()
+
+    val secret = k8s.secrets().inNamespace(config.namespace).withName("konstrainer-root-ca").get()
+    if (secret == null) {
+        val rootCaSecret = helm.rootCaSecret(ssl.getRootCaAsPem())
+        k8s.create(rootCaSecret)
+    }
 
     configureSerialization()
     configureAuthentication(config)

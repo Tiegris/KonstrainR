@@ -12,6 +12,10 @@ logsfile='/app/logs'
 file='/app/framework/lib/src/main/kotlin/me/btieger/DslInstance.kt'
 jar='/app/framework/lib/build/libs/lib.jar'
 
+
+cp "/app/tls-cert/rootCa.pem" /usr/local/share/ca-certificates
+update-ca-certificates
+
 echo "=== BEGIN ERROR REPORT ===" > $logsfile
 
 log "BASE_URL = $base_url"

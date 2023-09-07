@@ -75,7 +75,7 @@ class ServerServiceImpl(
                 )
 
                 val cert = sslService.deriveCert(cname, altnames)
-                val secret = helm.secret(server, cert, id)
+                val secret = helm.secret(server, cert, sslService.getRootCaAsPem(), id)
                 k8sclient.create(secret)
 
                 val dep = helm.deployment(server, id)

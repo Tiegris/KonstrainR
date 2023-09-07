@@ -1,7 +1,9 @@
 package me.btieger.services.helm.resources
 
-import com.fkorotkov.kubernetes.batch.v1.*
 import com.fkorotkov.kubernetes.*
+import com.fkorotkov.kubernetes.batch.v1.metadata
+import com.fkorotkov.kubernetes.batch.v1.spec
+import com.fkorotkov.kubernetes.batch.v1.template
 import io.fabric8.kubernetes.api.model.batch.v1.Job
 import me.btieger.services.helm.HelmService
 
@@ -40,7 +42,23 @@ fun HelmService.makeBuilderJob(dslId: Int, secret: String): Job {
                                     value = dslId.toString()
                                 }
                             )
+                            volumeMounts = listOf(
+                                newVolumeMount {
+                                    name = "rootCa"
+                                    mountPath = "/app/tls-cert"
+                                    readOnly = true
+                                }
+                            )
+                            volumes = listOf(
+                                newVolume {
+                                    name = "rootCa"
+                                    secret {
+                                        secretName = "konstrainer-root-ca"
+                                    }
+                                }
+                            )
                         }
+
                     )
                 }
             }
