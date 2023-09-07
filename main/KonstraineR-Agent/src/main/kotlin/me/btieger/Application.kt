@@ -16,10 +16,13 @@ import java.security.KeyStore
 import io.ktor.server.plugins.callloging.*
 import me.btieger.commonLibrary.EnvVarSettings
 import me.btieger.loader.Loader
+import me.btieger.plugins.configureAuthentication
 import org.slf4j.event.Level
 import java.nio.file.Paths
 
 class Config : EnvVarSettings("KSR_") {
+    val authUser by string()
+    val authPass by string()
     val rootDir by string("/app")
     val development by boolean(false)
 
@@ -70,5 +73,6 @@ fun Application.module() {
     val ruleset = if (_config.development) debugServer else Loader("me.btieger.DslInstanceKt").loadServer(Paths.get("/app/libs/agentdsl.jar"))
     configureSerialization()
     configureAdministration()
+    configureAuthentication(_config)
     configureRouting(ruleset, KubernetesClientBuilder().build())
 }

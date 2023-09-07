@@ -1,6 +1,7 @@
 package me.btieger.webui.pages
 
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
 import io.ktor.server.html.*
 import io.ktor.server.routing.*
 import me.btieger.id
@@ -15,14 +16,16 @@ fun Application.configureServerDetailsPageController() {
     val dslService by inject<DslService>()
 
     routing {
-        route("$SERVERS_PATH/{id}") {
-            get {
-                val id = call.id
-                val model = dslService.getFullDetails(id)
-                    ?: return@get notFound()
-                call.respondHtml {
-                    siteLayout {
-                        serverDetailsView(model)
+        authenticate {
+            route("$SERVERS_PATH/{id}") {
+                get {
+                    val id = call.id
+                    val model = dslService.getFullDetails(id)
+                        ?: return@get notFound()
+                    call.respondHtml {
+                        siteLayout {
+                            serverDetailsView(model)
+                        }
                     }
                 }
             }

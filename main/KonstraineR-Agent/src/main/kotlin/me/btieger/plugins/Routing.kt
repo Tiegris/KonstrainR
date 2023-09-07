@@ -1,16 +1,17 @@
 package me.btieger.plugins
 
 import io.fabric8.kubernetes.client.KubernetesClient
-import io.ktor.server.routing.*
 import io.ktor.http.*
 import io.ktor.server.application.*
-import io.ktor.server.response.*
+import io.ktor.server.auth.*
 import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import kotlinx.serialization.json.*
 import me.btieger.commonLibrary.toBase64
 import me.btieger.commonLibrary.toJsonString
-
-import me.btieger.dsl.*
+import me.btieger.dsl.Server
+import me.btieger.dsl.WebhookBehaviorBuilder
 
 fun Application.configureRouting(server: Server, k8s: KubernetesClient) {
 
@@ -18,20 +19,22 @@ fun Application.configureRouting(server: Server, k8s: KubernetesClient) {
         get("/") {
             call.respondText("OK")
         }
-        if (server.monitors.isNotEmpty()) {
-            get("/aggregator") {
-                val response = buildJsonObject {
-                    put("server", server.name)
-                    putJsonArray("monitors") {
-                        server.monitors.forEach {
-                            addJsonObject {
-                                put("name", it.monitorName)
-                                put("markedResources", Json.encodeToJsonElement(it.evaluate(k8s)))
+        authenticate {
+            if (server.monitors.isNotEmpty()) {
+                get("/aggregator") {
+                    val response = buildJsonObject {
+                        put("server", server.name)
+                        putJsonArray("monitors") {
+                            server.monitors.forEach {
+                                addJsonObject {
+                                    put("name", it.monitorName)
+                                    put("markedResources", Json.encodeToJsonElement(it.evaluate(k8s)))
+                                }
                             }
                         }
                     }
+                    call.respond(HttpStatusCode.OK, response)
                 }
-                call.respond(HttpStatusCode.OK, response)
             }
         }
         server.webhooks.forEach { webhook ->
@@ -77,7 +80,6 @@ fun Application.configureRouting(server: Server, k8s: KubernetesClient) {
             }
         }
     }
-
 
 
 }

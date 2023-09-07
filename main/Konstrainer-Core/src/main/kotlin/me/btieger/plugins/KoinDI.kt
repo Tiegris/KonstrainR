@@ -4,6 +4,8 @@ import io.fabric8.kubernetes.client.KubernetesClient
 import io.fabric8.kubernetes.client.KubernetesClientBuilder
 import io.ktor.server.application.*
 import me.btieger.Config
+import me.btieger.services.UserService
+import me.btieger.services.UserServiceImpl
 import me.btieger.services.helm.HelmService
 import me.btieger.services.DslService
 import me.btieger.services.DslServiceImpl
@@ -21,6 +23,7 @@ fun Application.configureKoin(config: Config) {
             module {
                 single(createdAtStart = true) { config }
                 single<KubernetesClient>(createdAtStart = true) { KubernetesClientBuilder().build() }
+                single<UserService>(createdAtStart = true) { UserServiceImpl() }
                 single<ServerService>(createdAtStart = true) { ServerServiceImpl(get(), get(), get(), get()) }
                 single<DslService>(createdAtStart = true) { DslServiceImpl(get(), get(), get(), get()) }
                 single(createdAtStart = true) { HelmService(get()) }

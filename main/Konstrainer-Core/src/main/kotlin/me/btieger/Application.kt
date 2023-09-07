@@ -1,10 +1,12 @@
 package me.btieger
 
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.callloging.*
 import io.ktor.server.webjars.*
+import io.ktor.util.*
 import me.btieger.commonLibrary.EnvVarSettings
 import me.btieger.controllers.dslController
 import me.btieger.controllers.echoController
@@ -12,6 +14,7 @@ import me.btieger.controllers.serverController
 import me.btieger.persistance.DatabaseFactory
 import me.btieger.plugins.configureKoin
 import me.btieger.plugins.configureSerialization
+import me.btieger.plugins.configureAuthentication
 import me.btieger.services.cronjobs.launchCleaner
 import me.btieger.webui.configureCSS
 import me.btieger.webui.configurePagesRouting
@@ -31,6 +34,10 @@ class Config : EnvVarSettings("KSR_") {
     val agentSpawnWaitMaxRetries by int(5)
     val enableWebUi by boolean(true)
     val home by string("/app/home")
+    val adminUser by string("admin")
+    val adminPass by string("admin")
+    val agentUser by string("alma")
+    val agentPass by string("alma")
 }
 
 private val config = Config().apply(Config::loadAll)
@@ -49,14 +56,15 @@ fun Application.startup() {
         level = Level.INFO
     }
 
-    configureSerialization()
     configureKoin(config)
+    DatabaseFactory.init(config)
+
+    configureSerialization()
+    configureAuthentication(config)
 
     echoController()
     dslController()
     serverController()
-
-    DatabaseFactory.init(config)
 
     if (config.enableWebUi) {
         install(Webjars) {

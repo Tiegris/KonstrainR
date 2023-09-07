@@ -17,11 +17,13 @@ object DatabaseFactory {
         val database = Database.connect(jdbcURL, driverClassName)
         transaction(database) {
             SchemaUtils.create(Dsls)
+            SchemaUtils.create(Users)
         }
     }
 
     fun cleanTables() = runBlocking {
         dbQuery { Dsls.deleteAll() }
+        dbQuery { Users.deleteAll() }
     }
 
     suspend fun <T> dbQuery(block: suspend () -> T): T =

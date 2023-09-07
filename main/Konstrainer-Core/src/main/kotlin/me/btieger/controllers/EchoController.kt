@@ -2,6 +2,7 @@ package me.btieger.controllers
 
 import io.fabric8.kubernetes.client.KubernetesClient
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import me.btieger.services.DslService
