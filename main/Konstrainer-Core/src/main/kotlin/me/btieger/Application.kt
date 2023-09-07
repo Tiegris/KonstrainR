@@ -1,30 +1,26 @@
 package me.btieger
 
-import io.fabric8.kubernetes.client.KubernetesClient
 import io.ktor.server.application.*
-import io.ktor.server.auth.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.callloging.*
 import io.ktor.server.webjars.*
-import io.ktor.util.*
 import me.btieger.commonLibrary.EnvVarSettings
 import me.btieger.controllers.dslController
 import me.btieger.controllers.echoController
 import me.btieger.controllers.serverController
 import me.btieger.persistance.DatabaseFactory
+import me.btieger.plugins.configureAuthentication
 import me.btieger.plugins.configureKoin
 import me.btieger.plugins.configureSerialization
-import me.btieger.plugins.configureAuthentication
+import me.btieger.plugins.initSsl
 import me.btieger.services.cronjobs.launchCleaner
-import me.btieger.services.helm.HelmService
-import me.btieger.services.helm.create
-import me.btieger.services.helm.resources.rootCaSecret
-import me.btieger.services.ssl.SslService
+import me.btieger.services.ssl.SslClient
 import me.btieger.webui.configureCSS
 import me.btieger.webui.configurePagesRouting
-import org.koin.ktor.ext.inject
+import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
+import java.io.File
 
 
 class Config : EnvVarSettings("KSR_") {
@@ -34,7 +30,7 @@ class Config : EnvVarSettings("KSR_") {
     val namespace by string("konstrainer-ns")
     val port by int(8080)
     val host by string("0.0.0.0")
-    val cleanerIntervalSeconds by int(5*60)
+    val cleanerIntervalSeconds by int(5 * 60)
     val agentImage by string("tiegris/konstrainer-agent:0.0.1")
     val agentSpawnWaitSeconds by long(5L)
     val agentSpawnWaitMaxRetries by int(5)
@@ -44,16 +40,39 @@ class Config : EnvVarSettings("KSR_") {
     val adminPass by string("admin")
     val agentUser by string("alma")
     val agentPass by string("alma")
+    val developmentMode by boolean(false)
 }
 
-private val config = Config().apply(Config::loadAll)
+private val _config = Config().apply(Config::loadAll)
 
 fun main() {
-    embeddedServer(Netty,
-        port = config.port,
-        host = config.host,
-        module = Application::startup)
-        .start(wait = true)
+
+    if (_config.developmentMode) {
+        embeddedServer(
+            Netty,
+            port = 8080,
+            host = "localhost",
+            module = Application::startup
+        )
+            .start(wait = true)
+    } else {
+        val sslClient = SslClient(File(_config.home))
+        val environment = applicationEngineEnvironment {
+            log = LoggerFactory.getLogger("ktor.application")
+            sslConnector(
+                keyStore = sslClient.keyStore,
+                keyAlias = "RootCa",
+                keyStorePassword = { sslClient.passwd },
+                privateKeyPassword = { sslClient.passwd }) {
+                keyStorePath = sslClient.keyStoreFile
+                port = _config.port
+                host = _config.host
+            }
+            module(Application::startup)
+        }
+        embeddedServer(Netty, environment).start(wait = true)
+    }
+
 }
 
 
@@ -62,31 +81,22 @@ fun Application.startup() {
         level = Level.INFO
     }
 
-    configureKoin(config)
-    DatabaseFactory.init(config)
+    configureKoin(_config)
+    DatabaseFactory.init(_config)
 
-    val helm by inject<HelmService>()
-    val ssl by inject<SslService>()
-    val k8s by inject<KubernetesClient>()
-
-    val secret = k8s.secrets().inNamespace(config.namespace).withName("konstrainer-root-ca").get()
-    if (secret == null) {
-        val rootCaSecret = helm.rootCaSecret(ssl.getRootCaAsPem())
-        k8s.create(rootCaSecret)
-    }
+    initSsl()
 
     configureSerialization()
-    configureAuthentication(config)
+    configureAuthentication(_config)
 
     echoController()
     dslController()
     serverController()
 
-    if (config.enableWebUi) {
+    if (_config.enableWebUi) {
         install(Webjars) {
             path = "assets"
         }
-
         configureCSS()
         configurePagesRouting()
     }
