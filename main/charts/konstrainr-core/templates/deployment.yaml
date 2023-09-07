@@ -42,7 +42,7 @@ spec:
           - name: KSR_NAMESPACE
             value: {{ .Release.Namespace }}
           ports:
-            - name: http
+            - name: https
               containerPort: {{ .Values.service.port }}
               protocol: TCP
           volumeMounts:
@@ -51,11 +51,11 @@ spec:
           livenessProbe:
             httpGet:
               path: /echo
-              port: http
+              port: https
           readinessProbe:
             httpGet:
               path: /echo
-              port: http
+              port: https
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
