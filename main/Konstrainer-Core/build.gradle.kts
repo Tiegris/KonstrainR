@@ -39,6 +39,7 @@ dependencies {
     implementation("me.btieger:KonstrainerDsl:0.0.1-SNAPSHOT")
 
     implementation("io.ktor:ktor-network-tls-certificates:$ktor_version")
+    implementation("com.lordcodes.turtle:turtle:0.8.0")
 
     implementation("io.ktor:ktor-client-core:$ktor_version")
     implementation("io.ktor:ktor-client-cio:$ktor_version")
