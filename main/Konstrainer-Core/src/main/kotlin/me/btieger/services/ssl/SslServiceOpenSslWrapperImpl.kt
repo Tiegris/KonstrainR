@@ -14,7 +14,7 @@ import kotlin.streams.asSequence
 class SslServiceOpenSslWrapperImpl(config: Config) : SslService(File("${config.home}/ssl")) {
 
     private val client = SslClient(pwd)
-    private val rootCA: String = client.initSsl()
+    private val rootCA: String = client.getFile("rootCA.crt")
 
     override fun getRootCaAsPem(): String {
         return rootCA

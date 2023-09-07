@@ -2,7 +2,6 @@ package me.btieger.services.ssl
 
 import com.lordcodes.turtle.ShellScript
 import com.lordcodes.turtle.shellRun
-import io.ktor.util.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -10,12 +9,11 @@ import java.io.File
 import java.io.FileInputStream
 import java.nio.file.Files
 import java.security.KeyStore
-import kotlin.text.toCharArray
 
 class SslClient(val pwd: File) {
 
     val keyStoreFile: File
-            get() = File("$pwd/keystore.jks")
+        get() = File("$pwd/keystore.jks")
 
     val passwdStr = "foobar"
     val passwd = passwdStr.toCharArray()
@@ -30,9 +28,7 @@ class SslClient(val pwd: File) {
         keyStore
     }
 
-    fun initSsl(): String {
-
-
+    init {
         if (pwd.exists() && !pwd.isDirectory)
             throw ExceptionInInitializerError("Ssl root dir exists, but is not a directory!")
 
@@ -69,23 +65,23 @@ class SslClient(val pwd: File) {
                     "-name", "RootCA",
                     "-password", "pass:$passwdStr",
                 )
-                command("keytool", listOf(
-                    "-importkeystore",
-                    "-srckeystore", "keystore.p12",
-                    "-srcstoretype", "pkcs12",
-                    "-destkeystore", "keystore.jks",
-                    "-deststorepass", passwdStr,
-                    "-srcstorepass", passwdStr,
-                ))
+                command(
+                    "keytool", listOf(
+                        "-importkeystore",
+                        "-srckeystore", "keystore.p12",
+                        "-srcstoretype", "pkcs12",
+                        "-destkeystore", "keystore.jks",
+                        "-deststorepass", passwdStr,
+                        "-srcstorepass", passwdStr,
+                    )
+                )
                 command("rm", listOf("keystore.p12"))
             }
-
-        return getFile("rootCA.crt")
     }
 
     fun getFile(fileName: String) = File(pwd, fileName).readText(Charsets.US_ASCII)
     fun ShellScript.openssl(vararg args: String) = command("openssl", args.toList())
-    fun shell(script: ShellScript.()->String) = shellRun(workingDirectory = pwd) {
+    fun shell(script: ShellScript.() -> String) = shellRun(workingDirectory = pwd) {
         script()
     }
 }
