@@ -13,14 +13,58 @@ import kotlin.streams.asSequence
 
 class SslServiceOpenSslWrapperImpl(config: Config) : SslService(File("${config.home}/ssl")) {
 
-    private val client = SslClient(pwd)
-    private val rootCA: String = client.getFile("rootCA.crt")
+    fun init() {
+        if (pwd.exists() && !pwd.isDirectory)
+            throw ExceptionInInitializerError("Ssl root dir exists, but is not a directory!")
 
-    override fun getRootCaAsPem(): String {
-        return rootCA
+        if (!pwd.exists()) {
+            Files.createDirectories(pwd.toPath())
+        }
+
+        if (!File(pwd, "rootCA.key").exists())
+            shell {
+                openssl("genrsa", "-out", "rootCA.key", "4096")
+            }
+
+        if (!File(pwd, "rootCA.crt").exists())
+            shell {
+                openssl(
+                    "req", "-x509", "-new",
+                    "-nodes",
+                    "-key", "rootCA.key",
+                    "-sha256",
+                    "-days", "365",
+                    "-out", "rootCA.crt",
+                    "-subj", "/C=HU/O=me.btieger/CN=konstrainer-core",
+                    "-addext", "subjectAltName=DNS:konstrainer-core",
+                )
+            }
+
+        if (!File(pwd, "keystore.jks").exists())
+            shell {
+                openssl(
+                    "pkcs12", "-export",
+                    "-in", "rootCA.crt",
+                    "-inkey", "rootCA.key",
+                    "-out", "keystore.p12",
+                    "-name", "RootCA",
+                    "-password", "pass:$passwdStr",
+                )
+                command(
+                    "keytool", listOf(
+                        "-importkeystore",
+                        "-srckeystore", "keystore.p12",
+                        "-srcstoretype", "pkcs12",
+                        "-destkeystore", "keystore.jks",
+                        "-deststorepass", passwdStr,
+                        "-srcstorepass", passwdStr,
+                    )
+                )
+                command("rm", listOf("keystore.p12"))
+            }
     }
 
-    override fun deriveCert(agentServiceName: String, altnames: List<String>) : SecretBundle {
+    override fun deriveCert(agentServiceName: String, altnames: List<String>): SecretBundle {
         var folder = randomString()
         while (File(pwd, folder).exists())
             folder = randomString()
@@ -53,8 +97,8 @@ class SslServiceOpenSslWrapperImpl(config: Config) : SslService(File("${config.h
                 "-extfile", confName
             )
         }
-        val key = client.getFile(keyName)
-        val cert = client.getFile(certName)
+        val key = getFile(keyName)
+        val cert = getFile(certName)
         return SecretBundle(cert, key)
     }
 
@@ -63,12 +107,12 @@ class SslServiceOpenSslWrapperImpl(config: Config) : SslService(File("${config.h
     }
 
     private fun ShellScript.openssl(vararg args: String) = command("openssl", args.toList())
-    private fun shell(script: ShellScript.()->String) = shellRun(workingDirectory = pwd) {
+    private fun shell(script: ShellScript.() -> String) = shellRun(workingDirectory = pwd) {
         script()
     }
 }
 
-private val charPool : List<Char> = ('a'..'z') + ('A'..'Z')
+private val charPool: List<Char> = ('a'..'z') + ('A'..'Z')
 
 private fun randomString() = ThreadLocalRandom.current()
     .ints(32L, 0, charPool.size)

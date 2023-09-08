@@ -17,7 +17,7 @@ fun Application.initSsl() {
 
     val secret = k8s.secrets().inNamespace(config.namespace).withName("konstrainer-root-ca").get()
     if (secret == null) {
-        val rootCaSecret = helm.rootCaSecret(ssl.getRootCaAsPem())
+        val rootCaSecret = helm.rootCaSecret(ssl.rootCa)
         k8s.create(rootCaSecret)
     }
 }

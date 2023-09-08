@@ -15,12 +15,11 @@ import me.btieger.plugins.configureKoin
 import me.btieger.plugins.configureSerialization
 import me.btieger.plugins.initSsl
 import me.btieger.services.cronjobs.launchCleaner
-import me.btieger.services.ssl.SslClient
+import me.btieger.services.ssl.SslServiceOpenSslWrapperImpl
 import me.btieger.webui.configureCSS
 import me.btieger.webui.configurePagesRouting
 import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
-import java.io.File
 
 
 class Config : EnvVarSettings("KSR_") {
@@ -46,33 +45,24 @@ class Config : EnvVarSettings("KSR_") {
 private val _config = Config().apply(Config::loadAll)
 
 fun main() {
-
-    if (_config.developmentMode) {
-        embeddedServer(
-            Netty,
-            port = 8080,
-            host = "localhost",
-            module = Application::startup
-        )
-            .start(wait = true)
-    } else {
-        val sslClient = SslClient(File(_config.home))
-        val environment = applicationEngineEnvironment {
-            log = LoggerFactory.getLogger("ktor.application")
-            sslConnector(
-                keyStore = sslClient.keyStore,
-                keyAlias = "RootCA",
-                keyStorePassword = { sslClient.passwd },
-                privateKeyPassword = { sslClient.passwd }) {
-                keyStorePath = sslClient.keyStoreFile
-                port = _config.port
-                host = _config.host
-            }
-            module(Application::startup)
-        }
-        embeddedServer(Netty, environment).start(wait = true)
+    val sslClient = SslServiceOpenSslWrapperImpl(_config)
+    if (!_config.developmentMode) {
+        sslClient.init()
     }
-
+    val environment = applicationEngineEnvironment {
+        log = LoggerFactory.getLogger("ktor.application")
+        sslConnector(
+            keyStore = sslClient.keyStore,
+            keyAlias = "RootCA",
+            keyStorePassword = { sslClient.passwd },
+            privateKeyPassword = { sslClient.passwd }) {
+            keyStorePath = sslClient.keyStoreFile
+            port = _config.port
+            host = _config.host
+        }
+        module(Application::startup)
+    }
+    embeddedServer(Netty, environment).start(wait = true)
 }
 
 

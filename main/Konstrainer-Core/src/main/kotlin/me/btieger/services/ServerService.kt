@@ -75,7 +75,7 @@ class ServerServiceImpl(
                 )
 
                 val cert = sslService.deriveCert(cname, altnames)
-                val secret = helm.secret(server, cert, sslService.getRootCaAsPem(), id)
+                val secret = helm.secret(server, cert, sslService.rootCa, id)
                 k8sclient.create(secret)
 
                 val dep = helm.deployment(server, id)
@@ -106,7 +106,7 @@ class ServerServiceImpl(
                 }
                 logger.info("Agent to started, dsl.id: `{}`", id)
 
-                val ca = sslService.getRootCaAsPem()
+                val ca = sslService.rootCa
                 val mwhc = helm.mutatingWebhookConfiguration(server, ca, id)
                 k8sclient.create(mwhc)
 
