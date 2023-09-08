@@ -48,14 +48,16 @@ spec:
           volumeMounts:
             - name: {{ include "konstrainr-core.fullname" . }}-storage
               mountPath: /app/home
-          #livenessProbe:
-          #  httpGet:
-          #    path: /echo
-          #    port: http
-          #readinessProbe:
-          #  httpGet:
-          #    path: /echo
-          #    port: http
+          livenessProbe:
+            httpGet:
+              path: /echo
+              port: http
+              scheme: HTTPS
+          readinessProbe:
+            httpGet:
+              path: /echo
+              port: http
+              scheme: HTTPS
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
