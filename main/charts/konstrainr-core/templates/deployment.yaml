@@ -42,20 +42,20 @@ spec:
           - name: KSR_NAMESPACE
             value: {{ .Release.Namespace }}
           ports:
-            - name: https
+            - name: http
               containerPort: {{ .Values.service.port }}
               protocol: TCP
           volumeMounts:
             - name: {{ include "konstrainr-core.fullname" . }}-storage
               mountPath: /app/home
-          livenessProbe:
-            httpGet:
-              path: /echo
-              port: https
-          readinessProbe:
-            httpGet:
-              path: /echo
-              port: https
+          #livenessProbe:
+          #  httpGet:
+          #    path: /echo
+          #    port: http
+          #readinessProbe:
+          #  httpGet:
+          #    path: /echo
+          #    port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
