@@ -6,7 +6,6 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import me.btieger.plugins.configureAdministration
 import me.btieger.plugins.configureRouting
 import me.btieger.plugins.configureSerialization
 import org.slf4j.LoggerFactory
@@ -72,7 +71,6 @@ fun Application.module() {
     //val debugServer = me.btieger.builtins.server
     val ruleset = if (_config.development) debugServer else Loader("me.btieger.DslInstanceKt").loadServer(Paths.get("/app/libs/agentdsl.jar"))
     configureSerialization()
-    configureAdministration()
     configureAuthentication(_config)
     configureRouting(ruleset, KubernetesClientBuilder().build())
 }

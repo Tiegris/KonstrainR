@@ -13,7 +13,6 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import kotlin.test.*
 import io.ktor.server.testing.*
-import me.btieger.dsl.Rule
 import me.btieger.dsl.Server
 import me.btieger.dsl.Status
 import me.btieger.plugins.*
