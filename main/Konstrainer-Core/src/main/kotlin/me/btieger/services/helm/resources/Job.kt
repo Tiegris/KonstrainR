@@ -44,14 +44,14 @@ fun HelmService.makeBuilderJob(dslId: Int, secret: String): Job {
                             )
                             volumeMounts = listOf(
                                 newVolumeMount {
-                                    name = "rootCa"
+                                    name = "root-ca"
                                     mountPath = "/app/tls-cert"
                                     readOnly = true
                                 }
                             )
                             volumes = listOf(
                                 newVolume {
-                                    name = "rootCa"
+                                    name = "root-ca"
                                     secret {
                                         secretName = "konstrainer-root-ca"
                                     }
