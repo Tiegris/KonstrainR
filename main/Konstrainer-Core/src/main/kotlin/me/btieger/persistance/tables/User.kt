@@ -21,6 +21,5 @@ object Users : IntIdTable() {
 }
 
 enum class Role {
-    Viewer,
     Admin,
 }

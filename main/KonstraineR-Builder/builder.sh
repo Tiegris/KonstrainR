@@ -4,7 +4,7 @@ function log() {
     echo "$1" >> $logsfile
 }
 
-base_url="http://${KSR_CORE_BASE_URL}:8080/api/v1/dsls"
+base_url="https://${KSR_CORE_BASE_URL}:8080/api/v1/dsls"
 dsl_id="${KSR_DSL_ID}"
 secret="${KSR_SECRET}"
 

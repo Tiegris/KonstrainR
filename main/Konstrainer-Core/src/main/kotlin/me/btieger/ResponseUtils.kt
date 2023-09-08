@@ -8,6 +8,17 @@ import io.ktor.util.pipeline.*
 @DslMarker
 annotation class ResponseDslMarker
 
+
+
+@ResponseDslMarker
+suspend inline fun <reified T : Any> PipelineContext<*, ApplicationCall>.forbidden(data: T) {
+    call.respond(HttpStatusCode.Forbidden, data)
+}
+@ResponseDslMarker
+suspend inline fun PipelineContext<*, ApplicationCall>.forbidden() {
+    call.respond(HttpStatusCode.Forbidden)
+}
+
 @ResponseDslMarker
 suspend inline fun <reified T : Any> PipelineContext<*, ApplicationCall>.notFound(data: T) {
     call.respond(HttpStatusCode.NotFound, data)

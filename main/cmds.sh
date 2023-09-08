@@ -15,7 +15,7 @@ function logs_core() {
 }
 
 function logs_builder() {
-    clear && k logs -f job.batch/dsl-build-job-1 -n konstrainer-ns
+    clear && k logs -f job.batch/dsl-build-job-$1 -n konstrainer-ns
 }
 
 function logs_agent() {

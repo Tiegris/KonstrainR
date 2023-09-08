@@ -11,7 +11,7 @@ fun Application.configureAuthentication(config: Config) {
     val userService by inject<UserService>()
 
     runBlocking {
-        userService.seedAdmin(config.adminUser, config.adminPass)
+        userService.seedUsers(config.adminUser, config.adminPass)
     }
 
     install(Authentication) {

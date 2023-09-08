@@ -13,7 +13,7 @@ data class MyPrincipal(val name: String, val role: Role) : Principal
 
 interface UserService {
     suspend fun create(name: String, plainPass: String, role: Role): MyPrincipal
-    suspend fun seedAdmin(name: String, plainPass: String)
+    suspend fun seedUsers(name: String, plainPass: String)
     suspend fun authenticate(credential: UserPasswordCredential): MyPrincipal?
 }
 
@@ -33,11 +33,11 @@ class UserServiceImpl : UserService {
         )
     }
 
-    override suspend fun seedAdmin(name: String, plainPass: String) = dbQuery {
+    override suspend fun seedUsers(name: String, plainPass: String) = dbQuery {
         if (Users.selectAll().count() > 0)
             return@dbQuery
 
-        val admin = User.new {
+        User.new {
             this.name = name
             this.role = Role.Admin
             password = digestFunction(plainPass)
