@@ -38,7 +38,7 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
           - name: KSR_SERVICE_NAME
-            value: {{ include "konstrainr-core.fullname" . }}
+            value: konstrainer-core
           - name: KSR_NAMESPACE
             value: {{ .Release.Namespace }}
           ports:

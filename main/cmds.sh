@@ -3,7 +3,7 @@ function watch_k8s() {
 }
 
 function fwd_core() {
-    clear && k port-forward service/konstrainr-core 8080:8080 -n konstrainer-ns
+    clear && k port-forward service/konstrainer-core 8080:8080 -n konstrainer-ns
 }
 
 function fwd_agent() {
@@ -11,7 +11,7 @@ function fwd_agent() {
 }
 
 function logs_core() {
-    clear && k logs -f service/konstrainr-core -n konstrainer-ns
+    clear && k logs -f service/konstrainer-core -n konstrainer-ns
 }
 
 function logs_builder() {
