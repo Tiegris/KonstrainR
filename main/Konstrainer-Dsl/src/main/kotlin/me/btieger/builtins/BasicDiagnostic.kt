@@ -1,8 +1,9 @@
 package me.btieger.builtins
 
-import me.btieger.dsl.server
+import me.btieger.dsl.*
 
 val diagnosticsServer = server("basic-diagnostics") {
+    clusterRole = ReadAny
 
     monitor("Deployments", {kubectl.apps().deployments().inAnyNamespace().list()}) {
         tag( "Has no resources") {
