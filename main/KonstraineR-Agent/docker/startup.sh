@@ -4,7 +4,7 @@ set -e -v -u -x
 app_root="/app"
 ssl_root="$app_root/tls-cert"
 
-cp "$ssl_root/rootCa.pem" /usr/local/share/ca-certificates
+cp "$ssl_root/rootCa.pem" /usr/local/share/ca-certificates/rootCa.crt
 update-ca-certificates
 
 openssl pkcs12 -export -in $ssl_root/cert.pem -inkey $ssl_root/key.pem -out $app_root/keystore.p12 -name "AgentCert" -password pass:foobar
