@@ -49,11 +49,15 @@ spec:
             - name: {{ include "konstrainr-core.fullname" . }}-storage
               mountPath: /app/home
           livenessProbe:
+            initialDelaySeconds: 60
+            periodSeconds: 60
             httpGet:
               path: /echo
               port: http
               scheme: HTTPS
           readinessProbe:
+            initialDelaySeconds: 60
+            periodSeconds: 60
             httpGet:
               path: /echo
               port: http
