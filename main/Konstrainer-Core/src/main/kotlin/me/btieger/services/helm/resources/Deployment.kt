@@ -36,6 +36,14 @@ fun HelmService.deployment(server: Server, agentId: Int) =
                                 newEnvVar {
                                     name = "KSR_DSL_ID"
                                     value = agentId.toString()
+                                },
+                                newEnvVar {
+                                    name = "KSR_AUTH_PASS"
+                                    value = config.agentPass
+                                },
+                                newEnvVar {
+                                    name = "KSR_AUTH_USER"
+                                    value = config.agentUser
                                 }
                             )
                             ports = listOf(
