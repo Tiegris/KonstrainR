@@ -78,9 +78,9 @@ class ServerServiceImpl(
                 val secret = helm.secret(server, cert, sslService.rootCa, id)
                 k8sclient.create(secret)
 
+                val rbac = helm.rbac(server, id)
                 val dep = helm.deployment(server, id)
                 val svc = helm.service(server, id)
-                val rbac = helm.rbac(server, id)
                 rbac?.let {
                     k8sclient.create(it.serviceAccount)
                     k8sclient.create(it.clusterRoleBinding)
