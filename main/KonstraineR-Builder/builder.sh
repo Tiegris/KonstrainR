@@ -13,7 +13,7 @@ file='/app/framework/lib/src/main/kotlin/me/btieger/DslInstance.kt'
 jar='/app/framework/lib/build/libs/lib.jar'
 
 
-cp "/app/tls-cert/rootCa.pem" /usr/local/share/ca-certificates
+cp "/app/tls-cert/rootCa.pem" /usr/local/share/ca-certificates/rootCa.crt
 update-ca-certificates
 
 echo "=== BEGIN ERROR REPORT ===" > $logsfile
