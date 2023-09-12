@@ -15,9 +15,7 @@ fun Application.initSsl() {
     val k8s by inject<KubernetesClient>()
     val config by inject<Config>()
 
-    val secret = k8s.secrets().inNamespace(config.namespace).withName("konstrainer-root-ca").get()
-    if (secret == null) {
-        val rootCaSecret = helm.rootCaSecret(ssl.rootCa)
-        k8s.create(rootCaSecret)
-    }
+    k8s.secrets().inNamespace(config.namespace).withName("konstrainer-root-ca").delete()
+    val rootCaSecret = helm.rootCaSecret(ssl.rootCa)
+    k8s.create(rootCaSecret)
 }

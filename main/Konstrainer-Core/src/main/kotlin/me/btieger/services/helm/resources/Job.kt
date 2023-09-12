@@ -25,7 +25,7 @@ fun HelmService.makeBuilderJob(dslId: Int, secret: String): Job {
                     restartPolicy = "Never"
                     containers = listOf(
                         newContainer {
-                            command = listOf("slee", "infinity")
+                            command = listOf("sleep", "infinity")
                             name = "builder"
                             imagePullPolicy = "Always"
                             image = config.builderImage
