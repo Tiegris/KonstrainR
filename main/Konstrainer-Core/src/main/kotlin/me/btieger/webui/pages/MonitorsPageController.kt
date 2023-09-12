@@ -7,6 +7,7 @@ import io.ktor.client.plugins.auth.*
 import io.ktor.client.plugins.auth.providers.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
+import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -21,7 +22,7 @@ import me.btieger.webui.siteLayout
 import org.koin.ktor.ext.inject
 
 @Serializable
-class MonitorsDto(val server: String, val monitors: List<MonitorDto>)
+class MonitorsDto(val server: String, val monitors: List<MonitorDto>?)
 
 @Serializable
 class MonitorDto(val name: String, val markedResources: List<MarkingDto>)
@@ -67,8 +68,10 @@ fun Application.configureMonitorsPageController() {
                     }.use { client ->
                         aggregators.forEach { item ->
                             val response = client.get("https://$item/aggregator")
-                            val x: MonitorsDto = response.body()
-                            monitors += response.body<MonitorsDto>()
+                            monitors += if (response.status == HttpStatusCode.OK)
+                                response.body<MonitorsDto>()
+                            else
+                                MonitorsDto(item, null)
                         }
                     }
                     call.respondHtml {
