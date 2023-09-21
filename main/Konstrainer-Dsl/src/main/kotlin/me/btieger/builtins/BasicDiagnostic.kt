@@ -24,7 +24,9 @@ val diagnosticsServer = server("basic-diagnostics") {
         val services = kubectl.services().inAnyNamespace().list().items
         aggregation("Services", services) {
             tag("No backend") {
-                !podLabels.contains(item.spec.selector)
+                podLabels.none { podLabel ->
+                    item.spec.selector.all { podLabel.entries.contains(it) }
+                }
             }
         }
 

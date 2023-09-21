@@ -43,5 +43,8 @@ val webhookServer = server("basic-webhook-rules") {
             }
         }
     }
+    webhook("warn-default-ns", defaults) {
+        
+    }
 
 }
