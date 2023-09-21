@@ -1,5 +1,6 @@
 package me.btieger.builtins
 
+import io.fabric8.kubernetes.api.model.LabelSelectorRequirement
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import me.btieger.dsl.*
@@ -10,9 +11,9 @@ val defaults = webhookConfigBundle {
     apiVersions(ANY)
     resources(DEPLOYMENTS)
     namespaceSelector {
-        matchLabels {
-            "managed" eq "true"
-        }
+        matchLabels = mapOf(
+            "managed" to "true"
+        )
     }
     failurePolicy(FAIL)
     logRequest = true
@@ -44,7 +45,21 @@ val webhookServer = server("basic-webhook-rules") {
         }
     }
     webhook("warn-default-ns", defaults) {
-        
+        namespaceSelector {
+            matchExpressions = listOf(
+                LabelSelectorRequirement().apply {
+                    operator = "In"
+                    key = "name"
+                    values = listOf("default", "kube-system", "kube-public", "kube-node-lease")
+                }
+            )
+        }
+        behavior {
+            val ns = request jqx "/object/metadata/namespace" parseAs string
+            warnings {
+                warning("You are working in the namespace: $ns")
+            }
+        }
     }
 
 }

@@ -1,6 +1,8 @@
 package me.btieger.services.helm.resources
 
 import com.fkorotkov.kubernetes.admissionregistration.v1.*
+import com.fkorotkov.kubernetes.newLabelSelector
+import io.fabric8.kubernetes.api.model.LabelSelector
 import me.btieger.dsl.*
 import io.fabric8.kubernetes.api.model.admissionregistration.v1.MutatingWebhookConfiguration
 import io.ktor.util.*
@@ -31,10 +33,10 @@ fun HelmService.mutatingWebhookConfiguration(server: Server, cert: String, agent
                         resources = it.resources
                     }
                 )
-                namespaceSelector {
-                    matchLabels = it.namespaceSelector
-                }
+                namespaceSelector = it.namespaceSelector
                 failurePolicy = it.failurePolicy
             }
         }
     }
+
+

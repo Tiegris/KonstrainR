@@ -1,6 +1,6 @@
 package me.btieger.dsl
 
-import kotlinx.serialization.json.JsonObject
+import io.fabric8.kubernetes.api.model.LabelSelector
 
 typealias WebhookBehaviorProvider = WebhookBehaviorBuilder.()->Unit
 class WebhookBuilder(defaults: WebhookConfigBundle) {
@@ -9,7 +9,7 @@ class WebhookBuilder(defaults: WebhookConfigBundle) {
     private var _apiVersions: Array<out Type> by setExactlyOnce(defaults.apiVersion)
     private var _resources: Array<out Type> by setExactlyOnce(defaults.resources)
     private var _scope: Type by setExactlyOnce(defaults.scope ?: ANY)
-    private var _namespaceSelector: NamespaceSelector by setExactlyOnce(defaults.namespaceSelector)
+    private var _namespaceSelector: LabelSelector by setExactlyOnce(defaults.namespaceSelector)
     private var _failurePolicy: FailurePolicy by setExactlyOnce(defaults.failurePolicy ?: FAIL)
 
     @DslMarkerVerb5
@@ -42,6 +42,11 @@ class WebhookBuilder(defaults: WebhookConfigBundle) {
         _apiGroups = arrayOf(ANY)
     }
 
+    @DslMarkerBlock
+    fun namespaceSelector(setup: LabelSelector.() -> Unit) {
+        _namespaceSelector = LabelSelector().apply(setup)
+    }
+
     @DslMarkerVerb5
     fun apiVersions(vararg args: ApiVersions) {
         _apiVersions = args
@@ -69,13 +74,6 @@ class WebhookBuilder(defaults: WebhookConfigBundle) {
         _scope = ANY
     }
 
-    @DslMarkerBlock
-    fun namespaceSelector(setup: NamespaceSelectorBuilder.() -> Unit) {
-        val builder = NamespaceSelectorBuilder()
-        builder.setup()
-        _namespaceSelector = builder.build()
-    }
-
     @DslMarkerVerb5
     fun failurePolicy(failurePolicy: FailurePolicy) {
         _failurePolicy = failurePolicy
@@ -94,7 +92,7 @@ class WebhookBuilder(defaults: WebhookConfigBundle) {
 
         return Webhook(
             operations, apiGroups, apiVersion, resources, scope,
-            namespaceSelector.selectorRule.rules, failurePolicy.string,
+            namespaceSelector, failurePolicy.string,
             _path, _name, behavior, logRequest, logResponse
         )
     }
@@ -154,7 +152,7 @@ class Webhook (
     val apiVersion: List<String>,
     val resources: List<String>,
     val scope: String,
-    val namespaceSelector: Map<String, String>,
+    val namespaceSelector: LabelSelector,
     val failurePolicy: String,
     val path: String,
     val name: String,

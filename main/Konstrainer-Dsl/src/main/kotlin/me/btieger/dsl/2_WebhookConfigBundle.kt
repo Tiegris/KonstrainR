@@ -1,5 +1,7 @@
 package me.btieger.dsl
 
+import io.fabric8.kubernetes.api.model.LabelSelector
+
 @DslMarkerBlock
 fun webhookConfigBundle(setup: WebhookConfigBundleBuilder.() -> Unit): WebhookConfigBundle {
     val builder = WebhookConfigBundleBuilder().apply(setup)
@@ -12,7 +14,7 @@ class WebhookConfigBundleBuilder {
     private var _apiVersions: Array<out Type>? by setMaxOnce()
     private var _resources: Array<out Type>? by setMaxOnce()
     private var _scope: Type? by setMaxOnce(ANY)
-    private var _namespaceSelector: NamespaceSelector? by setMaxOnce()
+    private var _namespaceSelector: LabelSelector? by setMaxOnce()
     private var _failurePolicy: FailurePolicy? by setMaxOnce(FAIL)
 
     @DslMarkerVerb5
@@ -66,10 +68,8 @@ class WebhookConfigBundleBuilder {
     }
 
     @DslMarkerBlock
-    fun namespaceSelector(setup: NamespaceSelectorBuilder.() -> Unit) {
-        val builder = NamespaceSelectorBuilder()
-        builder.setup()
-        _namespaceSelector = builder.build()
+    fun namespaceSelector(setup: LabelSelector.() -> Unit) {
+        _namespaceSelector = LabelSelector().apply(setup)
     }
 
     @DslMarkerVerb5
@@ -92,7 +92,7 @@ class WebhookConfigBundle(
     val apiVersion: Array<out Type>?,
     val resources: Array<out Type>?,
     val scope: Type?,
-    val namespaceSelector: NamespaceSelector?,
+    val namespaceSelector: LabelSelector?,
     val failurePolicy: FailurePolicy?,
     val logRequest: Boolean?,
     val logResponse: Boolean?,

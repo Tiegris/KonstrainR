@@ -4,9 +4,9 @@ import me.btieger.dsl.*
 
 val loggerDefaults = webhookConfigBundle {
     namespaceSelector {
-        matchLabels {
-            "managed" eq "true"
-        }
+        matchLabels = mapOf(
+            "managed" to "true"
+        )
     }
     failurePolicy(FAIL)
     logRequest = true

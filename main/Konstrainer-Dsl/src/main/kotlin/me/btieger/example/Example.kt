@@ -7,9 +7,9 @@ val defaults = webhookConfigBundle {
     apiVersions(ANY)
     resources(PODS)
     namespaceSelector {
-        matchLabels {
-            "managed" eq "true"
-        }
+        matchLabels = mapOf(
+            "managed" to "true"
+        )
     }
     failurePolicy(FAIL)
     logRequest = true
