@@ -20,38 +20,34 @@ class WatchBehaviorProvider<T>(val item: T) {
 typealias WatchBehaviorFunction<T> = WatchBehaviorProvider<T>.() -> Unit
 
 @Serializable
-class Tag(val fullResourceName: String, val name: String, val namespace: String, val marks: List<String>)
+class Tag(val fullResourceName: String, val name: String, val namespace: String?, val marks: List<String>) {
+    constructor(meta: TagMeta, marks: List<String>) : this(meta.fullResourceName, meta.name, meta.namespace, marks)
+}
+class TagMeta(val fullResourceName: String, val name: String, val namespace: String?) {
+    constructor(resource: HasMetadata) : this(resource.fullResourceName, resource.metadata.name, resource.metadata.namespace)
+}
 
 class Monitor<T : HasMetadata>(val monitorName: String, private val watch: WatchFunction<T>, private val behavior: WatchBehaviorFunction<T>) {
     fun evaluate(kubectl: KubernetesClient): List<Tag> {
         val resources = WatchProvider(kubectl).run(watch)
 
-        val result = mutableListOf<Tag>()
+        val tags = mutableListOf<Tag>()
 
         resources.items.forEach { resource ->
             val provider = WatchBehaviorProvider(resource).apply(behavior)
-            val tags = mutableListOf<String>()
+            val marks = mutableListOf<String>()
             provider.markers.forEach { b ->
                 if (b.condition()) {
-                    tags += b.status
+                    marks += b.status
                 }
             }
-            if (tags.isNotEmpty()) {
-                result += Tag(resource.fullResourceName, resource.metadata.name, resource.metadata.namespace, tags)
+            if (marks.isNotEmpty()) {
+                tags += Tag(resource.fullResourceName, resource.metadata.name, resource.metadata.namespace, marks)
             }
 
 
         }
-        return result
+        return tags
     }
 }
 
-
-
-
-
-
-abstract class StatusByColor(val string: String)
-@DslMarkerConstant object YELLOW : StatusByColor("yellow")
-@DslMarkerConstant object GREEN : StatusByColor("green")
-@DslMarkerConstant object RED : StatusByColor("red")

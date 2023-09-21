@@ -1,6 +1,7 @@
 package me.btieger.dsl
 
 import io.fabric8.kubernetes.api.model.HasMetadata
+import io.fabric8.kubernetes.client.KubernetesClient
 
 @DslMarkerBlock
 fun server(uniqueName: String, setup: ServerBuilder.() -> Unit): Server {
@@ -9,11 +10,14 @@ fun server(uniqueName: String, setup: ServerBuilder.() -> Unit): Server {
 }
 
 typealias ClusterRoleName = String
+
 @DslMarkerConstant
 val ReadAny = "ReadAny"
+
 class ServerBuilder() {
     private var _webhooks: MutableList<Webhook> = mutableListOf()
     private var _monitors: MutableList<Monitor<out HasMetadata>> = mutableListOf()
+    private var _complexMonitor: CustomMonitorBehaviorFunction? by setMaxOnce()
 
     @DslMarkerVerb5
     var clusterRole by setMaxOnce<ClusterRoleName>()
@@ -29,14 +33,48 @@ class ServerBuilder() {
         _monitors += Monitor(monitorName, watch, behavior)
     }
 
+    @DslMarkerBlock
+    fun complexMonitoring(behavior: CustomMonitorBehaviorFunction) {
+        _complexMonitor = behavior
+    }
+
     internal fun build(name: String): Server {
-        return Server(name, _webhooks, _monitors, clusterRole)
+        return Server(name, _webhooks, _monitors, clusterRole, _complexMonitor)
     }
 }
 
 class Server(
     val name: String,
     val webhooks: List<Webhook>,
-    val monitors: List<Monitor<out HasMetadata>>,
-    val clusterRole: ClusterRoleName?
-)
+    private val monitors: List<Monitor<out HasMetadata>>,
+    val clusterRole: ClusterRoleName?,
+    private val complexMonitor: CustomMonitorBehaviorFunction?
+) {
+
+    fun hasMonitors(): Boolean {
+        return complexMonitor != null || monitors.isNotEmpty()
+    }
+
+    fun evaluateMonitors(k8s: KubernetesClient): MutableMap<String, MutableList<Tag>> {
+        val results = mutableMapOf<String, MutableList<Tag>>()
+
+        monitors.forEach {
+            val tags = it.evaluate(k8s)
+            if (results[it.monitorName] == null)
+                results[it.monitorName] = mutableListOf()
+            results[it.monitorName]!!.addAll(tags)
+        }
+
+        complexMonitor?.let {
+            val aggregations = CustomMonitorBehaviorProvider(k8s).apply(it).getAggregations()
+            aggregations.forEach {
+                if (results[it.name] == null)
+                    results[it.name] = mutableListOf()
+                results[it.name]!!.addAll(it.collection)
+            }
+        }
+
+        return results
+    }
+
+}

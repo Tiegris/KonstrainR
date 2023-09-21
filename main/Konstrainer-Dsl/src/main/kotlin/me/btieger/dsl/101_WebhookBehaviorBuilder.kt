@@ -1,10 +1,11 @@
 package me.btieger.dsl
 
+import io.fabric8.kubernetes.client.KubernetesClient
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 
 class WebhookDecision(val allowed: Boolean, val patch: JsonArray?, val warnings: List<String>?, val status: Status)
-class WebhookBehaviorBuilder(@DslMarkerConstant val request: JsonObject) {
+class WebhookBehaviorBuilder(@DslMarkerConstant val request: JsonObject, @DslMarkerConstant val kubectl: KubernetesClient) {
     private var _allowed: Boolean by setExactlyOnce(true)
     private var _warnings: List<String>? by setMaxOnce()
     private var _patch: JsonArray? by setMaxOnce()

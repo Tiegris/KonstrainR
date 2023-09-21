@@ -20,15 +20,15 @@ fun Application.configureRouting(server: Server, k8s: KubernetesClient) {
             call.respondText("OK")
         }
         authenticate {
-            if (server.monitors.isNotEmpty()) {
+            if (server.hasMonitors()) {
                 get("/aggregator") {
                     val response = buildJsonObject {
                         put("server", server.name)
                         putJsonArray("monitors") {
-                            server.monitors.forEach {
+                            server.evaluateMonitors(k8s).forEach {
                                 addJsonObject {
-                                    put("name", it.monitorName)
-                                    put("markedResources", Json.encodeToJsonElement(it.evaluate(k8s)))
+                                    put("name", it.key)
+                                    put("markedResources", Json.encodeToJsonElement(it.value))
                                 }
                             }
                         }
@@ -46,7 +46,7 @@ fun Application.configureRouting(server: Server, k8s: KubernetesClient) {
                 val kind = body["kind"]?.jsonPrimitive?.content!!
                 val request = body["request"]?.jsonObject!!
 
-                val decision = WebhookBehaviorBuilder(request).apply(webhook.provider).build()
+                val decision = WebhookBehaviorBuilder(request, k8s).apply(webhook.provider).build()
 
                 val response = buildJsonObject {
                     put("apiVersion", apiVersion)
