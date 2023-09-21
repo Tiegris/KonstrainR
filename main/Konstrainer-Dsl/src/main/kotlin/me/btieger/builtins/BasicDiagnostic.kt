@@ -21,10 +21,10 @@ val diagnosticsServer = server("basic-diagnostics") {
         }
 
         val podLabels = pods.map { it.metadata.labels }.toHashSet()
-        val services =kubectl.services().inAnyNamespace().list().items
+        val services = kubectl.services().inAnyNamespace().list().items
         aggregation("Services", services) {
             tag("No backend") {
-                podLabels.contains(item.spec.selector)
+                !podLabels.contains(item.spec.selector)
             }
         }
 
