@@ -5,7 +5,7 @@ import kotlinx.serialization.json.*
 private val _regex = "/(?=(?:[^\']*\'[^\']*\')*[^\']*\$)".toRegex()
 
 @DslMarkerBlock
-infix fun JsonObject.jqx(s: String): JsonElement {
+infix fun JsonElement.jqx(s: String): JsonElement {
     try {
         val s = s.removePrefix("/").removeSuffix("/")
         val splits = s.split(_regex)

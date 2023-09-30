@@ -4,13 +4,13 @@ import io.fabric8.kubernetes.api.model.LabelSelector
 
 typealias WebhookBehaviorProvider = WebhookBehaviorBuilder.()->Unit
 class WebhookBuilder(defaults: WebhookConfigBundle) {
-    private var _operations: Array<out Type> by setExactlyOnce(defaults.operations)
-    private var _apiGroups: Array<out Type> by setExactlyOnce(defaults.apiGroups)
-    private var _apiVersions: Array<out Type> by setExactlyOnce(defaults.apiVersion)
-    private var _resources: Array<out Type> by setExactlyOnce(defaults.resources)
-    private var _scope: Type by setExactlyOnce(defaults.scope ?: ANY)
+    private var _operations: Array<out String> by setExactlyOnce(defaults.operations)
+    private var _apiGroups: Array<out String> by setExactlyOnce(defaults.apiGroups)
+    private var _apiVersions: Array<out String> by setExactlyOnce(defaults.apiVersion)
+    private var _resources: Array<out String> by setExactlyOnce(defaults.resources)
+    private var _scope: String by setExactlyOnce(defaults.scope ?: ANY)
     private var _namespaceSelector: LabelSelector by setExactlyOnce(defaults.namespaceSelector)
-    private var _failurePolicy: FailurePolicy by setExactlyOnce(defaults.failurePolicy ?: FAIL)
+    private var _failurePolicy: String by setExactlyOnce(defaults.failurePolicy ?: FAIL)
 
     @DslMarkerVerb5
     var logRequest by setExactlyOnce(defaults.logRequest ?: false)
@@ -25,21 +25,13 @@ class WebhookBuilder(defaults: WebhookConfigBundle) {
     }
 
     @DslMarkerVerb5
-    fun operations(vararg args: Operation) {
+    fun operations(vararg args: String) {
         _operations = args
-    }
-    @DslMarkerVerb5
-    fun operations(args: ANY) {
-        _operations = arrayOf(ANY)
     }
 
     @DslMarkerVerb5
-    fun apiGroups(vararg args: ApiGroups) {
+    fun apiGroups(vararg args: String) {
         _apiGroups = args
-    }
-    @DslMarkerVerb5
-    fun apiGroups(args: ANY) {
-        _apiGroups = arrayOf(ANY)
     }
 
     @DslMarkerBlock
@@ -48,43 +40,31 @@ class WebhookBuilder(defaults: WebhookConfigBundle) {
     }
 
     @DslMarkerVerb5
-    fun apiVersions(vararg args: ApiVersions) {
+    fun apiVersions(vararg args: String) {
         _apiVersions = args
     }
-    @DslMarkerVerb5
-    fun apiVersions(args: ANY) {
-        _apiVersions = arrayOf(ANY)
-    }
 
     @DslMarkerVerb5
-    fun resources(vararg args: Resources) {
+    fun resources(vararg args: String) {
         _resources = args
     }
-    @DslMarkerVerb5
-    fun resources(args: ANY) {
-        _resources = arrayOf(ANY)
-    }
 
     @DslMarkerVerb5
-    fun scope(scope: Scope) {
+    fun scope(scope: String) {
         _scope = scope
     }
-    @DslMarkerVerb5
-    fun scope(scope: ANY) {
-        _scope = ANY
-    }
 
     @DslMarkerVerb5
-    fun failurePolicy(failurePolicy: FailurePolicy) {
+    fun failurePolicy(failurePolicy: String) {
         _failurePolicy = failurePolicy
     }
 
     internal fun build(name: String): Webhook {
-        val operations = _operations.map {it.string}
-        val apiGroups = _apiGroups.map {it.string}
-        val apiVersion = _apiVersions.map {it.string}
-        val resources = _resources.map {it.string}
-        val scope = _scope.string
+        val operations = _operations.map {it}
+        val apiGroups = _apiGroups.map {it}
+        val apiVersion = _apiVersions.map {it}
+        val resources = _resources.map {it}
+        val scope = _scope
         val namespaceSelector = _namespaceSelector
         val failurePolicy = _failurePolicy
         val _name = validateWhName(name)
@@ -92,58 +72,50 @@ class WebhookBuilder(defaults: WebhookConfigBundle) {
 
         return Webhook(
             operations, apiGroups, apiVersion, resources, scope,
-            namespaceSelector, failurePolicy.string,
+            namespaceSelector, failurePolicy,
             _path, _name, behavior, logRequest, logResponse
         )
     }
 }
 
-abstract class Type(val string: String)
-
-abstract class Operation(string: String) : Type(string)
-@DslMarkerConstant
-object CREATE : Operation("CREATE")
-@DslMarkerConstant
-object UPDATE : Operation("UPDATE")
-@DslMarkerConstant
-object DELETE : Operation("DELETE")
-@DslMarkerConstant
-object CONNECT : Operation("CONNECT")
-
-abstract class ApiGroups(string: String) : Type(string)
-@DslMarkerConstant
-object CORE : ApiGroups("")
-@DslMarkerConstant
-object APPS : ApiGroups("apps")
-
-abstract class ApiVersions(string: String) : Type(string)
-@DslMarkerConstant
-object V1: ApiVersions("v1")
-@DslMarkerConstant
-object V1BETA1: ApiVersions("v1beta1")
-
-abstract class Resources(string: String) : Type(string)
-@DslMarkerConstant
-object DEPLOYMENTS: Resources("deployments")
-@DslMarkerConstant
-object PODS: Resources("pods")
-@DslMarkerConstant
-object REPLICASETS: Resources("replicasets")
-
-abstract class Scope(string: String) : Type(string)
-@DslMarkerConstant
-object CLUSTER: Scope("Clustered")
-@DslMarkerConstant
-object NAMESPACED: Scope("Namespaced")
-
-abstract class FailurePolicy(string: String) : Type(string)
-@DslMarkerConstant
-object IGNORE : FailurePolicy("Ignore")
-@DslMarkerConstant
-object FAIL : FailurePolicy("Fail")
 
 @DslMarkerConstant
-object ANY : Type("*")
+val CREATE = "CREATE"
+@DslMarkerConstant
+val UPDATE = "UPDATE"
+@DslMarkerConstant
+val DELETE = "DELETE"
+@DslMarkerConstant
+val CONNECT = "CONNECT"
+
+@DslMarkerConstant
+val CORE = ""
+@DslMarkerConstant
+val APPS = "apps"
+
+@DslMarkerConstant
+val DEPLOYMENTS = "deployments"
+@DslMarkerConstant
+val PODS = "pods"
+@DslMarkerConstant
+val REPLICASETS = "replicasets"
+@DslMarkerConstant
+val STATEFULSETS = "statefulsets"
+@DslMarkerConstant
+val DAEMONSETS = "daemonsets"
+
+@DslMarkerConstant
+val CLUSTER = "Clustered"
+@DslMarkerConstant
+val NAMESPACED = "Namespaced"
+
+@DslMarkerConstant
+val IGNORE ="Ignore"
+@DslMarkerConstant
+val FAIL = "Fail"
+
+@DslMarkerConstant
+val ANY = "*"
 
 
 class Webhook (

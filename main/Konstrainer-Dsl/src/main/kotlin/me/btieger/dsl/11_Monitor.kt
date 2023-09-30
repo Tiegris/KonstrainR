@@ -5,11 +5,18 @@ import io.fabric8.kubernetes.api.model.KubernetesResourceList
 import io.fabric8.kubernetes.client.KubernetesClient
 import kotlinx.serialization.Serializable
 
-class WatchProvider(val kubectl: KubernetesClient)
+class WatchProvider(private val _kubectl: KubernetesClient) {
+    @DslMarkerConstant
+    val kubectl = _kubectl
+}
 typealias WatchFunction<T> = WatchProvider.() -> KubernetesResourceList<T>
 typealias MarkCondition = () -> Boolean
 class MarkerObject(val status: String, val condition: MarkCondition)
-class WatchBehaviorProvider<T>(val item: T) {
+class WatchBehaviorProvider<T>(private val _item: T) {
+
+    @DslMarkerConstant
+    val item: T = _item
+
     internal val markers = mutableListOf<MarkerObject>()
 
     @DslMarkerBlock

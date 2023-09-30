@@ -29,12 +29,12 @@ class ServerBuilder() {
     }
 
     @DslMarkerBlock
-    fun <T : HasMetadata> monitor(monitorName: String, watch: WatchFunction<T>, behavior: WatchBehaviorFunction<T>) {
+    fun <T : HasMetadata> simpleMonitor(monitorName: String, watch: WatchFunction<T>, behavior: WatchBehaviorFunction<T>) {
         _monitors += Monitor(monitorName, watch, behavior)
     }
 
     @DslMarkerBlock
-    fun complexMonitoring(behavior: CustomMonitorBehaviorFunction) {
+    fun report(behavior: CustomMonitorBehaviorFunction) {
         _complexMonitor = behavior
     }
 

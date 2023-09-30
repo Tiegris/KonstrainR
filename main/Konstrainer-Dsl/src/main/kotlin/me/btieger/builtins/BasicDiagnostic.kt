@@ -7,13 +7,13 @@ import me.btieger.dsl.server
 val diagnosticsServer = server("basic-diagnostics") {
     clusterRole = ReadAny
 
-    complexMonitoring {
+    report {
         val pods = kubectl.pods().inAnyNamespace().list().items
         val podLogs = pods.associate { pod ->
-            TagMeta(pod) to kubectl.pods().inNamespace(pod.metadata.namespace)
+            pod to kubectl.pods().inNamespace(pod.metadata.namespace)
                 .withName(pod.metadata.name).log
         }
-        aggregation("Apps", podLogs.entries, keyName = { item.key }) {
+        aggregation("Apps", podLogs.entries, tagKey = { TagMeta(item.key) }) {
             tag("Leaking potential secrets") {
                 val log = item.value.lowercase()
                 log.contains("pass") || log.contains("secret") || log.contains("token")
@@ -23,6 +23,9 @@ val diagnosticsServer = server("basic-diagnostics") {
         val podLabels = pods.map { it.metadata.labels }.toHashSet()
         val services = kubectl.services().inAnyNamespace().list().items
         aggregation("Services", services) {
+            tag("Has external IP") {
+                item.spec.externalIPs.isNotEmpty()
+            }
             tag("No backend") {
                 podLabels.none { podLabel ->
                     item.spec.selector.all { podLabel.entries.contains(it) }
@@ -30,36 +33,106 @@ val diagnosticsServer = server("basic-diagnostics") {
             }
         }
 
+        val deployments = kubectl.apps().deployments().inAnyNamespace().list().items
+        val statefulsets = kubectl.apps().statefulSets().inAnyNamespace().list().items
+        val hpas = kubectl.autoscaling().v1().horizontalPodAutoscalers().inAnyNamespace().list().items
+        val hpaRefs = hpas.map { it.spec.scaleTargetRef }
+        aggregation("Deployments", deployments) {
+            tag("Has HPA, but resource requests and limits are not the same") {
+                (hpaRefs.any { it.name == item.metadata.name && it.apiVersion == item.apiVersion && it.kind == item.kind }) &&
+                        (item.spec.template.spec.containers.any {
+                            it.resources.limits["cpu"] != it.resources.requests["cpu"] ||
+                                    it.resources.limits["memory"] != it.resources.requests["memory"]
+                        })
+            }
+            tag("Has no resources") {
+                item.spec.template.spec.containers.any { it.resources.limits.isNullOrEmpty() || it.resources.requests.isNullOrEmpty() }
+            }
+            tag("No node selector") {
+                item.spec.template.spec.nodeSelector.isEmpty()
+            }
+            tag("No probes") {
+                item.spec.template.spec.containers.any { it.livenessProbe == null }
+            }
+            tag("Has long history") {
+                item.spec.revisionHistoryLimit > 4
+            }
+            tag("No node affinity") {
+                val podSpec = item.spec.template.spec
+                podSpec.affinity == null && podSpec.nodeSelector == null && podSpec.nodeName == null
+            }
+        }
+        aggregation("StatefulSets", statefulsets) {
+            tag("Has HPA, but resource requests and limits are not the same") {
+                (hpaRefs.any { it.name == item.metadata.name && it.apiVersion == item.apiVersion && it.kind == item.kind }) &&
+                        (item.spec.template.spec.containers.any {
+                            it.resources.limits["cpu"] != it.resources.requests["cpu"] ||
+                                    it.resources.limits["memory"] != it.resources.requests["memory"]
+                        })
+            }
+            tag("Has no resources") {
+                item.spec.template.spec.containers.any { it.resources.limits.isNullOrEmpty() || it.resources.requests.isNullOrEmpty() }
+            }
+            tag("No node selector") {
+                item.spec.template.spec.nodeSelector.isEmpty()
+            }
+            tag("No probes") {
+                item.spec.template.spec.containers.any { it.livenessProbe == null }
+            }
+            tag("Has long history") {
+                item.spec.revisionHistoryLimit > 4
+            }
+            tag("No node affinity") {
+                val podSpec = item.spec.template.spec
+                podSpec.affinity == null && podSpec.nodeSelector == null && podSpec.nodeName == null
+            }
+        }
+
+        val pvs = kubectl.persistentVolumes().list().items
+        aggregation("Volumes", pvs) {
+            tag("Released state") {
+                item.status.phase == "Released"
+            }
+            tag("Available state") {
+                item.status.phase == "Available"
+            }
+            tag("Failed state") {
+                item.status.phase == "Failed"
+            }
+        }
+
+        val nss = kubectl.namespaces().list().items
+        aggregation("Namespaces", nss) {
+            tag("Has no pods") {
+                pods.none { pod -> pod.metadata.namespace == item.metadata.name }
+            }
+        }
+
+        aggregation("Kube System", pods.filter {it.metadata.namespace=="kube-system"}) {
+            tag("Has error in logs") {
+                podLogs[item]?.contains("[ERROR]") == true
+            }
+        }
+
+        aggregation("Pods", pods) {
+            tag("Not running or not succeeded") {
+                item.status.phase != "Running" && item.status.phase != "Succeeded"
+            }
+            tag("Image pull backoff") {
+                item.status.containerStatuses.any { it.state.waiting?.reason == "ImagePullBackOff" } ||
+                        item.status.containerStatuses.any { it.state.waiting?.reason == "ErrImagePull" }
+            }
+            tag("Dangling pods") {
+                item.metadata.ownerReferences.isEmpty()
+            }
+            tag("NotRunning") {
+                item.status.containerStatuses.any { it.state.running == null }
+            }
+            tag("No security context") {
+                item.spec.securityContext == null
+            }
+        }
     }
 
-    monitor("Deployments", { kubectl.apps().deployments().inAnyNamespace().list() }) {
-        tag("Has no resources") {
-            item.spec.template.spec.containers.any { it.resources.limits.isNullOrEmpty() || it.resources.requests.isNullOrEmpty() }
-        }
-        tag("No node selector") {
-            item.spec.template.spec.nodeSelector.isEmpty()
-        }
-        tag("No probes") {
-            item.spec.template.spec.containers.any { it.livenessProbe == null }
-        }
-        tag("Has long history") {
-            item.spec.revisionHistoryLimit > 4
-        }
-    }
-
-    monitor("Services", { kubectl.services().inAnyNamespace().list() }) {
-        tag("Has external IP") {
-            item.spec.externalIPs.isNotEmpty()
-        }
-    }
-
-    monitor("Pods", { kubectl.pods().inAnyNamespace().list() }) {
-        tag("Image pull backoff") {
-            item.status.containerStatuses.any { it.state.waiting?.reason == "ImagePullBackOff" }
-        }
-        tag("Dangling pods") {
-            item.metadata.ownerReferences.isEmpty()
-        }
-    }
 
 }

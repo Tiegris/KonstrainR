@@ -9,13 +9,13 @@ fun webhookConfigBundle(setup: WebhookConfigBundleBuilder.() -> Unit): WebhookCo
 }
 
 class WebhookConfigBundleBuilder {
-    private var _operations: Array<out Type>? by setMaxOnce()
-    private var _apiGroups: Array<out Type>? by setMaxOnce()
-    private var _apiVersions: Array<out Type>? by setMaxOnce()
-    private var _resources: Array<out Type>? by setMaxOnce()
-    private var _scope: Type? by setMaxOnce(ANY)
+    private var _operations: Array<out String>? by setMaxOnce()
+    private var _apiGroups: Array<out String>? by setMaxOnce()
+    private var _apiVersions: Array<out String>? by setMaxOnce()
+    private var _resources: Array<out String>? by setMaxOnce()
+    private var _scope: String? by setMaxOnce(ANY)
     private var _namespaceSelector: LabelSelector? by setMaxOnce()
-    private var _failurePolicy: FailurePolicy? by setMaxOnce(FAIL)
+    private var _failurePolicy: String? by setMaxOnce(FAIL)
 
     @DslMarkerVerb5
     var logRequest by setExactlyOnce(false)
@@ -23,48 +23,28 @@ class WebhookConfigBundleBuilder {
     var logResponse by setExactlyOnce(false)
 
     @DslMarkerVerb5
-    fun operations(vararg args: Operation) {
+    fun operations(vararg args: String) {
         _operations = args
     }
-    @DslMarkerVerb5
-    fun operations(args: ANY) {
-        _operations = arrayOf(ANY)
-    }
 
     @DslMarkerVerb5
-    fun apiGroups(vararg args: ApiGroups) {
+    fun apiGroups(vararg args: String) {
         _apiGroups = args
     }
-    @DslMarkerVerb5
-    fun apiGroups(args: ANY) {
-        _apiGroups = arrayOf(ANY)
-    }
 
     @DslMarkerVerb5
-    fun apiVersions(vararg args: ApiVersions) {
+    fun apiVersions(vararg args: String) {
         _apiVersions = args
     }
-    @DslMarkerVerb5
-    fun apiVersions(args: ANY) {
-        _apiVersions = arrayOf(ANY)
-    }
 
     @DslMarkerVerb5
-    fun resources(vararg args: Resources) {
+    fun resources(vararg args: String) {
         _resources = args
     }
-    @DslMarkerVerb5
-    fun resources(args: ANY) {
-        _resources = arrayOf(ANY)
-    }
 
     @DslMarkerVerb5
-    fun scope(scope: Scope) {
+    fun scope(scope: String) {
         _scope = scope
-    }
-    @DslMarkerVerb5
-    fun scope(scope: ANY) {
-        _scope = ANY
     }
 
     @DslMarkerBlock
@@ -73,7 +53,7 @@ class WebhookConfigBundleBuilder {
     }
 
     @DslMarkerVerb5
-    fun failurePolicy(failurePolicy: FailurePolicy) {
+    fun failurePolicy(failurePolicy: String) {
         _failurePolicy = failurePolicy
     }
 
@@ -87,13 +67,13 @@ class WebhookConfigBundleBuilder {
 }
 
 class WebhookConfigBundle(
-    val operations: Array<out Type>?,
-    val apiGroups: Array<out Type>?,
-    val apiVersion: Array<out Type>?,
-    val resources: Array<out Type>?,
-    val scope: Type?,
+    val operations: Array<out String>?,
+    val apiGroups: Array<out String>?,
+    val apiVersion: Array<out String>?,
+    val resources: Array<out String>?,
+    val scope: String?,
     val namespaceSelector: LabelSelector?,
-    val failurePolicy: FailurePolicy?,
+    val failurePolicy: String?,
     val logRequest: Boolean?,
     val logResponse: Boolean?,
 )
