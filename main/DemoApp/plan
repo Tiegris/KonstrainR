@@ -1,0 +1,13 @@
+van egy létező app k8s-ben:
+    látszik rajta az evolúció
+        egyes részek kubectl apply, mások helm
+        üres névterek
+        hátrahagyott pazarló cuccok
+
+random szemetek {
+    üres ns
+    random pod deployment nélkül
+    kubectl-lel kitett default deployment: no secu context, long history, no node selector
+    hátrahagyott volumeok
+
+}
