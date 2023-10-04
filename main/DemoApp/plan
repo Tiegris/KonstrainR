@@ -11,3 +11,9 @@ random szemetek {
     hátrahagyott volumeok
 
 }
+
+
+itemsapp {
+    items be - mongo
+    users - disk
+}
