@@ -12,20 +12,25 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: item
+  name: items
 spec:
   selector:
     matchLabels:
-      app: item
+      app: items
   template:
     metadata:
       labels:
-        app: item
+        app: items
       annotations:
         v: "0"
     spec:
       containers:
-        - name: item
+        - name: items
+          env:
+            - name: MongoPass
+              value: G8CKmxWjvr
+            - name: MongoHost
+              value: my-release-mongodb.mongo.svc.cluster.local
           image: tiegris/apples-items:latest
           resources:
             limits:

@@ -3,8 +3,11 @@ from pymongo import MongoClient
 import os
 
 mongo_pass = os.getenv("MongoPass", "0CGdI215Iz")
-mongo_url = os.getenv("MongoUrl", f"mongodb://root:{mongo_pass}@localhost:27017")
+mongo_host = os.getenv("MongoHost", "localhost")
+mongo_url = os.getenv("MongoUrl", f"mongodb://root:{mongo_pass}@{mongo_host}:27017")
 mongo = MongoClient(mongo_url)
+
+print(f'Mongo connection string: "mongodb://root:{mongo_pass}@{mongo_host}:27017"')
 
 app = Flask(__name__)
 
@@ -32,6 +35,9 @@ def init_db():
     ]
     mongo.applesapp.items.insert_many(items)
 
+
+if len([convert(x) for x in mongo.applesapp.items.find()]) == 0:
+    init_db()
 
 app.run(host="0.0.0.0", port=8079)
 
