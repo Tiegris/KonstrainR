@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: users
+spec:
+  selector:
+    app: users
+  ports:
+  - port: 8080
+    targetPort: 8079
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user
+spec:
+  selector:
+    matchLabels:
+      app: user
+  template:
+    metadata:
+      labels:
+        app: user
+    spec:
+      containers:
+      - name: user
+        image: tiegris/apples-users:latest
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8079
+        volumeMounts:
+          - mountPath: "/app/data"
+            name: user-storage
+      volumes:
+      - name: user-storage
+        persistentVolumeClaim:
+          claimName: user-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: users-pvc
+spec:
+  resources:
+    requests:
+      storage: 50M
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+

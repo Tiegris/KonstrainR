@@ -1,4 +1,4 @@
-FROM python:apline
+FROM python:alpine
 RUN pip install Flask pymongo
 WORKDIR /app
 COPY ./main.py .
