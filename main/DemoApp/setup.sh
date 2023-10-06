@@ -12,26 +12,35 @@ kns () {
         fi
 }
 
-# Build images
+# Setup
 repo=tiegris
-
 home=$(pwd)
+
+# Build images
 cd $home/apps/items
 docker build -t $repo/apples-items:latest .
 docker push $repo/apples-items:latest
-
 cd $home/apps/users
 docker build -t $repo/apples-users:latest .
 docker push $repo/apples-users:latest
 
-
+# Initial creation of users app
 kubectl create ns users
 kns users
 kubectl apply -f $home/k8s/users.yaml
 
+# Initial creation of items app
 kubectl create ns items
 kns items
 kubectl apply -f $home/k8s/items.yaml
+
+# Simulate a history of changes
+for v in {1..14}; do
+    yq eval 'select(.kind == "Deployment").spec.template.metadata.annotations.v = env(v)' $home/k8s/items.yaml -i
+    kubectl apply -f $home/k8s/items.yaml
+done
+v=0
+yq eval 'select(.kind == "Deployment").spec.template.metadata.annotations.v = env(v)' $home/k8s/items.yaml -i
 
 # Simulate collegaue 1 creating test namespace
 kubectl create ns johndoe-test

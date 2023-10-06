@@ -13,8 +13,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: item
-  annotations:
-    v: "1"
 spec:
   selector:
     matchLabels:
@@ -23,6 +21,8 @@ spec:
     metadata:
       labels:
         app: item
+      annotations:
+        v: "0"
     spec:
       containers:
         - name: item
