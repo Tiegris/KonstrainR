@@ -37,7 +37,7 @@ spec:
       volumes:
       - name: user-storage
         persistentVolumeClaim:
-          claimName: user-pvc
+          claimName: users-pvc
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

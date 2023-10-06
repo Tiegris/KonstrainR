@@ -31,7 +31,8 @@ def init_db():
         INSERT INTO users VALUES
             ('John Athan', 'red', 1864),
             ('Ida Red', 'red', 1935),
-            ('Granny Smith', 'green', 1868)
+            ('Granny Smith', 'green', 1868),
+            ('John A. Gold', 'red', 1943)
         """)
         con.commit()
 

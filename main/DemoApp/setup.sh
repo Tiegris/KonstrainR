@@ -39,19 +39,19 @@ for v in {1..14}; do
     yq eval 'select(.kind == "Deployment").spec.template.metadata.annotations.v = env(v)' $home/k8s/items.yaml -i
     kubectl apply -f $home/k8s/items.yaml
 done
-v=0
-yq eval 'select(.kind == "Deployment").spec.template.metadata.annotations.v = env(v)' $home/k8s/items.yaml -i
+# Restore yaml file
+yq eval 'select(.kind == "Deployment").spec.template.metadata.annotations.v = "0"' $home/k8s/items.yaml -i
 
-# Simulate collegaue 1 creating test namespace
-kubectl create ns johndoe-test
-# Simulate collegaue 2 creating test namespace and leaving some leftover junk in it
-kubectl create ns janeroe-test
-kns janeroe-test
+# Simulate John Athan creating test namespace
+kubectl create ns jathan-test
+# Simulate Ida Red creating test namespace and leaving some leftover junk in it
+kubectl create ns ired-test
+kns idared-test
 kubectl apply -f $home/k8s/junk.yaml
 
-kubectl create ns mongo
-kns mongo
 
 # install mongodb
 # https://bitnami.com/stack/mongodb/helm
+kubectl create ns mongo
+kns mongo
 helm install my-release oci://registry-1.docker.io/bitnamicharts/mongodb
