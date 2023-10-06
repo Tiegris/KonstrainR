@@ -6,8 +6,8 @@ spec:
   selector:
     app: items
   ports:
-  - port: 8080
-    targetPort: 8079
+    - port: 8080
+      targetPort: 8079
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -25,14 +25,14 @@ spec:
         app: item
     spec:
       containers:
-      - name: item
-        image: tiegris/apples-items:latest
-        resources:
-          limits:
-            memory: "128Mi"
-            cpu: "500m"
-        ports:
-        - containerPort: 8079
+        - name: item
+          image: tiegris/apples-items:latest
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 8079
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -45,4 +45,3 @@ spec:
   volumeMode: Filesystem
   accessModes:
     - ReadWriteOnce
-
