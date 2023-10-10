@@ -123,7 +123,10 @@ kubectl delete ns users items jathan-test ired-test mongo
 
 ## Running Konstrainer
 
+Go to the main directory.
+
 ```bash
+kubectl create ns konstrainer-ns
 ./publish.sh
 kubectl port-forward service/konstrainer-core 8080:8080 -n konstrainer-ns
 ```
