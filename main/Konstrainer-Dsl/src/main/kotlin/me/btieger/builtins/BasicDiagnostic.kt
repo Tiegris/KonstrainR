@@ -1,7 +1,6 @@
 package me.btieger.builtins
 
 import me.btieger.dsl.ReadAny
-import me.btieger.dsl.TagMeta
 import me.btieger.dsl.server
 
 val diagnosticsServer = server("basic-diagnostics") {
@@ -9,17 +8,6 @@ val diagnosticsServer = server("basic-diagnostics") {
 
     report {
         val pods = kubectl.pods().inAnyNamespace().list().items
-        val podLogs = pods.associate { pod ->
-            pod to kubectl.pods().inNamespace(pod.metadata.namespace)
-                .withName(pod.metadata.name).log
-        }
-        aggregation("Apps", podLogs.entries, tagKey = { TagMeta(item.key) }) {
-            tag("Leaking potential secrets") {
-                val log = item.value.lowercase()
-                log.contains("pass") || log.contains("secret") || log.contains("token")
-            }
-        }
-
         val podLabels = pods.map { it.metadata.labels }.toHashSet()
         val services = kubectl.services().inAnyNamespace().list().items
         aggregation("Services", services) {
@@ -101,16 +89,20 @@ val diagnosticsServer = server("basic-diagnostics") {
             }
         }
 
+        val pvcs = kubectl.persistentVolumeClaims().inAnyNamespace().list().items
+        aggregation("PVCs", pvcs) {
+            tag("Unused") {
+                pods.none { pod ->
+                    pod.metadata.namespace == item.metadata.namespace &&
+                            pod.spec.volumes.any { volume -> volume.persistentVolumeClaim?.claimName == item.metadata.name }
+                }
+            }
+        }
+
         val nss = kubectl.namespaces().list().items
         aggregation("Namespaces", nss) {
             tag("Has no pods") {
                 pods.none { pod -> pod.metadata.namespace == item.metadata.name }
-            }
-        }
-
-        aggregation("Kube System", pods.filter {it.metadata.namespace=="kube-system"}) {
-            tag("Has error in logs") {
-                podLogs[item]?.contains("[ERROR]") == true
             }
         }
 
@@ -122,7 +114,7 @@ val diagnosticsServer = server("basic-diagnostics") {
                 item.status.containerStatuses.any { it.state.waiting?.reason == "ImagePullBackOff" } ||
                         item.status.containerStatuses.any { it.state.waiting?.reason == "ErrImagePull" }
             }
-            tag("Dangling pods") {
+            tag("Dangling pod") {
                 item.metadata.ownerReferences.isEmpty()
             }
             tag("NotRunning") {

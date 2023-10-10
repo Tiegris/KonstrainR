@@ -5,13 +5,13 @@ import io.fabric8.kubernetes.client.KubernetesClient
 
 typealias CustomMonitorBehaviorFunction = CustomMonitorBehaviorProvider.() -> Unit
 
-class TagMetaProvider<T>(private val _item: T) {
+class TagMetaProvider<T>(_item: T) {
     @DslMarkerConstant
     val item = _item
 }
 typealias TagMetaProviderFunction<T> = TagMetaProvider<T>.() -> TagMeta
 
-class CustomMonitorBehaviorProvider(private val _kubectl: KubernetesClient) {
+class CustomMonitorBehaviorProvider(_kubectl: KubernetesClient) {
 
     @DslMarkerConstant
     val kubectl = _kubectl
@@ -41,7 +41,7 @@ class CustomMonitorBehaviorProvider(private val _kubectl: KubernetesClient) {
 
 }
 
-class AggregationBuilder<T>(private val _item: T) {
+class AggregationBuilder<T>(_item: T) {
     internal val markers = mutableListOf<MarkerObject>()
 
     @DslMarkerConstant
