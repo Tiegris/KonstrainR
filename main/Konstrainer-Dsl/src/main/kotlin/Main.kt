@@ -18,6 +18,6 @@ fun main(args: Array<String>) {
 
     val x = kubectl.apps().deployments().inNamespace("users")
 
-    val xx = CustomMonitorBehaviorProvider(kubectl).kubectl(namesapce = "users") { apps().deployments() }
+    val xx = CustomMonitorBehaviorProvider(kubectl).kubelist(namesapce = "users") { apps().deployments() }
     println()
 }

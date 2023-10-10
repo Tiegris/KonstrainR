@@ -7,10 +7,21 @@ val diagnosticsServer = server("basic-diagnostics") {
     clusterRole = ReadAny
 
     report {
-        val pods = kubectl { pods() }
+        val pods = kubelist { pods() }
         val podLabels = pods.map { it.metadata.labels }.toHashSet()
 
-        val services = kubectl { services() }
+        val sysPods = kubelist(namesapce = "kube-system") { pods() }
+        val sysLogs = sysPods.associateWith {
+            kubectl { pods().inNamespace(it.metadata.namespace).withName(it.metadata.name).log }
+        }
+
+        aggregation("SysPods", sysLogs.entries) {
+            tag("Has Error in logs") {
+                item.value?.contains("ERROR", true) ?: false
+            }
+        }
+
+        val services = kubelist { services() }
         aggregation("Services", services) {
             tag("Has external IP") {
                 item.spec.externalIPs.isNotEmpty()
@@ -22,9 +33,9 @@ val diagnosticsServer = server("basic-diagnostics") {
             }
         }
 
-        val deployments = kubectl { apps().deployments() }
-        val statefulsets = kubectl { apps().statefulSets() }
-        val hpas = kubectl { autoscaling().v1().horizontalPodAutoscalers() }
+        val deployments = kubelist { apps().deployments() }
+        val statefulsets = kubelist { apps().statefulSets() }
+        val hpas = kubelist { autoscaling().v1().horizontalPodAutoscalers() }
         val hpaRefs = hpas.map { it.spec.scaleTargetRef }
         aggregation("Deployments", deployments) {
             tag("Has HPA, but resource requests and limits are not the same") {
@@ -34,7 +45,7 @@ val diagnosticsServer = server("basic-diagnostics") {
                                     it.resources.limits["memory"] != it.resources.requests["memory"]
                         })
             }
-            tag("Has no resources") {
+            tag("No resources defined") {
                 item.spec.template.spec.containers.any { it.resources.limits.isNullOrEmpty() || it.resources.requests.isNullOrEmpty() }
             }
             tag("No node selector") {
@@ -59,7 +70,7 @@ val diagnosticsServer = server("basic-diagnostics") {
                                     it.resources.limits["memory"] != it.resources.requests["memory"]
                         })
             }
-            tag("Has no resources") {
+            tag("No resources defined") {
                 item.spec.template.spec.containers.any { it.resources.limits.isNullOrEmpty() || it.resources.requests.isNullOrEmpty() }
             }
             tag("No node selector") {
@@ -77,7 +88,7 @@ val diagnosticsServer = server("basic-diagnostics") {
             }
         }
 
-        val pvs = kubectl { persistentVolumes() }
+        val pvs = kubelist { persistentVolumes() }
         aggregation("Volumes", pvs) {
             tag("Released state") {
                 item.status.phase == "Released"
@@ -90,7 +101,7 @@ val diagnosticsServer = server("basic-diagnostics") {
             }
         }
 
-        val pvcs = kubectl { persistentVolumeClaims() }
+        val pvcs = kubelist { persistentVolumeClaims() }
         aggregation("PVCs", pvcs) {
             tag("Unused") {
                 pods.none { pod ->
@@ -100,8 +111,8 @@ val diagnosticsServer = server("basic-diagnostics") {
             }
         }
 
-        val nss = kubectl(filter = {
-            filter { it.metadata.name !in listOf("kube-node-lease", "default", "kube-public") }
+        val nss = kubelist(filter = {
+            filter { it.metadata.name !in listOf("kube-node-lease", "default", "kube-public", "kube-system") }
         }) { namespaces() }
         aggregation("Namespaces", nss) {
             tag("Has no pods") {
@@ -120,7 +131,7 @@ val diagnosticsServer = server("basic-diagnostics") {
             tag("Dangling pod") {
                 item.metadata.ownerReferences.isEmpty()
             }
-            tag("NotRunning") {
+            tag("Not Running") {
                 item.status.containerStatuses.any { it.state.running == null }
             }
             tag("No security context") {

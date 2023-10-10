@@ -30,7 +30,19 @@ class CustomMonitorBehaviorProvider(private val _kubectl: KubernetesClient) {
 //    val kubectl = _kubectl
 
     @DslMarkerBlock
-    fun <T : HasMetadata, L : KubernetesResourceList<T>, R : Resource<T>> kubectl(
+    fun <T> kubectl(
+        setup: KubernetesClient.() -> T
+    ): T? {
+        return try {
+            _kubectl.run(setup)
+        } catch (e: Exception) {
+            _errors += "Error during kubectl call: ${e.message}"
+            null
+        }
+    }
+
+    @DslMarkerBlock
+    fun <T : HasMetadata, L : KubernetesResourceList<T>, R : Resource<T>> kubelist(
         filter: Filter<T> = {filterOutKubeSystemNss()}, setup: KubernetesClient.() -> NonNamespaceOperation<T, L, R>
     ): List<T> {
         return try {
@@ -46,7 +58,7 @@ class CustomMonitorBehaviorProvider(private val _kubectl: KubernetesClient) {
     }
 
     @DslMarkerBlock
-    fun <T : HasMetadata, L : KubernetesResourceList<T>, R : Resource<T>> kubectl(
+    fun <T : HasMetadata, L : KubernetesResourceList<T>, R : Resource<T>> kubelist(
         namesapce: String, filter: Filter<T> = {this}, setup: KubernetesClient.() -> Namespaceable<NonNamespaceOperation<T, L, R>>
     ): List<T> {
         return try {
@@ -71,7 +83,9 @@ class CustomMonitorBehaviorProvider(private val _kubectl: KubernetesClient) {
         name: String,
         collection: Iterable<T>,
         tagKey: TagMetaProviderFunction<T> = {
-            if (item is HasMetadata) TagMeta(item) else throw Exception()
+            (item as? HasMetadata)?.let { TagMeta(it) } ?:
+            (item as? Map.Entry<*, *>)?.let { (it.key as? HasMetadata)?.let {TagMeta(it)} } ?:
+            throw Exception()
         },
         setup: AggregationBuilder<T>.() -> Unit
     ) {
