@@ -4,9 +4,21 @@ import me.btieger.dsl.*
 
 const val companyPrefix = "tiegris/"
 val advancedWebhookServer = server("advanced-webhook-rules") {
-    simpleMonitor("Pods", {kubectl.pods().inAnyNamespace().list()}) {
-        tag("Image not from company registry") {
-            item.spec.containers.any { !it.image.startsWith(companyPrefix) }
+    report {
+        aggregation("Pods", kubelist { pods() }) {
+            tag("Image not from company registry") {
+                item.spec.containers.any { !it.image.startsWith(companyPrefix) }
+            }
+        }
+
+        val usersPods = kubelist(namesapce = "users") { pods() }
+        val usersLogs = usersPods.associateWith {
+            kubectl { pods().inNamespace(it.metadata.namespace).withName(it.metadata.name).log }
+        }
+        aggregation("Users App", usersLogs.entries) {
+            tag("Leaks secret in logs") {
+                item.value?.contains("pass", true) ?: false
+            }
         }
     }
     webhook("only-internal-registry") {

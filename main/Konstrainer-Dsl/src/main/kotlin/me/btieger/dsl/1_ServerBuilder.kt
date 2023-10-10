@@ -29,17 +29,12 @@ class ServerBuilder {
     }
 
     @DslMarkerBlock
-    fun <T : HasMetadata> simpleMonitor(monitorName: String, watch: WatchFunction<T>, behavior: WatchBehaviorFunction<T>) {
-        _monitors += Monitor(monitorName, watch, behavior)
-    }
-
-    @DslMarkerBlock
     fun report(behavior: CustomMonitorBehaviorFunction) {
         _complexMonitor = behavior
     }
 
     internal fun build(name: String): Server {
-        return Server(name, _webhooks, _monitors, clusterRole, _complexMonitor)
+        return Server(name, _webhooks, clusterRole, _complexMonitor)
     }
 }
 
@@ -47,27 +42,19 @@ class MonitorResponse(val results: MutableMap<String, MutableList<Tag>>, val err
 class Server(
     val name: String,
     val webhooks: List<Webhook>,
-    private val monitors: List<Monitor<out HasMetadata>>,
     val clusterRole: ClusterRoleName?,
-    private val complexMonitor: CustomMonitorBehaviorFunction?
+    private val report: CustomMonitorBehaviorFunction?
 ) {
 
     fun hasMonitors(): Boolean {
-        return complexMonitor != null || monitors.isNotEmpty()
+        return report != null
     }
 
     fun evaluateMonitors(k8s: KubernetesClient): MonitorResponse {
         val results = mutableMapOf<String, MutableList<Tag>>()
 
-        monitors.forEach {
-            val tags = it.evaluate(k8s)
-            if (results[it.monitorName] == null)
-                results[it.monitorName] = mutableListOf()
-            results[it.monitorName]!!.addAll(tags)
-        }
-
         var errors: List<String>? = null
-        complexMonitor?.let {
+        report?.let {
             val monitor = CustomMonitorBehaviorProvider(k8s).apply(it)
             val aggregations = monitor.getAggregations()
             errors = monitor.getErrors()

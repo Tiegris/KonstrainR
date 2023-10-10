@@ -10,17 +10,6 @@ val diagnosticsServer = server("basic-diagnostics") {
         val pods = kubelist { pods() }
         val podLabels = pods.map { it.metadata.labels }.toHashSet()
 
-        val sysPods = kubelist(namesapce = "kube-system") { pods() }
-        val sysLogs = sysPods.associateWith {
-            kubectl { pods().inNamespace(it.metadata.namespace).withName(it.metadata.name).log }
-        }
-
-        aggregation("SysPods", sysLogs.entries) {
-            tag("Has Error in logs") {
-                item.value?.contains("ERROR", true) ?: false
-            }
-        }
-
         val services = kubelist { services() }
         aggregation("Services", services) {
             tag("Has external IP") {
