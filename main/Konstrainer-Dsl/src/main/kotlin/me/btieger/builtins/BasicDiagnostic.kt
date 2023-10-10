@@ -7,9 +7,10 @@ val diagnosticsServer = server("basic-diagnostics") {
     clusterRole = ReadAny
 
     report {
-        val pods = kubectl.pods().inAnyNamespace().list().items
+        val pods = kubectl { pods() }
         val podLabels = pods.map { it.metadata.labels }.toHashSet()
-        val services = kubectl.services().inAnyNamespace().list().items
+
+        val services = kubectl { services() }
         aggregation("Services", services) {
             tag("Has external IP") {
                 item.spec.externalIPs.isNotEmpty()
@@ -21,9 +22,9 @@ val diagnosticsServer = server("basic-diagnostics") {
             }
         }
 
-        val deployments = kubectl.apps().deployments().inAnyNamespace().list().items
-        val statefulsets = kubectl.apps().statefulSets().inAnyNamespace().list().items
-        val hpas = kubectl.autoscaling().v1().horizontalPodAutoscalers().inAnyNamespace().list().items
+        val deployments = kubectl { apps().deployments() }
+        val statefulsets = kubectl { apps().statefulSets() }
+        val hpas = kubectl { autoscaling().v1().horizontalPodAutoscalers() }
         val hpaRefs = hpas.map { it.spec.scaleTargetRef }
         aggregation("Deployments", deployments) {
             tag("Has HPA, but resource requests and limits are not the same") {
@@ -76,7 +77,7 @@ val diagnosticsServer = server("basic-diagnostics") {
             }
         }
 
-        val pvs = kubectl.persistentVolumes().list().items
+        val pvs = kubectl { persistentVolumes() }
         aggregation("Volumes", pvs) {
             tag("Released state") {
                 item.status.phase == "Released"
@@ -89,7 +90,7 @@ val diagnosticsServer = server("basic-diagnostics") {
             }
         }
 
-        val pvcs = kubectl.persistentVolumeClaims().inAnyNamespace().list().items
+        val pvcs = kubectl { persistentVolumeClaims() }
         aggregation("PVCs", pvcs) {
             tag("Unused") {
                 pods.none { pod ->
@@ -99,7 +100,9 @@ val diagnosticsServer = server("basic-diagnostics") {
             }
         }
 
-        val nss = kubectl.namespaces().list().items
+        val nss = kubectl(filter = {
+            filter { it.metadata.name !in listOf("kube-node-lease", "default", "kube-public") }
+        }) { namespaces() }
         aggregation("Namespaces", nss) {
             tag("Has no pods") {
                 pods.none { pod -> pod.metadata.namespace == item.metadata.name }

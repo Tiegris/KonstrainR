@@ -43,6 +43,7 @@ class ServerBuilder() {
     }
 }
 
+class MonitorResponse(val results: MutableMap<String, MutableList<Tag>>, val errors: List<String>)
 class Server(
     val name: String,
     val webhooks: List<Webhook>,
@@ -55,7 +56,7 @@ class Server(
         return complexMonitor != null || monitors.isNotEmpty()
     }
 
-    fun evaluateMonitors(k8s: KubernetesClient): MutableMap<String, MutableList<Tag>> {
+    fun evaluateMonitors(k8s: KubernetesClient): MonitorResponse {
         val results = mutableMapOf<String, MutableList<Tag>>()
 
         monitors.forEach {
@@ -65,8 +66,11 @@ class Server(
             results[it.monitorName]!!.addAll(tags)
         }
 
+        var errors: List<String>? = null
         complexMonitor?.let {
-            val aggregations = CustomMonitorBehaviorProvider(k8s).apply(it).getAggregations()
+            val monitor = CustomMonitorBehaviorProvider(k8s).apply(it)
+            val aggregations = monitor.getAggregations()
+            errors = monitor.getErrors()
             aggregations.forEach {
                 if (results[it.name] == null)
                     results[it.name] = mutableListOf()
@@ -74,7 +78,7 @@ class Server(
             }
         }
 
-        return results
+        return MonitorResponse(results, errors ?: listOf())
     }
 
 }

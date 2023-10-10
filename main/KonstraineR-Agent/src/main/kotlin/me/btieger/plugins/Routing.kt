@@ -22,15 +22,19 @@ fun Application.configureRouting(server: Server, k8s: KubernetesClient) {
         authenticate {
             if (server.hasMonitors()) {
                 get("/aggregator") {
+                    val monitorResponse = server.evaluateMonitors(k8s)
                     val response = buildJsonObject {
                         put("server", server.name)
                         putJsonArray("monitors") {
-                            server.evaluateMonitors(k8s).forEach {
+                            monitorResponse.results.forEach {
                                 addJsonObject {
                                     put("name", it.key)
                                     put("markedResources", Json.encodeToJsonElement(it.value))
                                 }
                             }
+                        }
+                        putJsonArray("errors") {
+                            monitorResponse.errors.forEach(::add)
                         }
                     }
                     call.respond(HttpStatusCode.OK, response)
