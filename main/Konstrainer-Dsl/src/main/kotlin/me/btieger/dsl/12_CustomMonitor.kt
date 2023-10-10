@@ -46,10 +46,11 @@ class CustomMonitorBehaviorProvider(private val _kubectl: KubernetesClient) {
         omittedNss: List<String> = systemNss, setup: KubernetesClient.() -> NonNamespaceOperation<T, L, R>
     ): List<T> {
         return try {
-            val t: NonNamespaceOperation<T, L, R> = _kubectl.run(setup)
+            var t: NonNamespaceOperation<T, L, R> = _kubectl.run(setup)
             if (t is AnyNamespaceable<*>) {
-                omittedNss.forEach { t.withoutField("metadata.namespace", it) }
-                (t.inAnyNamespace() as NonNamespaceOperation<T, L, R>).list().items
+                t = t.inAnyNamespace() as NonNamespaceOperation<T, L, R>
+                omittedNss.forEach { t = t.withoutField("metadata.namespace", it) as NonNamespaceOperation<T, L, R> }
+                t.list().items
             } else
                 t.list().items
         } catch (e: Exception) {
