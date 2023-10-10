@@ -111,9 +111,7 @@ val diagnosticsServer = server("basic-diagnostics") {
             }
         }
 
-        val nss = kubelist(filter = {
-            filter { it.metadata.name !in listOf("kube-node-lease", "default", "kube-public", "kube-system") }
-        }) { namespaces() }
+        val nss = kubelist { namespaces() }.filter { it.metadata.name !in nonUserNss }
         aggregation("Namespaces", nss) {
             tag("Has no pods") {
                 pods.none { pod -> pod.metadata.namespace == item.metadata.name }

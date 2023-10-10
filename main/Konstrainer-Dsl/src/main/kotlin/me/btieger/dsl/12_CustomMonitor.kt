@@ -43,14 +43,15 @@ class CustomMonitorBehaviorProvider(private val _kubectl: KubernetesClient) {
 
     @DslMarkerBlock
     fun <T : HasMetadata, L : KubernetesResourceList<T>, R : Resource<T>> kubelist(
-        filter: Filter<T> = {filterOutKubeSystemNss()}, setup: KubernetesClient.() -> NonNamespaceOperation<T, L, R>
+        omittedNss: List<String> = systemNss, setup: KubernetesClient.() -> NonNamespaceOperation<T, L, R>
     ): List<T> {
         return try {
             val t: NonNamespaceOperation<T, L, R> = _kubectl.run(setup)
-                if (t is AnyNamespaceable<*>)
-                    (t.inAnyNamespace() as NonNamespaceOperation<T, L, R>).list().items.filter()
-                else
-                    t.list().items.filter()
+            if (t is AnyNamespaceable<*>) {
+                omittedNss.forEach { t.withoutField("metadata.namespace", it) }
+                (t.inAnyNamespace() as NonNamespaceOperation<T, L, R>).list().items
+            } else
+                t.list().items
         } catch (e: Exception) {
             _errors += "Error during kubectl call: ${e.message}"
             listOf()
@@ -59,33 +60,40 @@ class CustomMonitorBehaviorProvider(private val _kubectl: KubernetesClient) {
 
     @DslMarkerBlock
     fun <T : HasMetadata, L : KubernetesResourceList<T>, R : Resource<T>> kubelist(
-        namesapce: String, filter: Filter<T> = {this}, setup: KubernetesClient.() -> Namespaceable<NonNamespaceOperation<T, L, R>>
+        namesapce: String,
+        setup: KubernetesClient.() -> Namespaceable<NonNamespaceOperation<T, L, R>>
     ): List<T> {
         return try {
-            _kubectl.run(setup).inNamespace(namesapce).list().items.filter()
+            _kubectl.run(setup).inNamespace(namesapce).list().items
         } catch (e: Exception) {
             _errors += "Error during kubectl call: ${e.message}"
             listOf()
         }
     }
 
-    fun <T : HasMetadata> List<T>.filterOutKubeSystemNss(): List<T> =
-        filter { it.metadata.namespace !in listOf("kube-system", "kube-node-lease", "kube-public") }
+    /**
+     * kube-system, kube-node-lease, kube-public
+     */
+    @DslMarkerConstant
+    val systemNss = listOf("kube-system", "kube-node-lease", "kube-public")
 
-    fun <T : HasMetadata> List<T>.filterOutDefaultNs(): List<T> =
-        filter { it.metadata.namespace != "default" }
+    /**
+     * kube-system, kube-node-lease, kube-public, default
+     */
+    @DslMarkerConstant
+    val nonUserNss = listOf("kube-system", "kube-node-lease", "kube-public", "default")
 
-    fun <T : HasMetadata> List<T>.filterOutKubeSystemAndDefaultNss(): List<T> =
-        filter { it.metadata.namespace !in listOf("kube-system", "kube-node-lease", "kube-public", "default") }
+    @DslMarkerConstant
+    val none: List<String> = listOf()
 
     @DslMarkerBlock
     fun <T> aggregation(
         name: String,
         collection: Iterable<T>,
         tagKey: TagMetaProviderFunction<T> = {
-            (item as? HasMetadata)?.let { TagMeta(it) } ?:
-            (item as? Map.Entry<*, *>)?.let { (it.key as? HasMetadata)?.let {TagMeta(it)} } ?:
-            throw Exception()
+            (item as? HasMetadata)?.let { TagMeta(it) }
+                ?: (item as? Map.Entry<*, *>)?.let { (it.key as? HasMetadata)?.let { TagMeta(it) } }
+                ?: throw Exception()
         },
         setup: AggregationBuilder<T>.() -> Unit
     ) {
@@ -102,7 +110,6 @@ class CustomMonitorBehaviorProvider(private val _kubectl: KubernetesClient) {
             _errors += "Error when processing aggregation, message: ${e.message}"
         }
     }
-
 }
 
 class AggregationBuilder<T>(_item: T) {

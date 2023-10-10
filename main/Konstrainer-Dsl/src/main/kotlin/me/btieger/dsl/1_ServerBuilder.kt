@@ -14,7 +14,7 @@ typealias ClusterRoleName = String
 @DslMarkerConstant
 val ReadAny = "ReadAny"
 
-class ServerBuilder() {
+class ServerBuilder {
     private var _webhooks: MutableList<Webhook> = mutableListOf()
     private var _monitors: MutableList<Monitor<out HasMetadata>> = mutableListOf()
     private var _complexMonitor: CustomMonitorBehaviorFunction? by setMaxOnce()
