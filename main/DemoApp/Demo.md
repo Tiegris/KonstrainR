@@ -125,4 +125,7 @@ kubectl delete ns users items jathan-test ired-test mongo
 
 ```bash
 ./publish.sh
+kubectl port-forward service/konstrainer-core 8080:8080 -n konstrainer-ns
 ```
+
+First let's run the basic diagnostics on the cluster. Go to [localhost:8080](http://localhost:8080) and upload 
