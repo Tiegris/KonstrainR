@@ -18,7 +18,7 @@ fun DIV.monitorsView(monitors: MutableList<MonitorsDto>) {
                                     a.markedResources.forEach { m ->
                                         div("card m-1") {
                                             div("card-header") {
-                                                +"${m.fullResourceName}/${m.name}${m.namespace?.let { ".$it" }}"
+                                                +"${m.fullResourceName}/${m.name}${m.namespace?.let { ".$it" } ?: ""}"
                                             }
                                             div("card-body") {
                                                 +m.marks.joinToString(", ") { it }
