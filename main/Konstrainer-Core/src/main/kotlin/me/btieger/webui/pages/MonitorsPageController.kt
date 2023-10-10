@@ -22,7 +22,7 @@ import me.btieger.webui.siteLayout
 import org.koin.ktor.ext.inject
 
 @Serializable
-class MonitorsDto(val server: String, val monitors: List<MonitorDto>?)
+class MonitorsDto(val server: String, val monitors: List<MonitorDto>?, val errors: List<String>)
 
 @Serializable
 class MonitorDto(val name: String, val markedResources: List<MarkingDto>)
@@ -71,7 +71,7 @@ fun Application.configureMonitorsPageController() {
                             monitors += if (response.status == HttpStatusCode.OK)
                                 response.body<MonitorsDto>()
                             else
-                                MonitorsDto(item, null)
+                                MonitorsDto(item, null, listOf("Error while fetching data from monitor: $item"))
                         }
                     }
                     call.respondHtml {
