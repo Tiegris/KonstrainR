@@ -28,9 +28,7 @@ val companyPolicies = server("company-policies") {
         apiVersions(ANY)
         resources(DEPLOYMENTS, STATEFULSETS, DAEMONSETS)
         namespaceSelector {
-            matchLabels = mapOf(
-                "managed" to "true"
-            )
+
         }
         failurePolicy(FAIL)
         behavior {
