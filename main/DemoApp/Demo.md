@@ -181,7 +181,37 @@ The next aggregation group with problems is the PVCs. It tells us that there is 
 
 The next group is the namespaces. It says that the jathan-test namespace has no pods. It is common for developers to create a test namespace which they can use as a sandbox, but often when they are finished with their work, they leave it behind and forgot to delete it. In our case the engineer John Athan probably forgot to delete his sandbox namespace.
 
-The last group is the Pods. It has two items.
+The last group is the Pods. It has two items. The first is the pod 'my-test' in the ired-test namespace. It is a dangling pod, which means that there is no operator (eg.: a deployment or statefulset) managing its lifecycle. The seconds pod has way more problems. It is not running because the docker image of the pod could not be pulled. In this case both pods were created by a developer for testing or development purposes, but she forgot to delete them.
+
+### Introducing basic rule enforcements
+
+Upload and start the [$PROJECT_ROOT/main/Konstrainer-Dsl/src/main/kotlin/me/btieger/builtins/BasicEnforce.kt](../Konstrainer-Dsl/src/main/kotlin/me/btieger/builtins/BasicEnforce.kt) dsl file.
+
+This file describes basic rules that are evaluated upon events, like deployment creation. This can be used to prevent the creation of poorly configured resources, and can enforce best practices from the beginning.
+
+Lets deploy the new component of the company app. First, lets create a namespace for it:
+
+```bash
+cd DemoApp
+kubectl apply -f k8s/ns.yaml
+```
+
+Now let's deploy the new app, but intentionally forget to switch to the newly created namespace:
+
+```bash
+# make sure you are in the default namespace
+kubectl config set-context --current --namespace=default
+kubectl apply -f k8s/accounting.yaml
+```
+
+You should get a warning: `Warning: You are working in the namespace: default`
+
+If you work in the default namespace that might be a mistake, so the BasicDiagnostics warns you. Let's revert our mistake and switch to the correct namespace:
+
+```bash
+kubectl delete deployment.apps/accounting
+kubectl apply -f k8s/accounting.yaml --namespace=accounting
+```
 
 ### Company policies
 

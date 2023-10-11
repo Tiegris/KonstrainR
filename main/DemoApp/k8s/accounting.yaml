@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: accounting
+spec:
+  selector:
+    matchLabels:
+      app: accounting
+  template:
+    metadata:
+      labels:
+        app: accounting
+    spec:
+      containers:
+        - name: accounting
+          image: tiegris/apples-accounting:latest
+          ports:
+            - containerPort: 8079

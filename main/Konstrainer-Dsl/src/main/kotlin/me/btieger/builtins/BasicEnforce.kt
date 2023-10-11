@@ -16,10 +16,12 @@ val createUpdate_DeploymentStatefulSetDaemonSet = webhookConfigBundle {
         )
     }
     failurePolicy(FAIL)
+    logRequest = true
 }
 
 val webhookServer = server("basic-webhook-rules") {
-
+    clusterRole = ReadAny
+    
     webhook("hpa-resources", createUpdate_DeploymentStatefulSetDaemonSet) {
         resources(DEPLOYMENTS, STATEFULSETS)
         behavior {
