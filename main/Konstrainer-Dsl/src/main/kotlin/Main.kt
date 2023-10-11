@@ -18,6 +18,7 @@ fun main(args: Array<String>) {
 
     kubectl.pods().inAnyNamespace().withoutField("metadata.namespace", "kube-system").list().items
 
-    CustomMonitorBehaviorProvider(kubectl).kubelist { pods() }
+    val x = CustomMonitorBehaviorProvider(kubectl).kubelist { namespaces() }.filter { it.metadata.name !in listOf("kube-system", "kube-node-lease", "kube-public", "default") }
+
     println()
 }

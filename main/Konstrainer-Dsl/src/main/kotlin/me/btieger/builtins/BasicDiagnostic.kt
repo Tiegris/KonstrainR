@@ -37,9 +37,6 @@ val diagnosticsServer = server("basic-diagnostics") {
             tag("No resources defined") {
                 item.spec.template.spec.containers.any { it.resources.limits.isNullOrEmpty() || it.resources.requests.isNullOrEmpty() }
             }
-            tag("No node selector") {
-                item.spec.template.spec.nodeSelector.isEmpty()
-            }
             tag("No probes") {
                 item.spec.template.spec.containers.any { it.livenessProbe == null }
             }
@@ -48,7 +45,7 @@ val diagnosticsServer = server("basic-diagnostics") {
             }
             tag("No node affinity") {
                 val podSpec = item.spec.template.spec
-                podSpec.affinity == null && podSpec.nodeSelector == null && podSpec.nodeName == null
+                podSpec.affinity == null && podSpec.nodeSelector.isNullOrEmpty() && podSpec.nodeName == null
             }
         }
         aggregation("StatefulSets", statefulsets) {
@@ -62,9 +59,6 @@ val diagnosticsServer = server("basic-diagnostics") {
             tag("No resources defined") {
                 item.spec.template.spec.containers.any { it.resources.limits.isNullOrEmpty() || it.resources.requests.isNullOrEmpty() }
             }
-            tag("No node selector") {
-                item.spec.template.spec.nodeSelector.isEmpty()
-            }
             tag("No probes") {
                 item.spec.template.spec.containers.any { it.livenessProbe == null }
             }
@@ -73,7 +67,7 @@ val diagnosticsServer = server("basic-diagnostics") {
             }
             tag("No node affinity") {
                 val podSpec = item.spec.template.spec
-                podSpec.affinity == null && podSpec.nodeSelector == null && podSpec.nodeName == null
+                podSpec.affinity == null && podSpec.nodeSelector.isNullOrEmpty() && podSpec.nodeName == null
             }
         }
 
@@ -100,7 +94,7 @@ val diagnosticsServer = server("basic-diagnostics") {
             }
         }
 
-        val nss = kubelist { namespaces() }.filter { it.metadata.name !in nonUserNss }
+        val nss = kubelist(omittedNss = none) { namespaces() }.filter { it.metadata.name !in nonUserNss }
         aggregation("Namespaces", nss) {
             tag("Has no pods") {
                 pods.none { pod -> pod.metadata.namespace == item.metadata.name }
