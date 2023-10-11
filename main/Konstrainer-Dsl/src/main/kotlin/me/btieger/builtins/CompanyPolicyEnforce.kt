@@ -34,9 +34,8 @@ val companyPolicies = server("company-policies") {
         }
         failurePolicy(FAIL)
         behavior {
-            val podSpec = podSpec!!
             allowed {
-                podSpec.containers.all { it.image.startsWith(companyPrefix) }
+                podSpec!!.containers.all { it.image.startsWith(companyPrefix) }
             }
             status {
                 message = "All images must be from the company registry."
