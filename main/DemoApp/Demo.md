@@ -213,6 +213,49 @@ kubectl delete deployment.apps/accounting
 kubectl apply -f k8s/accounting.yaml --namespace=accounting
 ```
 
+You should get the following error:
+
+```log
+Error from server: error when creating "k8s/accounting.yaml": admission webhook "node-affinity.btieger.me" denied the request: Deployment must have some kind of node affinity! (affinity, nodeSelector, nodeName)
+```
+
+It is generally a good practice to define some kind of logic on where to schedule our pods. There can be many principals, this rule only requires to define something. In a real scenario we should define at least a nodeSelector, but for now lets just set the nodeName field.
+
+Depending on your cluster find a suitable node:
+
+```bash
+kubectl get nodes -A
+# chose one, eg.:
+export node_name="docker-desktop"
+yq eval 'select(.kind == "Deployment").spec.template.spec.nodeName = env(node_name)' k8s/accounting.yaml -i
+kubectl apply -f k8s/accounting.yaml --namespace=accounting
+```
+
+Now we fixed the node affinity problem, but there are still problems:
+
+```log
+Error from server: error when creating "k8s/accounting.yaml": admission webhook "deny-no-resources.btieger.me" denied the request: Deployment must have resource definitions!
+```
+
+It is possible to define resource requests and limitations for Pods. Here is a great blog post why defining them a best practice: [Kubernetes best practices: Resource requests and limits](https://cloud.google.com/blog/products/containers-kubernetes/kubernetes-best-practices-resource-requests-and-limits)
+
+Lets set some resource limits and requests, than redeploy the deployment:
+
+```bash
+yq eval 'select(.kind == "Deployment").spec.template.spec.containers[0].resources.limits.cpu = "500m"' k8s/accounting.yaml -i
+yq eval 'select(.kind == "Deployment").spec.template.spec.containers[0].resources.limits.memory = "128Mi"' k8s/accounting.yaml -i
+yq eval 'select(.kind == "Deployment").spec.template.spec.containers[0].resources.requests.cpu = "500m"' k8s/accounting.yaml -i
+yq eval 'select(.kind == "Deployment").spec.template.spec.containers[0].resources.requests.memory = "128Mi"' k8s/accounting.yaml -i
+kubectl apply -f k8s/accounting.yaml --namespace=accounting
+```
+
+This time it succeeded, but we got a warning:
+
+```log
+Warning: RevisionHistoryLimit was set to 4, from original: 10
+deployment.apps/accounting created
+```
+
 ### Company policies
 
 ```bash
