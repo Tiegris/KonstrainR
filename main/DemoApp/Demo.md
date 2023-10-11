@@ -181,7 +181,7 @@ The next aggregation group with problems is the PVCs. It tells us that there is 
 
 The next group is the namespaces. It says that the jathan-test namespace has no pods. It is common for developers to create a test namespace which they can use as a sandbox, but often when they are finished with their work, they leave it behind and forgot to delete it. In our case the engineer John Athan probably forgot to delete his sandbox namespace.
 
-The last group is the Pods. 
+The last group is the Pods. It has two items.
 
 ### Company policies
 
