@@ -1,7 +1,6 @@
 package me.btieger.builtins
 
 import io.fabric8.kubernetes.api.model.LabelSelectorRequirement
-import io.fabric8.kubernetes.api.model.PodSpec
 import kotlinx.serialization.json.JsonNull
 import me.btieger.dsl.*
 
@@ -21,7 +20,7 @@ val createUpdate_DeploymentStatefulSetDaemonSet = webhookConfigBundle {
 
 val webhookServer = server("basic-webhook-rules") {
     clusterRole = ReadAny
-    
+    /*
     webhook("hpa-resources", createUpdate_DeploymentStatefulSetDaemonSet) {
         resources(DEPLOYMENTS, STATEFULSETS)
         behavior {
@@ -45,13 +44,13 @@ val webhookServer = server("basic-webhook-rules") {
                 message = "${currentObject.kind} with HPA must have the same resource requests and limits!"
             }
         }
-    }
+    }*/
 
     webhook("warn-no-security-context", createUpdate_DeploymentStatefulSetDaemonSet) {
         behavior {
-            val podSpec: PodSpec? = unmarshal(request jqx "/object/spec/template/spec")
             warnings {
-                if (podSpec?.securityContext == null) warning("No security context")
+                if (request jqx "/object/spec/template/spec/securityContext" == JsonEmpty)
+                    warning("No security context")
             }
         }
     }

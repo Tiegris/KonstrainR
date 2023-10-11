@@ -26,6 +26,9 @@ infix fun JsonElement.jqx(s: String): JsonElement {
 
 }
 
+@DslMarkerConstant
+val JsonEmpty = buildJsonObject {  }
+
 @DslMarkerBlock object int
 @DslMarkerBlock object bool
 @DslMarkerBlock object double

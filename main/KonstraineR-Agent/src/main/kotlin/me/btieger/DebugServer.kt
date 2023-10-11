@@ -3,6 +3,7 @@ package me.btieger
 import io.fabric8.kubernetes.api.model.LabelSelectorRequirement
 import io.fabric8.kubernetes.api.model.PodSpec
 import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.buildJsonObject
 import me.btieger.dsl.*
 
 val createUpdate_DeploymentStatefulSetDaemonSet = webhookConfigBundle {
@@ -47,7 +48,7 @@ val webhookServer = server("basic-webhook-rules") {
 
     webhook("warn-no-security-context", createUpdate_DeploymentStatefulSetDaemonSet) {
         behavior {
-            val podSpec: PodSpec? = unmarshal(request jqx "/object/spec/template/spec")
+            val securityContext = (request jqx "/object/spec/template/spec/securityContext") == buildJsonObject {  }
             warnings {
                 if (podSpec?.securityContext == null) warning("No security context")
             }
