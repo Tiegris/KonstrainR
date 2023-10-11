@@ -249,14 +249,109 @@ yq eval 'select(.kind == "Deployment").spec.template.spec.containers[0].resource
 kubectl apply -f k8s/accounting.yaml --namespace=accounting
 ```
 
-This time it succeeded, but we got a warning:
+This time it succeeded, but we got some warnings:
 
 ```log
+Warning: No security context
 Warning: RevisionHistoryLimit was set to 4, from original: 10
-deployment.apps/accounting created
 ```
 
-### Company policies
+The first just tells us tht we have not yet defined a security context, the seconds tells us that the revisionHistoryLimit of the deployment was changed. Konstrainer allows to create rules that not only reject some actions, but do some minor alterations as well.
+
+Describe the newly created deployment and we can see that the revisionHistoryLimit in fact got changed:
+
+```bash
+kubectl get deployment accounting -n accounting -o yaml | yq '.spec.revisionHistoryLimit'
+```
+
+### Writing your own policies
+
+Lets assume the company has introduced some custom policies and now we want to enforce them using Konstrainer. Start with a very simple policy: All images must come from the internal companies registry.
+
+To enforce this, first lets detect what images violate this policy:
+
+Create a file with the company-policies.kt file with the following content:
+
+```kotlin
+package me.btieger
+
+import me.btieger.dsl.*
+
+const val companyPrefix = "tiegris/"
+val companPolicies = server("company-policies") {
+
+}
+```
+
+This is just the boilerplate of a konstrainer agent dsl so far. To create a report add the `report` block inside the server block:
+
+```kotlin
+val companPolicies = server("company-policies") {
+  report {
+
+  }
+}
+```
+
+Inside the report block we can create aggregation groups and we aslo have access to the `kubelist` and `kubectl` commands.
+
+Both the `kubectl` and `kubelist` commands provide access to the Kubernetes API. The `kubectl` command gives you full control, but this is rarely needed. The `kubelist` command has limitations, but it is more convenient to use in most cases.
+
+Use `kubelist` and `kubectl` like this to fetch the list of all pods:
+
+```kotlin
+val pods: List<Pod> = kubelist { pods() }
+val pods: List<Pod>? = kubectl { pods().inAnyNamespace().list().items }
+```
+
+Inside the scope of these commands, everything is executed on an instance of a KubernetesClient class from the [fabric8](https://github.com/fabric8io/kubernetes-client) library. This is an open source third party Kubernetes client for Java. With the Kotlin terminology we say that the receiver of your lambda function is the KubernetesClient class.
+
+Both function are exception safe, meaning if an error occurs inside their scope, or during the k8s api call, they return a default value and include the error in the report instead of causing the entire report to fail. The default return value for `kubelist` is an empty list, for the `kubectl` it is null.
+
+Using this knowledge, create an aggregation group on the pods of the cluster:
+
+```kotlin
+report {
+  aggregation("Pods", kubelist { pods() }) {
+
+  }
+}
+```
+
+Inside the scope of the aggregation group we can add tags to mark the resources. A tag function has 2 arguments: The text of the tag, and a lambda defining the condition if the resource should be marked or not:
+
+```kotlin
+report {
+  aggregation("Pods", kubelist { pods() }) {
+    tag("Image not from company registry") {
+      item.spec.containers.any { !it.image.startsWith(companyPrefix) }
+    }
+  }
+}
+```
+
+Use the `item` keyword inside the scope of the tag function to refer to the items of the collection you are doing the aggregation on. Think of it like a foreach loop, where the `item` is the iterator, referring to each elements of the list.
+
+Now we only need to associate a clusterrole to the agent and we are done with the report. The clusterrole is needed, because we list the pods, and it requires authorization. The final agent dsl:
+
+```kotlin
+package me.btieger
+import me.btieger.dsl.*
+
+const val companyPrefix = "tiegris/"
+val companyPolicies = server("company-policies") {
+  clusterRole = ReadAny
+  report {
+    aggregation("Pods", kubelist { pods() }) {
+      tag("Image not from company registry") {
+        item.spec.containers.any { !it.image.startsWith(companyPrefix) }
+      }
+    }
+  }
+}
+```
+
+The line: `clusterRole = ReadAny` assigns the ReadAny clusterrole to the agent by creating a clusterrolebinding during the deployment of the agent. The ReadAny clusterrole is created with the Konstrainer installation, it gives read access to all resources in the cluster.
 
 ```bash
 curl localhost:8078/login -H "Content-Type: application/json" -d '{"user": "John A. Gold", "passwd": "apples"}'
