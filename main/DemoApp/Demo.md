@@ -19,7 +19,7 @@ Requirements:
 - Docker
 - Sandbox Kubernetes cluster
 - Helm
-- yq (Tested with version: (https://github.com/mikefarah/yq/) version 4.18.)
+- yq (Tested with version: (<https://github.com/mikefarah/yq/>) version 4.18.)
 
 ### Initial setup
 
@@ -353,6 +353,45 @@ val companyPolicies = server("company-policies") {
 
 The line: `clusterRole = ReadAny` assigns the ReadAny clusterrole to the agent by creating a clusterrolebinding during the deployment of the agent. The ReadAny clusterrole is created with the Konstrainer installation, it gives read access to all resources in the cluster.
 
+Now lets do the enforcing part. Put this code inside the server block.
+
+```kotlin
+webhook("only-internal-registry") {
+  operations(CREATE, UPDATE)
+  apiGroups(APPS)
+  apiVersions(ANY)
+  resources(DEPLOYMENTS, STATEFULSETS, DAEMONSETS)
+  namespaceSelector { }
+  failurePolicy(FAIL)
+  behavior {
+    allowed {
+      podSpec!!.containers.all { it.image.startsWith(companyPrefix) }
+    }
+    status {
+      message = "All images must be from the company registry."
+    }
+  }
+}
+```
+
+To create a rule, we need to add a `webhook` block. It needs a unique name. Lets name it "only-internal-registry". We need to define which events should the webhook listen to. In this example the webhook listens to the creation or update of any deployments, statefulsets and daemonsets.
+
+The more interesting part is the behavior block. It describes how should the webhook behave when a request arrives. Inside the behavior block we can access the request body using many ways. One of them is the podSpec keyword. It is a shortcut to the `.spec.template.spec` of a deployment, statefulset or daemonset.
+
+In the allowed block we can specify when to allow or reject an event. In this case we only accept events when the all the containers of the pod has an image starting with the the company prefix.
+
+In the status block we define the error message in case the event is rejected.
+
+Lets deploy and test our newly created agent dsl. On the monitors view we can see that the pods inside the ired-test namespace use images outside of the company registry, and the mongodb also uses an image from docker.io instead of the company registry.
+
+We can also test that we can no longer create resources which use images outside from the company registry:
+
 ```bash
-curl localhost:8078/login -H "Content-Type: application/json" -d '{"user": "John A. Gold", "passwd": "apples"}'
+kubectl apply -f k8s/test-policy.yaml
+```
+
+We should get this error:
+
+```log
+Error from server: error when creating "k8s/test-policy.yaml": admission webhook "only-internal-registry.btieger.me" denied the request: All images must be from the company registry.
 ```
