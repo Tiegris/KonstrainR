@@ -3,7 +3,8 @@ package me.btieger.builtins
 import me.btieger.dsl.*
 
 const val companyPrefix = "tiegris/"
-val advancedWebhookServer = server("advanced-webhook-rules") {
+val companyPolicies = server("company-policies") {
+    clusterRole = ReadAny
     report {
         aggregation("Pods", kubelist { pods() }) {
             tag("Image not from company registry") {
