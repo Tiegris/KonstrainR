@@ -31,6 +31,8 @@ infix fun JsonElement.jqx(s: String): JsonElement {
 @DslMarkerBlock object double
 @DslMarkerBlock object string
 fun <T> JsonElement.guard(fn: JsonElement.()->T) : T? {
+    if (this is JsonNull)
+        return null
     return if (this is JsonPrimitive)
         fn()
     else
