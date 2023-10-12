@@ -396,6 +396,11 @@ We should get this error:
 Error from server: error when creating "k8s/test-policy.yaml": admission webhook "only-internal-registry.btieger.me" denied the request: All images must be from the company registry.
 ```
 
+```bash
+yq eval 'select(.kind == "Deployment").spec.template.spec.containers[0].image = "tiegris/apples-users"' k8s/test-policy.yaml -i
+kubectl apply -f k8s/test-policy.yaml
+```
+
 This error shows that our rule works and is enforced.
 
 This is the end of the demo. In this demo we saw the basic capabilities of the Konstrainer platform, some use-cases, and how to create our own rules.

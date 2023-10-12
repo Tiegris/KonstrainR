@@ -1,17 +1,17 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: accounting
+  name: policy-test
 spec:
   selector:
     matchLabels:
-      app: accounting
+      app: policy-test
   template:
     metadata:
       labels:
-        app: accounting
+        app: policy-test
     spec:
       containers:
         - image: alpine
+          name: policy-test
           command: ["sleep", "infinity"]
-
