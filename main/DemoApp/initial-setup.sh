@@ -13,10 +13,12 @@ if [ "$BUILD_IMAGES" = "1" ]; then
     cd $home/apps/users
     docker build -t $repo/apples-users:latest .
     docker push $repo/apples-users:latest
+    cd $home/apps/accounting
+    docker build -t $repo/apples-accounting:latest .
+    docker push $repo/apples-accounting:latest
 else
     echo "Skipping build images"
 fi
-
 
 
 # Initial creation of users app

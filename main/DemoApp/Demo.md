@@ -387,7 +387,8 @@ Lets deploy and test our newly created agent dsl. On the monitors view we can se
 We can also test that we can no longer create resources which use images outside from the company registry:
 
 ```bash
-kubectl apply -f k8s/test-policy.yaml
+kubectl create ns policy-test
+kubectl apply -f k8s/test-policy.yaml -n policy-test
 ```
 
 We should get this error:
@@ -398,7 +399,7 @@ Error from server: error when creating "k8s/test-policy.yaml": admission webhook
 
 ```bash
 yq eval 'select(.kind == "Deployment").spec.template.spec.containers[0].image = "tiegris/apples-users"' k8s/test-policy.yaml -i
-kubectl apply -f k8s/test-policy.yaml
+kubectl apply -f k8s/test-policy.yaml -n policy-test
 ```
 
 This error shows that our rule works and is enforced.
