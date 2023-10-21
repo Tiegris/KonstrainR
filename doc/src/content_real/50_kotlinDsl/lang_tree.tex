@@ -1,0 +1,78 @@
+\begin{figure}[h]
+{\footnotesize
+\begin{forest}
+    for tree={
+        font=\ttfamily,
+        grow'=0,
+        child anchor=west,
+        parent anchor=south,
+        anchor=west,
+        calign=first,
+        edge path={
+        \noexpand\path [draw, \forestoption{edge}]
+        (!u.south west) +(7.5pt,0) |- node[fill,inner sep=1.25pt] {} (.child anchor)\forestoption{edge label};
+        },
+        before typesetting nodes={
+        if n=1
+            {insert before={[,phantom]}}
+            {}
+        },
+        fit=band,
+        inner ysep=0pt,
+        before computing xy={l=20pt},
+    }
+    [server
+        [clusterRole]
+        [ReadAny]
+        [report
+        [kubelist]
+        [kubectl]
+        [none]
+        [nonUserNss]
+        [systemNss]
+        [aggregation
+            [tag
+                [item]
+            ]
+        ]
+        ]
+        [webhook
+            [operations]
+            [apiGroups]
+            [namespaceSelector]
+            [apiVersions]
+            [resources]
+            [scope]
+            [failurePolicy]
+            [logRequest]
+            [logResponse]
+            [behavior
+                [kubectl]
+                [request]
+                [currentObject]
+                [oldObject]
+                [podSpec]
+                [unmarshal]
+                [allowed]
+                [patch
+                    [add]
+                    [remove]
+                    [replace]
+                    [copy]
+                    [move]
+                    [test]
+                ]
+                [warnings
+                    [warning]
+                ]
+                [status
+                    [code]
+                    [message]
+                ]
+            ]
+        ]
+    ]
+\end{forest}
+}
+\caption{Tree of keywords in the language}\label{tree:tpl_tree}
+\end{figure}

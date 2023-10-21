@@ -1,0 +1,12 @@
+{
+    "terminal.integrated.fontFamily": "Inconsolata-dz for Powerline",
+    "spellright.language": [
+        "en"
+    ],
+    "spellright.documentTypes": [
+        "markdown",
+        "plaintext"
+    ],
+    "editor.wordWrap": "on",
+
+}

@@ -3,6 +3,8 @@ thesis-pdflatex*.pdf
 thesis-xelatex*.pdf
 thesis-lualatex*.pdf
 
+!.vscode
+
 ## Core latex/pdflatex auxiliary files:
 *.aux
 *.lof

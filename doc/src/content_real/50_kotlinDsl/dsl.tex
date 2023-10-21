@@ -10,21 +10,21 @@
 
 When designing a Domain Specific Language, some questions need to be answered first. What kind of things the language should express? Who are going to use the language? How important extendibility is? Should it be a graphical or a text-based language?
 
-The first question is almost answered by the title of the topic. My high level goal is to create language, that can describe k8s admission webhook configurations, validation rules and mutations on k8s resources using the content of the incoming AdmissionReview requests. The first goal basically means that it should be able to describe simple data objects, like a JSON file. The second, and third goal requires the language to be able to describe parameterized behaviors. This is not trivial and this is one of the main reasons I chose a general purpose language for implementing the DSL.
+The first question is almost answered by the title of the topic. My high level goal is to create language, that can describe k8s admission webhook configurations, validation rules and mutations on k8s resources using the content of the incoming AdmissionReview requests. The first goal basically means that it should be able to describe simple data objects, like a JSON file. The second and third goal requires the language to be able to describe parameterized behaviors. This is not trivial and this is one of the main reasons I chose a general purpose language for implementing the DSL.
 
-The users of this language are going to be developers, DevOps engineers, system administrators. These are all engineers so all should have a basic knowledge of programming or at least declarative description things. Therefore it is not a top priority to make the language natural language like.
+The users of this language are going to be developers, DevOps engineers, system administrators. These are all engineers, so all should have a basic knowledge of programming or at least declarative description things. Therefore, it is not a top priority to make the language natural language like.
 
-I decided to make the language text-based. There are many reasons in this case against a graphical language. First of all the users of the language are engineers, who generally prefer writing than dragging boxes on a GUI. A text-based language is also easier to make, and extend. Extendibility in this case is very important, since Kubernetes is a very extendable technology it would cumbersome to create a new graphical element for each k8s resource. However I could imagine a graphical editor for the validation rules, where the user has to draw a pipeline with filters and that would describe the validation process, it also comes down to personal preference and I highly prefer text-based languages and editors.
+I decided to make the language text-based. There are many reasons in this case against a graphical language. First of all the users of the language are engineers, who generally prefer writing than dragging boxes on a GUI. A text-based language is also easier to make, and extend. Extendibility in this case is very important, since Kubernetes is a very extendable technology it would be cumbersome to create a new graphical element for each k8s resource. However, I could imagine a graphical editor for the validation rules, where the user has to draw a pipeline with filters and that would describe the validation process, it also comes down to personal preference and I highly prefer text-based languages and editors.
 
-So the task is to make an easy to extend, text-based language, which can easily describe behaviors and static information too. The time for implementing is also very short, because the DSL is just one relatively small part of the project. 
+So the task is to make an easy to extend, text-based language, which can easily describe behaviors and static information too. The time for implementing is also very short, because the DSL is just one relatively small part of the project.
 
-There are many options for creating DSLs, for example ANTLR, Xtext and MPS. These all have well rounded toolset for creating languages, having support for parsing, syntax checking, semantics checking and some level of code generation support too. I have tried all of them, and they were all fine, however I found them slow to work with and time consuming to extend them. It would have been hard and time consuming to create an expressive language with these technologies.
+There are many options for creating DSLs, for example ANTLR, Xtext and MPS. These all have well-rounded toolset for creating languages, having support for parsing, syntax checking, semantics checking and some level of code generation support too. I have tried all of them, and they were all fine, however I found them slow to work with and time-consuming to extend them. It would have been hard and time-consuming to create an expressive language with these technologies.
 
-Language creation tools were no good for my purpose, so I chose a general purpose programming language to write my DSL. I chose Kotlin, which is a very expressive, modern statically typed JVM language. Because of its expressiveness, and syntax sugars, it is capable of creating almost natural language like DSLs. Creating DSLs in general purpose languages is not a new thing. Gradle, which is a build tool, uses a Groovy or Kotlin based DSL to describe how to build a software. There is also Ktor, which is webserver technology for Kotlin, basically and alternative to SpringBoot. It uses Kotlin DSL to configure the server, define the routing, and can also create HTML documents with DSL.
+Language creation tools were no good for my purpose, so I chose a general purpose programming language to write my DSL. I chose Kotlin, which is a very expressive, modern statically typed JVM language. Because of its expressiveness, and syntax sugars, it is capable of creating almost natural language like DSLs. Creating DSLs in general purpose languages is not a new thing. Gradle, which is a build tool, uses a Groovy or Kotlin based DSL to describe how to build a software. There is also Ktor, which is web server technology for Kotlin, basically and alternative to SpringBoot. It uses Kotlin DSL to configure the server, define the routing, and can also create HTML documents with DSL.
 
 One of the main advantages of using Kotlin for my DSL is that I do not need to write a parser, syntax checker, code generator or any other complex thing for my language, since it is basically a software library. The compilation is done by a JDK and compiles to Java bytecode. Then the compiled class of the DSL can be used in the agent. Syntax highlight, intellisense, error detection can be done by and Kotlin IDE.
 
-The second greatest advantage is that the language will be very expressive and extendable without a huge time investment. If needed, all the language features of Kotlin an be used when writing a DSL function. This comes especially handy, when defining behavior and logic.
+The second-greatest advantage is that the language will be very expressive and extendable without a huge time investment. If needed, all the language features of Kotlin an be used when writing a DSL function. This comes especially handy, when defining behavior and logic.
 
 \section{Software patterns}
 
@@ -42,7 +42,7 @@ val myVillage = village {
 There is a top level block, containing properties, and inner blocks. This can describe a structure of data in a type-safe manner. Here is the implementation:
 
 \begin{lstlisting}[caption={Pattern example},language=Kotlin,label=code:pattern_example_impl]
-@MyDslMarker 
+@MyDslMarker
 fun village(setup: VillageBuilder.() -> Unit): Village {
     val builder = VillageBuilder()
     builder.setup()
@@ -52,10 +52,10 @@ fun village(setup: VillageBuilder.() -> Unit): Village {
 class VillageBuilder {
     private var _houses: Houses by setOnce()
 
-    @MyDslMarker 
+    @MyDslMarker
     var name: String by setOnce()
 
-    @MyDslMarker 
+    @MyDslMarker
     fun houses(setup: Houses.() -> Unit): Houses {
         ...
     }
@@ -69,9 +69,16 @@ class VillageBuilder {
 data class Village(val houses: Houses, val name: String)
 \end{lstlisting}
 
-The word `village', is basically a top-level function. Its only argument is an extension method on the VillageBuilder class. In Kotlin, if the last argument of a function is a lambda, the body of the lambda can be moved outside of the brackets, and they can be omitted if the lambda is the only parameter. The lambda definition must be put inside curly brackets. Since this lambda is an extension method on the VillageBuilder class, there is an implicit `this' before each statement in the block. So the line `name = "Loremvill"' is in fact a property assignment on an instance of a VillageBuilder.
+TODO reference braun marton
 
-At the end of the outer most block, the definition of the setup lambda is done, and the village function is executed. It creates a new instance of the VillageBuilder, executes the setup function on it, and returns a built and final data class of the Village.
+The word `village', is basically a top-level function. Its only argument is an extension method on the VillageBuilder class. In Kotlin, whenever a function's last parameter is a function type, and that parameter is being fulfilled by a lambda, we can move that lambda outside the parentheses. Furthermore, the parentheses can be omitted if the lambda is the only parameter. The lambda definition must be put inside curly brackets. Since this lambda is an extension method on the VillageBuilder class, there is an implicit `this' before each statement in the block. So the line `name = "Loremvill"' is in fact a property assignment on an instance of a VillageBuilder.
 
-This patterns is the basic idea between most of the DSLs written in Kotlin.
+At the end of the outermost block, the definition of the setup lambda is done, and the village function is executed. It creates a new instance of the VillageBuilder, executes the setup function on it, and returns a built and final data class of the Village.
+
+This pattern is the basic idea between most of the DSLs written in Kotlin.
+
+TODO
+
+\subfile{./content_real/50_kotlinDsl/konstrainer.tex}
+
 

@@ -26,9 +26,6 @@ class CustomMonitorBehaviorProvider(private val _kubectl: KubernetesClient) {
     fun getAggregations() = _aggregations
     fun getErrors() = _errors
 
-//    @DslMarkerConstant
-//    val kubectl = _kubectl
-
     @DslMarkerBlock
     fun <T> kubectl(
         setup: KubernetesClient.() -> T
