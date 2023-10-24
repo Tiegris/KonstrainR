@@ -97,7 +97,6 @@ val webhookServer = server("basic-webhook-rules") {
         apiVersions(ANY)
         resources(ANY)
         failurePolicy(IGNORE)
-        logRequest = true
         namespaceSelector {
             matchExpressions = listOf(
                 LabelSelectorRequirement().apply {
