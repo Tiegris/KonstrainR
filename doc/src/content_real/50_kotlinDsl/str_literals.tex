@@ -1,0 +1,61 @@
+\begin{figure}[h]
+{\footnotesize
+\begin{forest}
+    for tree={
+        font=\ttfamily,
+        grow'=0,
+        child anchor=west,
+        parent anchor=south,
+        anchor=west,
+        calign=first,
+        edge path={
+        \noexpand\path [draw, \forestoption{edge}]
+        (!u.south west) +(7.5pt,0) |- node[fill,inner sep=1.25pt] {} (.child anchor)\forestoption{edge label};
+        },
+        before typesetting nodes={
+        if n=1
+            {insert before={[,phantom]}}
+            {}
+        },
+        fit=band,
+        inner ysep=0pt,
+        before computing xy={l=20pt},
+    }
+    [fields:
+        [operations()
+            [ANY: "*"]
+            [CREATE: "CREATE"]
+            [UPDATE: "UPDATE"]
+            [DELETE: "DELETE"]
+            [CONNECT: "CONNECT"]
+        ]
+        [apiGroups()
+            [ANY: "*"]
+            [CORE: ""]
+            [APPS: "apps"]
+        ]
+        [apiVersions()
+            [ANY: "*"]
+        ]
+        [resources()
+            [ANY: "*"]
+            [DEPLOYMENTS: "deployments"]
+            [PODS: "pods"]
+            [REPLICASETS: "replicasets"]
+            [STATEFULSETS: "statefulsets"]
+            [DAEMONSETS: "daemonsets"]
+        ]
+        [scope()
+            [ANY: "*"]
+            [CLUSTERED: "Clustered"]
+            [NAMESPACED: "Namespaced"]
+        ]
+        [failurePolicy()
+            [FAIL: "Fail"]
+            [IGNORE: "Ignore"]
+        ]
+    ]
+\end{forest}
+}
+\caption{Tree of string constants}\label{tree:str_literals}
+\end{figure}

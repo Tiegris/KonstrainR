@@ -25,16 +25,17 @@
         [clusterRole]
         [ReadAny]
         [report
-        [kubelist]
-        [kubectl]
-        [none]
-        [nonUserNss]
-        [systemNss]
-        [aggregation
-            [tag
+            [kubelist]
+            [kubectl]
+            [none]
+            [nonUserNss]
+            [systemNss]
+            [aggregation
                 [item]
+                [tag
+                    [item]
+                ]
             ]
-        ]
         ]
         [webhook
             [operations]
@@ -53,6 +54,12 @@
                 [oldObject]
                 [podSpec]
                 [unmarshal]
+                [jqx]
+                [string]
+                [int]
+                [double]
+                [bool]
+                [JsonEmpty]
                 [allowed]
                 [patch
                     [add]
@@ -74,5 +81,5 @@
     ]
 \end{forest}
 }
-\caption{Tree of keywords in the language}\label{tree:tpl_tree}
+\caption{Tree of keywords in the language}\label{tree:lang_tree}
 \end{figure}

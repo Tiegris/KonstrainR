@@ -1,16 +1,8 @@
-\section{Konstrainer DSL}
+\chapter{Konstrainer DSL}
 
-The top level keyword is the `server', which declares a new agent. It is called server, because a web server will be generated from it. It takes 1 argument, the name of the server, which must be in kebab-case\footnote{kebab-case: \url{https://developer.mozilla.org/en-US/docs/Glossary/Kebab_case}}, and opens a block. To be precise it takes 2 arguments, the second argument is a lambda, but in this context it is easier to refer to the last lambda argument of the server function as the `block of the server keyword', or the `server block'.
+The main top level keyword is the `server', which declares a new agent. It is called server, because a web server will be generated from it. It takes 1 argument, the name of the server, which must be in kebab-case\footnote{kebab-case: \url{https://developer.mozilla.org/en-US/docs/Glossary/Kebab_case}}, and opens a block. To be precise it takes 2 arguments, the second argument is a lambda, but in this context it is easier to refer to the last lambda argument of the server function as the `block of the server keyword', or the `server block'.
 
 From now on, I will always use this terminology whenever referring to the last lambda argument of a function.
-
-\begin{lstlisting}[caption={Implementation of the server keyword},language=Kotlin,label=code:server_keyword_impl]
-@DslMarkerBlock
-fun server(uniqueName: String, setup: ServerBuilder.() -> Unit): Server {
-    val builder = ServerBuilder().apply(setup)
-    return builder.build(uniqueName)
-}
-\end{lstlisting}
 
 For the code to compile, we also need to import the DSL library, and define a package. The \ref{code:server_boilerplate} code snippet shows the basic template of an agent.
 
@@ -42,11 +34,11 @@ The `report' keyword opens a new block. In this block we can create a report fro
 
 The `webhook' keyword defines a webhook which listens to certain events in the cluster. This can be used to create warnings, modify or reject some actions.
 
-\subsection{Report block}
+\section{Report block}
 
 The report block allows us to relatively easily create an overview of the state of the cluster. First let's see how could any report be created regardless of this DSL. To create any sort of report, the necessary data must be fetched, and it must be processed and aggregated. To support these use-cases, I created dedicated language features but also relied on existing libraries and the built-in features of Kotlin.
 
-In my model of creating a report, first you should fetch the data from the k8s API, like the list of pods and deployments. Optionally after that, you can make some processing (e.g.: filtering out namespaces you don't care about, or extracting pod labels for easier associations between resources). Finally, you create aggregation groups where you can tag certain k8s resources based on custom logic. Creating an aggregation group is basically iterating over a kind of resources, (like the deployments or pods) and applying one or more `if' statements to them. If an `if' statement evaluates to true, a tag is attached to that resource in the result report. The following pseudo-Java code snippet shows an example how this model works:
+In my model of creating a report, first you should fetch the data from the k8s API, like the list of pods and deployments. Optionally after that, you can make some processing (e.g.: filtering out namespaces you don't care about, or extracting pod labels for easier associations between resources). Finally, you create aggregation groups where you can tag certain k8s resources based on custom logic. Creating an aggregation group is basically iterating over a kind of resources, (like the deployments or pods) and applying one or more `if' statements to them. If an `if' statement evaluates to true, a label is attached to that resource in the resulting report. The following pseudo-Java code snippet shows an example how this model works:
 
 \begin{lstlisting}[caption={Example report in pseudo-Java},language=Java,label=code:pseudo_report]
 KubernetesClient k8s = /* Instantiate a client */;
@@ -73,7 +65,7 @@ for (ServicePodPairs pair : podsWithServices) {
 
 A small note on why I designed the model this way: API calls are orders of magnitude slower than operations made on the CPU. My model minimizes the number of API calls thus making the process faster. The other approach would be to fetch only the services first, and during the loop fetch the pods for only that service. This would be slightly more memory efficient, but significantly slower. I approximated the memory footprint of a pod to be around 5 KB. A thousand pods would take approximately 5 MB, which is insignificant but fetching them only once can save us a thousand API calls.
 
-\subsubsection{Fetching data from k8s}
+\subsection{Fetching data from k8s}
 
 For fetching data, I created two language features: the imperative `kubectl' and declarative `kubelist' commands. Both commands open a new block, in which we can access the k8s API. Inside the block of these commands, everything is executed on an instance of a KubernetesClient class from the fabric8\footnote{fabric8: https://github.com/fabric8io/kubernetes-client} library. This is an open source third party Kubernetes client for Java. With the Kotlin terminology we say that the receiver of your lambda function is the KubernetesClient class.
 
@@ -128,7 +120,7 @@ val none: List<String> = listOf()
 
 With the last method, you can select a single namespace to work within.
 
-\subsubsection{Transforming data}
+\subsection{Transforming data}
 
 Sometimes you may want to process the data between fetching it and using to create an aggregation. The use-cases can be filtering on some criteria, or associating different types of resources, like pods with services. For example if you want to associate pods with other resources, I found that it is worth extracting the pods labels to a set. It makes it easier to write the aggregations later. The \ref{code:pod_labels} code snippet shows how to extract the pod labels, and use them to find if a service has any pods.
 
@@ -145,7 +137,176 @@ It is complicated I admit, but this is complicated on the mathematical level. Wi
 
 For data manipulation and resource associations I did not add anything new, rather I relied on the extension methods of collections from the Kotlin standard library\footnote{https://kotlinlang.org/docs/collection-transformations.html}. These functions are excellent for data processing, and I used them extensively during the creation of the case study.
 
-\subsubsection{Aggregation groups}
+\subsection{Aggregation groups}
+
+This is the part of the language that allows to create the end result of the report. It works in a way, that it iterate over a list of resources and applies a condition to each element of it. If a condition is true to an element, a label is attached to that element. Let's see an example:
+
+\begin{lstlisting}[caption={Aggregation group example},language=Kotlin,label=code:aggregation_group]
+aggregation("Pods", pods) {
+    tag("No security context") {
+        item.spec.securityContext == null
+    }
+}
+\end{lstlisting}
+
+To create an aggregation group, use the `aggregation' keyword, like seen in the example. It has two required arguments: the name of the aggregation group and the list of resources you are tagging. This keyword also opens a new block, where we can perform the tagging.
+
+There is an extra optional argument, the `tagKey' argument, which determines how to identify a resource in the end result. In Kubernetes, any resource can be uniquely identified, by the tuple of its name, namespace and full resource name, which is the combination of the resource kind and api version. The default implementation of the tagKey checks if the list item is a Kubernetes resource or not. If it is, it simply extracts the previously mentioned information of the item. If the item is not, it checks if it is a map entry, where the key is a Kubernetes resource and tries to extract the information from the key of the map entry. If none of these, it raises an exception. The next example shows how to override the default tagKey Implementation.
+
+\begin{lstlisting}[caption={Override tagKey},language=Kotlin,label=code:tagkey]
+aggregation("Services", services, tagKey = {
+    TagMeta(
+        item.fullResourceName,
+        item.metadata.name,
+        item.metadata.namespace
+    )
+}) {
+    /*...*/
+}
+\end{lstlisting}
+
+I recommend using the named argument syntax, but it is not necessary. The value for the argument must be a function that returns a TagMeta object. Use the `item' keyword inside your lambda to reference an element of the list.
+
+Inside the body of the aggregation block, we get access to the `tag' keyword. Its first argument is a label that gets attached to the resource. The block of `tag' keyword must be a boolean expression. The `item' keyword can be used to reference an element of the list.
+
+To write complex boolean expressions I recommend using extension functions from the Kotlin standard library. Unfortunately these boolean expressions can get very complicated, because Kubernetes is complicated. 
+
+Furthermore, not all Kubernetes resource fields are implemented in the same way. Some have null as default value, some have empty string, others have an empty object or empty list. To determine whether to use ` == null' or `.isEmpty()' whenever looking for default or undefined values (e.g: not defined readiness probe), use either the Kubernetes documentation, the method of trial and error, or inspect a test resource using the `kubectl get <resource name> -o json' CLI command.
+
+Note that the label does not get actually attached to the resource, for example in the form of an annotation, so there are no modifications done to the cluster. The tagging only exists in the report, and the `tagKey' function is used to derive a unique ID for the resource.
+
+
+TODO
+
+total language tree
+
+hidden features:
+    errors 
+    screenshot ??
+
+
+\section{Webhooks}
+
+The report can be used to diagnose the cluster, and the webhooks can be used to enforce rules by rejecting or altering modifications that result in an undesired state.
+
+The main keyword for creating a webhook rule is `webhook'. A webhook requires a name, it must be unique, and must be in kebab-case.
+
+A webhook definition has two main parts: the configuration and the behavior block.
+
+\subsection{Webhook configuration}
+
+The configuration defines which events the webhook listens to. For example, we can create a webhook rule, that listens to deployment creations and updates. Let's see a code example:
+
+\begin{lstlisting}[caption={Webhook configuration},language=Kotlin,label=code:wh_conf]
+webhook("webhook-unique-name") {
+    operations(CREATE, UPDATE)
+    apiGroups(APPS)
+    apiVersions(ANY)
+    resources(DEPLOYMENTS, STATEFULSETS, DAEMONSETS)
+    failurePolicy(FAIL)
+    namespaceSelector {
+        matchLabels = mapOf(
+            "managed" to "true"
+        )
+    }
+    logRequest = true
+    logResponse = true
+
+    behavior {
+        /* Behavior goes here */
+    }
+}
+\end{lstlisting}
+
+Note that the webhooks and the report have a slightly different syntax and design. The main reason for this that I designed the webhook language feature way earlier than the report. When I was designing the webhooks I was still figuring out how to create a Kotlin DSL and I also had to experiment with the whole dynamic admission control concept of Kubernetes. So this resulted in a less mature design. By the time I got to the reporting functionality, I had more experience, so I could perfect the design of it. The current design of the webhooks feature is not as good as the report, but it is useable even in real scenarios. Therefore, I leave the redesigning of the webhooks to be a future improvement.
+
+TODO explain why only mutating
+
+I more or less created a mapping for the Kubernetes MutatingWebhookConfiguration\footnote{Dynamic Admission Control: https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers} object, but I tried to simplify it. The most significant simplification which makes it much easier to use, that I totally hid the SSL and implementation related parts, like the `caBundle' and `clientConfig' fields. These are simplifications for the user, and they do not reduce the functionality, they just make it easier to use the webhooks. However, I also made simplification that slightly reduces the functionality. The MutatingWebhookConfiguration object has the `rules' field, which is a list of RuleWithOperations objects. I do not allow it to be a list, I only allow it to be a single element. So the `operations', `apiGroups', `apiVersion', `resources', `scope' fields could be set multiple times in the rules list, but I just did not implement it in such a way. This could be a future improvement.
+
+In the \ref{code:wh_conf} example we can also see the syntax of setting these fields. I decided to use the: `fieldName(param, param2, ...)' syntax. These are basically functions with vararg \footnote{vararg: https://kotlinlang.org/docs/functions.html\#variable-number-of-arguments-varargs} parameters, so you can list your parameters separated by commas, they will be converted to an array. I chose this, because these fields are mostly lists and even dough Kotlin has a nice way for creating lists, I did not want to use the `listOf' function, because I thought that I would look more like a regular program code, instead of a DSL. With my approach it looks more like a DSL and not just regular Kotlin code, but looking back, I am not sure if it is better this way or not.
+
+I also created keyword constants for the most commonly used string literals in this context, like `CREATE', `DELETE', `ANY' or `DEPLOYMENTS', however you can also just use string literals.
+
+The \ref{tree:str_literals} figure shows the full list of constants with their values and in which context they should be used.
+
+\subfile{str_literals.tex}
+
+Let's talk about the `namespaceSelector'. I will only talk about it on the DSL level, to understand what it actually does, see the official documentation\footnote{namespaceSelector: \url{https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/\#matching-requests-namespaceselector}}. 
+This keyword opens a new block with the LabelSelector class from the fabric8 package as the receiver. The created LabelSelector will be passed to the MutatingWebhookConfiguration as is. This gives full control, but also requires the user to fully understand the topic. This is also an aspect that could be improved.
+
+The \ref{code:wh_conf} example also shows two fields: `logRequest' and the `logResponse'. These are tools for developing and debugging your webhooks. If they are set to true, the incoming webhook request or the given response is logged in a JSON format by the agent. These logs can be used to troubleshoot your webhooks, however I recommend turning them off in production.
+
+\subsection{Webhook configuration bundle}
+
+Webhooks require a lot of configuration. To eliminate repetition, I created a language feature, which allows for reusable configurations. This can be done via the `webhookConfigBundle' keyword. See the \ref{code:wcb} code example on how to use it.
+
+\begin{lstlisting}[caption={Webhook configuration bundle},language=Kotlin,label=code:wcb]
+val conf = webhookConfigBundle {
+    operations(CREATE, UPDATE)
+    apiGroups(APPS)
+    resources(ANY)
+}
+val myServer = server("my-server") {
+    webhook("wh-example", conf) {
+        resources(DAEMONSETS)
+    }
+}
+\end{lstlisting}
+
+It is a top level keyword like the `server'. Inside its block, you have access to all language features that the webhook provides, except the `behavior' block. To use the configuration bundle inside a webhook, pass it as a second parameter. In a webhook, where a configuration bundle is provided, the default values become the ones from the bundle. These default values can be overridden inside the webhook, just as the \ref{code:wcb} example shows, where the `resources' setting is overridden.
+
+\subsection{Behavior block}
+
+Everything so far about the webhook block was processed at deploy time, however the behavior block runs when the webhook is triggered. The implementation of it is detailed in TODO chapter. 
+
+To understand the structure of the behavior block, let's quickly review how an admission webhook works. This is detailed in the TODO chapter, but basically when a request arrives to the webhook, the webhook processes the request, makes a decision, than assembles a response.
+
+\subsubsection{Processing request}
+
+For the processing of the request, I implemented many tools. The request arrives in the form of an AdmissionRequest\footnote{\url{https://kubernetes.io/docs/reference/config-api/apiserver-admission.v1/}} object. The AdmissionRequest object's only field that is needed for the custom logic we want to define is the `request' field. The behavior block provides access to this field with the `request' keyword, which is represented as a \emph{kotlinx.serialization.json.JsonObject }object. Processing it with regular Kotlin tools are cumbersome, so I provided two main approaches: unmarshalling the request into Java objects from the fabric8 library, and a jq\footnote{jq is a lightweight and flexible command-line JSON processor, \url{https://jqlang.github.io/jq/}} like JSON processor language feature. 
+
+First let's talk about the JSON processor. It provides a way to null-safely read data from \emph{JsonElement}s, and convert the end result to string, number or boolean. 
+
+The keyword for reading data is: `jqx'. It is an infix function, with the \emph{JsonElement} as the left-hand side argument, and a selector string as the right-hand side argument. The selector string defines which field to get from the \emph{JsonElement}. The format of the selector string is slash (/) separated words. The words can even be numbers to select from a list. Surrounding slashes do not matter. The \ref{code:jqx} example shows the usage of the command.
+
+\begin{lstlisting}[caption={Usage of `jqx'},language=Kotlin,label=code:jqx]
+// Pseudo-Kotlin JSON definition
+val myJson = {
+    "lorem": [
+        {
+            "ipsum": "dolor"
+        },
+        {
+            "sit": "amet"
+        }
+    ]
+}
+
+val result: JsonElement = myJson jqx "/lorem/0/ipsum"
+// The value of result is a json primitive: "dolor"
+\end{lstlisting}
+
+The `jqx' function always returns a \emph{JsonElement}. Sometimes it is enough to just read a field and test if it is JsonNull or JsonEmpty. \emph{JsonNull} comes from the kotlinx.serialization.json library, jqx returns this when you tried to read something that does not exist, or has a null value. JsonEmpty is defined in the Konstrainer-DSL, and it is only a shortcut for an empty JSON object. The `==' operator can be used between the return value of the jqx command, and these two special JSON primitives.
+
+These were just some special cases, however most of the time you need to parse the result. The `parseAs' infix keyword can do just that. Its left-hand side argument is a \emph{JsonElement}, the RHS has to be one of the these special tokens: `string', `int', `double', `bool'. Depending on which token is passed as the RHS argument the return value is either null if it could not parse, or the value of the \emph{JsonElement} parsed as the type represented by the token.
+
+\begin{lstlisting}[caption={Usage of `parseAs'},language=Kotlin,label=code:jqx2]
+// Pseudo-Kotlin JSON definition
+val myJson = {
+    "color": "red",
+    "count": 10,
+    "isRipe": true
+}
+
+val color: String? = myJson jqx "color" parseAs string // String: "red"
+val rhl: Int? = myJson jqx "count" parseAs int // Integer: 10
+val isRipe: Boolean? = myJson jqx "isRipe" parseAs bool // Boolean: true
+val name: String? = myJson jqx "name" parseAs string // null
+\end{lstlisting}
+
+The second approach for request processing is unmarshalling. In the context of the `behavior' we get the `currentObject', `oldObject', `podSpec' and `unmarshal' keywords. Because of the structure of the \emph{AdmissionRequest} object, its `object' field will be read most of the time, since this stores the k8s resource the webhook request is about. In case of update and delete operations, the `oldObject' field is also used. The keywords with the same names provide access to these fields, and they are also unmarshalled to the right type.
+
 
 
 \subfile{lang_tree.tex}
