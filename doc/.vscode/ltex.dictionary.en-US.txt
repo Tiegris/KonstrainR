@@ -21,3 +21,10 @@ podSpec
 oldObject
 currentObject
 unmarshalled
+StatefulSets
+Unmarshalling
+StatefulSet
+HasMetadata
+DaemonSet
+PodSpec
+AdmissionResponse

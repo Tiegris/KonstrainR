@@ -305,7 +305,36 @@ val isRipe: Boolean? = myJson jqx "isRipe" parseAs bool // Boolean: true
 val name: String? = myJson jqx "name" parseAs string // null
 \end{lstlisting}
 
-The second approach for request processing is unmarshalling. In the context of the `behavior' we get the `currentObject', `oldObject', `podSpec' and `unmarshal' keywords. Because of the structure of the \emph{AdmissionRequest} object, its `object' field will be read most of the time, since this stores the k8s resource the webhook request is about. In case of update and delete operations, the `oldObject' field is also used. The keywords with the same names provide access to these fields, and they are also unmarshalled to the right type.
+The second approach for request processing is unmarshalling. In the context of the `behavior' we get the `currentObject', `oldObject', `podSpec' and `unmarshal' keywords. Because of the structure of the \emph{AdmissionRequest} object, its `object' field will be read most of the time, since this stores the k8s resource the webhook request is about. In case of update and delete operations, the `oldObject' field is also used. The keywords with the same names provide access to these fields (for the `object' field, I had to use `currentObject', because `object' is a reserved keyword in Kotlin). 
+
+The `currentObject', and `oldObject' properties also automatically unmarshal the following resources: \emph{Deployment}, \emph{Service}, \emph{Pod}, \emph{Secret}, \emph{DaemonSet}, \emph{StatefulSet}, \emph{Job}, \emph{CronJob}, \emph{Namespace}. The type of these properties is \emph{HasMetadata?}, but they can be cast to the previously listed types.
+
+The `podSpec' is a shortcut for the spec.template.spec fields of resources. Writing webhooks for Deployments and StatefulSets are common, and they all have that field, which is the spec field of the Pods they manage. It is common use-case to write rules on the managed pods of operator resources, that's why I created this shortcut. The type of `podSpec' is \emph{PodSpec?}, and it works with any kind of resources, which has the spec.template.spec field.
+
+`currentObject', `oldObject' and `podSpec' are lazy properties. It means that they are only evaluated, if you use them, so they will not cause an error if the field they reference does not exist, and they will also not waste processing time if you do not use them. On the other hand, `unmarshal' is a function, which helps to deserialize any part of the `request' property.
+
+In different scenarios, different approaches might be the best. The \ref{code:unmarshal} code snippet shows all the approaches on reading the podSpec if a Deployment.
+
+\begin{lstlisting}[caption={Unmarshalling},language=Kotlin,label=code:unmarshal]
+// request.object is a Deployment
+behavior {
+    val ps1: PodSpec = unmarshal(request jqx "/object/spec/template/spec")!!
+    val ps2 = podSpec!!
+    val ps3 = (currentObject as Deployment).spec.template.spec
+}
+\end{lstlisting}
+
+All the unmarshalling methods return a nullable type. The reason for this is exception handling. Instead of throwing an exception, they return null when they can not unmarshal the object.
+
+\subsubsection{Making a response}
+
+The actual assembly of the AdmissionResponse
+\footnote{\url{https://kubernetes.io/docs/re  ference/config-api/apiserver-admission.v1/\#admission-k8s-io-v1-AdmissionResponse}}
+object is done by the framework, however the fields of the AdmissionResponse object are mapped to DSL keywords, so basically making decision about the request and assembling a response is the same step for the user.
+
+For the best understanding I recommend reading the official documentation on the topic, but I will explain the most important things along the way. The AdmissionResponse has two required fields: `uid', and `allowed'. The `uid' field is filled automatically by the framework. The `allowed' field indicates whether the admission request was permitted or not. There is a keyword in the DSL with the same name. It opens a block, in which you must provide a boolean expression. The result of this boolean expression will be the value of the `allowed' field. In the DSL it is optional to use the allowed block, if we omit it, it will default to constant \emph{true}.
+
+In the official documentation, the next field is the `status' field. It can be used to provide an explanation why the request was denied. This field is ignored if the value of the `allowed' field is `true'. In the DSL, the `status' keyword opens a block. Inside its block, we get can set two fields: `message', `code'. With the `code' field we can set an HTTP status code and with the `message' field we can provide a detailed explanation.
 
 
 
