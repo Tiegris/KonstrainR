@@ -28,3 +28,4 @@ HasMetadata
 DaemonSet
 PodSpec
 AdmissionResponse
+patchType

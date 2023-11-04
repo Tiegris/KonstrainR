@@ -1,0 +1,215 @@
+\section{Webhooks}
+
+The report can be used to diagnose the cluster, and the webhooks can be used to enforce rules by rejecting or altering modifications that result in an undesired state.
+
+The main keyword for creating a webhook rule is `webhook'. A webhook requires a name, it must be unique, and must be in kebab-case.
+
+A webhook definition has two main parts: the configuration and the behavior block.
+
+\subsection{Webhook configuration}
+
+The configuration defines which events the webhook listens to. For example, we can create a webhook rule, that listens to deployment creations and updates. Let's see a code example:
+
+\begin{lstlisting}[caption={Webhook configuration},language=Kotlin,label=code:wh_conf]
+webhook("webhook-unique-name") {
+    operations(CREATE, UPDATE)
+    apiGroups(APPS)
+    apiVersions(ANY)
+    resources(DEPLOYMENTS, STATEFULSETS, DAEMONSETS)
+    failurePolicy(FAIL)
+    namespaceSelector {
+        matchLabels = mapOf(
+            "managed" to "true"
+        )
+    }
+    logRequest = true
+    logResponse = true
+
+    behavior {
+        /* Behavior goes here */
+    }
+}
+\end{lstlisting}
+
+Note that the webhooks and the report have a slightly different syntax and design. The main reason for this that I designed the webhook language feature way earlier than the report. When I was designing the webhooks I was still figuring out how to create a Kotlin DSL and I also had to experiment with the whole dynamic admission control concept of Kubernetes. So this resulted in a less mature design. By the time I got to the reporting functionality, I had more experience, so I could perfect the design of it. The current design of the webhooks feature is not as good as the report, but it is useable even in real scenarios. Therefore, I leave the redesigning of the webhooks to be a future improvement.
+
+TODO explain why only mutating
+
+I more or less created a mapping for the Kubernetes MutatingWebhookConfiguration\footnote{Dynamic Admission Control: https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers} object, but I tried to simplify it. The most significant simplification which makes it much easier to use, that I totally hid the SSL and implementation related parts, like the `caBundle' and `clientConfig' fields. These are simplifications for the user, and they do not reduce the functionality, they just make it easier to use the webhooks. However, I also made simplification that slightly reduces the functionality. The MutatingWebhookConfiguration object has the `rules' field, which is a list of RuleWithOperations objects. I do not allow it to be a list, I only allow it to be a single element. So the `operations', `apiGroups', `apiVersion', `resources', `scope' fields could be set multiple times in the rules list, but I just did not implement it in such a way. This could be a future improvement.
+
+In the \ref{code:wh_conf} example we can also see the syntax of setting these fields. I decided to use the: `fieldName(param, param2, ...)' syntax. These are basically functions with vararg \footnote{vararg: https://kotlinlang.org/docs/functions.html\#variable-number-of-arguments-varargs} parameters, so you can list your parameters separated by commas, they will be converted to an array. I chose this, because these fields are mostly lists and even dough Kotlin has a nice way for creating lists, I did not want to use the `listOf' function, because I thought that I would look more like a regular program code, instead of a DSL. With my approach it looks more like a DSL and not just regular Kotlin code, but looking back, I am not sure if it is better this way or not.
+
+I also created keyword constants for the most commonly used string literals in this context, like `CREATE', `DELETE', `ANY' or `DEPLOYMENTS', however you can also just use string literals.
+
+The \ref{tree:str_literals} figure shows the full list of constants with their values and in which context they should be used.
+
+\subfile{str_literals.tex}
+
+Let's talk about the `namespaceSelector'. I will only talk about it on the DSL level, to understand what it actually does, see the official documentation\footnote{namespaceSelector: \url{https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/\#matching-requests-namespaceselector}}. 
+This keyword opens a new block with the LabelSelector class from the fabric8 package as the receiver. The created LabelSelector will be passed to the MutatingWebhookConfiguration as is. This gives full control, but also requires the user to fully understand the topic. This is also an aspect that could be improved.
+
+The \ref{code:wh_conf} example also shows two fields: `logRequest' and the `logResponse'. These are tools for developing and debugging your webhooks. If they are set to true, the incoming webhook request or the given response is logged in a JSON format by the agent. These logs can be used to troubleshoot your webhooks, however I recommend turning them off in production.
+
+\subsection{Webhook configuration bundle}
+
+Webhooks require a lot of configuration. To eliminate repetition, I created a language feature, which allows for reusable configurations. This can be done via the `webhookConfigBundle' keyword. See the \ref{code:wcb} code example on how to use it.
+
+\begin{lstlisting}[caption={Webhook configuration bundle},language=Kotlin,label=code:wcb]
+val conf = webhookConfigBundle {
+    operations(CREATE, UPDATE)
+    apiGroups(APPS)
+    resources(ANY)
+}
+val myServer = server("my-server") {
+    webhook("wh-example", conf) {
+        resources(DAEMONSETS)
+    }
+}
+\end{lstlisting}
+
+It is a top level keyword like the `server'. Inside its block, you have access to all language features that the webhook provides, except the `behavior' block. To use the configuration bundle inside a webhook, pass it as a second parameter. In a webhook, where a configuration bundle is provided, the default values become the ones from the bundle. These default values can be overridden inside the webhook, just as the \ref{code:wcb} example shows, where the `resources' setting is overridden.
+
+\subsection{Behavior block}
+
+Everything so far about the webhook block was processed at deploy time, however the behavior block runs when the webhook is triggered. The implementation of it is detailed in TODO chapter. 
+
+To understand the structure of the behavior block, let's quickly review how an admission webhook works. This is detailed in the TODO chapter, but basically when a request arrives to the webhook, the webhook processes the request, makes a decision, than assembles a response.
+
+\subsubsection{Processing request}
+
+For the processing of the request, I implemented many tools. The request arrives in the form of an AdmissionRequest\footnote{\url{https://kubernetes.io/docs/reference/config-api/apiserver-admission.v1/}} object. The AdmissionRequest object's only field that is needed for the custom logic we want to define is the `request' field. The behavior block provides access to this field with the `request' keyword, which is represented as a \emph{kotlinx.serialization.json.JsonObject }object. Processing it with regular Kotlin tools are cumbersome, so I provided two main approaches: unmarshalling the request into Java objects from the fabric8 library, and a jq\footnote{jq is a lightweight and flexible command-line JSON processor, \url{https://jqlang.github.io/jq/}} like JSON processor language feature. 
+
+First let's talk about the JSON processor. It provides a way to null-safely read data from \emph{JsonElement}s, and convert the end result to string, number or boolean. 
+
+The keyword for reading data is: `jqx'. It is an infix function, with the \emph{JsonElement} as the left-hand side argument, and a selector string as the right-hand side argument. The selector string defines which field to get from the \emph{JsonElement}. The format of the selector string is slash (/) separated words. The words can even be numbers to select from a list. Surrounding slashes do not matter. The \ref{code:jqx} example shows the usage of the command.
+
+\begin{lstlisting}[caption={Usage of `jqx'},language=Kotlin,label=code:jqx]
+// Pseudo-Kotlin JSON definition
+val myJson = {
+    "lorem": [
+        {
+            "ipsum": "dolor"
+        },
+        {
+            "sit": "amet"
+        }
+    ]
+}
+
+val result: JsonElement = myJson jqx "/lorem/0/ipsum"
+// The value of result is a json primitive: "dolor"
+\end{lstlisting}
+
+The `jqx' function always returns a \emph{JsonElement}. Sometimes it is enough to just read a field and test if it is JsonNull or JsonEmpty. \emph{JsonNull} comes from the kotlinx.serialization.json library, jqx returns this when you tried to read something that does not exist, or has a null value. JsonEmpty is defined in the Konstrainer-DSL, and it is only a shortcut for an empty JSON object. The `==' operator can be used between the return value of the jqx command, and these two special JSON primitives.
+
+These were just some special cases, however most of the time you need to parse the result. The `parseAs' infix keyword can do just that. Its left-hand side argument is a \emph{JsonElement}, the RHS has to be one of the these special tokens: `string', `int', `double', `bool'. Depending on which token is passed as the RHS argument the return value is either null if it could not parse, or the value of the \emph{JsonElement} parsed as the type represented by the token.
+
+\begin{lstlisting}[caption={Usage of `parseAs'},language=Kotlin,label=code:jqx2]
+// Pseudo-Kotlin JSON definition
+val myJson = {
+    "color": "red",
+    "count": 10,
+    "isRipe": true
+}
+
+val color: String? = myJson jqx "color" parseAs string // String: "red"
+val rhl: Int? = myJson jqx "count" parseAs int // Integer: 10
+val isRipe: Boolean? = myJson jqx "isRipe" parseAs bool // Boolean: true
+val name: String? = myJson jqx "name" parseAs string // null
+\end{lstlisting}
+
+The second approach for request processing is unmarshalling. In the context of the `behavior' we get the `currentObject', `oldObject', `podSpec' and `unmarshal' keywords. Because of the structure of the \emph{AdmissionRequest} object, its `object' field will be read most of the time, since this stores the k8s resource the webhook request is about. In case of update and delete operations, the `oldObject' field is also used. The keywords with the same names provide access to these fields (for the `object' field, I had to use `currentObject', because `object' is a reserved keyword in Kotlin). 
+
+The `currentObject', and `oldObject' properties also automatically unmarshal the following resources: \emph{Deployment}, \emph{Service}, \emph{Pod}, \emph{Secret}, \emph{DaemonSet}, \emph{StatefulSet}, \emph{Job}, \emph{CronJob}, \emph{Namespace}. The type of these properties is \emph{HasMetadata?}, but they can be cast to the previously listed types.
+
+The `podSpec' is a shortcut for the spec.template.spec fields of resources. Writing webhooks for Deployments and StatefulSets are common, and they all have that field, which is the spec field of the Pods they manage. It is common use-case to write rules on the managed pods of operator resources, that's why I created this shortcut. The type of `podSpec' is \emph{PodSpec?}, and it works with any kind of resources, which has the spec.template.spec field.
+
+`currentObject', `oldObject' and `podSpec' are lazy properties. It means that they are only evaluated, if you use them, so they will not cause an error if the field they reference does not exist, and they will also not waste processing time if you do not use them. On the other hand, `unmarshal' is a function, which helps to deserialize any part of the `request' property.
+
+In different scenarios, different approaches might be the best. The \ref{code:unmarshal} code snippet shows all the approaches on reading the podSpec if a Deployment.
+
+\begin{lstlisting}[caption={Unmarshalling},language=Kotlin,label=code:unmarshal]
+// request.object is a Deployment
+behavior {
+    val ps1: PodSpec = unmarshal(request jqx "/object/spec/template/spec")!!
+    val ps2 = podSpec!!
+    val ps3 = (currentObject as Deployment).spec.template.spec
+}
+\end{lstlisting}
+
+All the unmarshalling methods return a nullable type. The reason for this is exception handling. Instead of throwing an exception, they return null when they can not unmarshal the object.
+
+\subsubsection{Making a response}
+
+To make a response, we must first make a decision about the request. The decision can be one of these things:
+
+\begin{itemize}
+    \item Allow
+    \item Allow, but raise a warning
+    \item Allow, but apply a patch
+    \item Allow, but apply a patch and raise a warning
+    \item Reject
+\end{itemize}
+
+The actual assembly of the AdmissionResponse
+\footnote{\url{https://kubernetes.io/docs/re  ference/config-api/apiserver-admission.v1/\#admission-k8s-io-v1-AdmissionResponse}}
+object is done by the framework, however the fields of the AdmissionResponse object are mapped to DSL keywords, so basically making decision about the request and assembling a response is the same step for the user. 
+
+For the best understanding I recommend reading the official documentation on the topic, but I will explain the most important things along the way. The AdmissionResponse has two required fields: `uid', and `allowed'. The `uid' field is filled automatically by the framework. The `allowed' field indicates whether the admission request was permitted or not. There is a keyword in the DSL with the same name. It opens a block, in which you must provide a boolean expression. The result of this boolean expression will be the value of the `allowed' field. In the DSL it is optional to use the allowed block, if we omit it, it will default to constant \emph{true}.
+
+In the official documentation, the next field is the `status' field. It can be used to provide an explanation why the request was denied. This field is ignored if the value of the `allowed' field is `true'. In the DSL, the `status' keyword opens a block. Inside its block, we get can set two fields: `message', `code'. With the `code' field we can set an HTTP status code and with the `message' field we can provide a detailed explanation. Both has a default value, for the message it is: `Denied by Konstrainer webhook' and for the code it is: `403'. This implementation gives full control, but as a future improvement I might simplify it. The word: `status' does not really speak for itself. One has to read the documentation to understand that the `status' field is responsible for explaining the reason of the rejection. A single settable property, like: `rejectionReason' might be more intuitive.
+
+The \ref{code:allowed} code snippet shows an example how to use these two previously introduced keywords.
+
+\begin{lstlisting}[caption={Allowed and status},language=Kotlin,label=code:allowed]
+behavior {
+    allowed {
+        podSpec!!.affinity != null
+    }
+    status {
+        message = "All pods must have an affinity!"
+        status = 400
+    }
+}
+\end{lstlisting}
+
+The next optional part of the response is the patch. This is two fields in the AdmissionResponse k8s object, but in the DSL it is just one keyword, since the patchType field is either empty, or has the value of: `JSONPatch', so it is handled automatically by the framework. 
+
+JSON Patch\footnote{\url{https://jsonpatch.com/}} is a standard, which can be used to describe changes to a JSON document. A JSON Patch document is a JSON document containing a list of patch operations. The patch operations supported by the standard are “add”, “remove”, “replace”, “move”, “copy” and “test”.
+
+The \ref{code:json_patch_1} code snippet shows an example JSON Patch. A patch object always has an `op' field, which indicates the operation. In the DSL I created a function keyword for all the supported operations. A patch object also has one or two other parameters, those are the arguments of the operation. In the DSL these are represented as input parameters for the operation functions. The \ref{code:json_patch_2} code snippet show how to implement the same patch as the \ref{code:json_patch_1} example patch.
+
+\begin{lstlisting}[caption={JSON Patch example},language=JSON,label=code:json_patch_1]
+[
+    { "op": "replace", "path": "/lorem", "value": "ipsum" },
+    { "op": "add", "path": "/dolor", "value": ["sit", "amet"] },
+]
+\end{lstlisting}
+
+\begin{lstlisting}[caption={JSON Patch using DSL},language=Kotlin,label=code:json_patch_2]
+patch {
+    replace("/lorem", "ipsum")
+    add("/dolor", buildJsonArray {
+        add("sit")
+        add("amet")
+    })
+}
+\end{lstlisting}
+
+The `add' and `replace' operations accept \emph{String}, \emph{Number} and \emph{JsonElement} as the second argument. For the rest of the operations it does not make sense to support anything else than \emph{String}s.
+
+The framework automatically assembles the standard compliant JSON Patch based on the instructions in the DSL instance. The resulting patch is also added as an annotation to the patched resources in a base64 encoded format, so it is clear whether a resource got patched or not. To read the patch applied to a resource run the following command: `kubectl get <resurce> -o yaml | yq '.metadata.annotations.ksr-patch' | base64 --decode' TODO check this
+
+The last feature in the response is the warning. Use the `warning' keyword to open a new block where you can list your warnings. Inside the scope of the `warning' block use the `warning' keyword to raise a warning. The `warning' keyword only takes one argument, the message of the warning. To make it conditional use the build in language features of Kotlin, like the `if' statement. The \ref{code:warning} code snippet is an example on how to use the warnings.
+
+\begin{lstlisting}[caption={JSON Patch using DSL},language=Kotlin,label=code:warning]
+behavior {
+    val condition = /*Custom boolean expression*/
+    warnings {
+        if (condition) warning("My warning message")
+        if (/*Custom condition*/) warning("My second warning message")
+    }
+}
+\end{lstlisting}
+
+As a future improvement I plan to change the warning language feature to function more like the `tag' keyword from the report, so that the condition is a second lambda parameter and not an `if' statement.
