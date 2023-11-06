@@ -90,13 +90,16 @@ The developers decided that they want to use a NoSQL database. They searched the
 
 \begin{lstlisting}[caption={Create first deployment},language=bash,label=code:bash5]
 kubectl create ns mongo
-helm install -n mongo my-release oci://registry-1.docker.io/bitnamicharts/mongodb
+helm install -n mongo my-release \
+  oci://registry-1.docker.io/bitnamicharts/mongodb
 \end{lstlisting}
 
 The output of the command has some helpful tips. The engineers deploying MongoDB followed them like this:
 
 \begin{lstlisting}[caption={Create first deployment},language=bash,label=code:bash6]
-export MONGODB_ROOT_PASSWORD=$(kubectl get secret --namespace mongo my-release-mongodb -o jsonpath="{.data.mongodb-root-password}" | base64 -d)
+export MONGODB_ROOT_PASSWORD=$(kubectl get secret --namespace mongo \
+  my-release-mongodb -o jsonpath="{.data.mongodb-root-password}" \
+  | base64 -d)
 export MONGO_HOST="my-release-mongodb.mongo.svc.cluster.local"
 \end{lstlisting}
 
