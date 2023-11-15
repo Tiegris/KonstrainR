@@ -1,0 +1,25 @@
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.6em}
+
+%----------------------------------------------------------------------------
+\chapter{Related works}
+\label{chap:relatedWorks}
+%----------------------------------------------------------------------------
+
+This chapter will introduce some similar project to my work.
+
+\section{Open Policy Agent}
+
+Open Policy Agent\footnote{OPA: \url{https://www.openpolicyagent.org/}} is a platform for a policy-based control for cloud native environments. It can declare and enforce policies not just for Kubernetes, but for a variety of platforms and tools, like Terraform and SQL. Sidenote: what OPA calls `policies', I call them `constraints', but they are basically the same in two platforms.
+
+OPA is very similar to my Konstrainer project. Both has a high-level DSL and can easily deploy and enforce policies. OPA supports many platforms, Konstrainer is Kubernetes specific. OPA is better in the sense that  one tool can be used to manage everything from the infrastructure level, through the platform level, to the application level. On the other hand, being specific to one platform allows my DSL to be more suited for managing the one platform it is designed for.
+
+My DSL is in form of a JVM library, so it is basically an extension to existing JVM languages, mainly Kotlin. On the other side, OPA created a language from scratch. Creating a new language is better in some sense, because there are no limitations, and you can tailor your DSL to your use-case the best. In contrast, it has many drawbacks, because you can't use existing libraries and tools of existing languages. You have to implement them on your own. You also have to implement a parser, transpiler or compiler. What is more, learning an absolutely new and unique language can be harder for the user, because there are few things they can relate to, and there are fewer documentation and tutorials available on the topic.
+
+Even dough it is easier to learn just a library, in my experience people rather learn something totally new, then learn a library for a foreign programming language. The explanation might be that if people know absolutely nothing about a language or platform, their curiosity drives them to explore and learn. Yet, when they encounter an existing language the only thing they know for sure, is that they don't know it. Kotlin also has a negative psychological effect, because it is mainly used for Android development and engineers might think that the language for Android development can not be used for Kubernetes.
+
+The two platforms are very on the deployment level.
+
+\section{Kubernetes reporting tools}
+
+

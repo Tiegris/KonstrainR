@@ -29,3 +29,9 @@ DaemonSet
 PodSpec
 AdmissionResponse
 patchType
+ClusterRole
+clusterRole
+ClusterRoleBinding
+ResourceList
+transpiler
+least-privilaged

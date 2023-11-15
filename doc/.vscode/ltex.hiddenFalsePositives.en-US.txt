@@ -1,2 +1,3 @@
 {"rule":"UPPERCASE_SENTENCE_START","sentence":"^\\Qkebab-case: \\E(?:Dummy|Ina|Jimmy-)[0-9]+$"}
 {"rule":"IF_IS","sentence":"^\\QIf the `if' statement evaluates to true,\\E$"}
+{"rule":"MORFOLOGIK_RULE_EN_US","sentence":"^\\QWe can reference this clusterrole with the `ReadAny' keyword.\\E$"}

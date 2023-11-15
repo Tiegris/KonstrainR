@@ -28,7 +28,7 @@ spec:
         - name: items
           env:
             - name: MongoPass
-              value: K2axORImma
+              value: cLJBxAPrnY
             - name: MongoHost
               value: my-release-mongodb.mongo.svc.cluster.local
           image: tiegris/apples-items:latest

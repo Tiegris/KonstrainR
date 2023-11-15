@@ -1,4 +1,5 @@
-\chapter{Case study}
+\chapter{Case study 1}
+\label{chap:case_study1}
 
 This chapter demonstrates the capabilities of the Konstrainer framework through a fictional company's business application. The case study first establishes the starting state of a demo application, then identifies several problems with the application, after that it proposes solutions to those problems, finally it establishes rules that prevent the future occurrence of those problems.
 
@@ -21,6 +22,9 @@ Requirements:
 The demo was tested on Ubuntu 22 with bash.
 
 TODO: explain how to get the starting project
+
+TODO kedves olvaso tudja azt használni
+TODO I prepared this code in github link ....
 
 % Let's see what mistakes they made and let's prevent many future mistakes they might make using the power of the Konstrainer platform.
 
@@ -144,10 +148,9 @@ Install the Konstrainer helm chart.
 cd ../charts
 kubectl create ns konstrainer-ns
 helm upgrade konstrainr-core konstrainr-core -n konstrainer-ns --install
-kubectl port-forward service/konstrainer-core 8443:8080 -n konstrainer-ns
 \end{lstlisting}
 
-Wait for it to start, than port forward the core component.
+Wait for it to start, then port forward the core component.
 
 \begin{lstlisting}[caption={TODO},language=bash,label=code:bashx]
 kubectl port-forward service/konstrainer-core 8443:8080 -n konstrainer-ns
@@ -159,7 +162,9 @@ First let's run the basic diagnostics on the cluster.
 
 The Basic Diagnostics is a build dsl file, which generates a report of the most common best-practice violations in the cluster.
 
-Go to \url{https://localhost:8443}. The site has a self signed certificate, configure your browser to trust it. For login use \emph{admin:admin}. Upload the basic diagnostics dsl: \url{../Konstrainer-Dsl/src/main/kotlin/me/btieger/builtins/BasicDiagnostic.kt} Use browse, than submit. Wait for it to compile. The site does not refresh automatically, refresh the page after about 20 seconds to see if it's compiled. You should see: `Build status: Ready'
+Go to \url{https://localhost:8443}. The site has a self signed certificate, configure your browser to trust it. For login use \emph{admin:admin}. Upload the basic diagnostics dsl:
+\url{../Konstrainer-Dsl/src/main/kotlin/me/btieger/builtins/BasicDiagnostic.kt}
+Use browse, than submit. Wait for it to compile. The site does not refresh automatically, refresh the page after about 20 seconds to see if it's compiled. You should see: `Build status: Ready'
 
 Click `Start Server'. Wait for it to start. After about 5 seconds refresh the page. You should see: `Server status: Up'
 
@@ -279,144 +284,7 @@ Describe the newly created deployment and we can see that the revisionHistoryLim
 kubectl get deployment accounting -n accounting -o yaml | yq '.spec.revisionHistoryLimit'
 \end{lstlisting}
 
-\subsection{Writing your own policies}
 
-Lets assume the company has introduced some custom policies and now we want to enforce them using Konstrainer. Start with a very simple policy: All images must come from the internal companies registry.
-
-To enforce this, first lets detect what images violate this policy:
-
-Create a file with the company-policies.kt file with the following content:
-
-\begin{lstlisting}[caption={TODO},language=Kotlin,label=code:todo]
-package me.btieger
-
-import me.btieger.dsl.*
-
-const val companyPrefix = "tiegris/"
-val companPolicies = server("company-policies") {
-
-}
-\end{lstlisting}
-
-This is just the boilerplate of a konstrainer agent dsl so far. To create a report add the `report` block inside the server block:
-
-\begin{lstlisting}[caption={TODO},language=Kotlin,label=code:todo]
-val companPolicies = server("company-policies") {
-  report {
-
-  }
-}
-\end{lstlisting}
-
-Inside the report block we can create aggregation groups and we aslo have access to the `kubelist` and `kubectl` commands.
-
-Both the `kubectl` and `kubelist` commands provide access to the Kubernetes API. The `kubectl` command gives you full control, but this is rarely needed. The `kubelist` command has limitations, but it is more convenient to use in most cases.
-
-Use `kubelist` and `kubectl` like this to fetch the list of all pods:
-
-\begin{lstlisting}[caption={TODO},language=Kotlin,label=code:todo]
-val pods: List<Pod> = kubelist { pods() }
-val pods: List<Pod>? = kubectl { pods().inAnyNamespace().list().items }
-\end{lstlisting}
-
-Inside the scope of these commands, everything is executed on an instance of a KubernetesClient class from the [fabric8](https://github.com/fabric8io/kubernetes-client) library. This is an open source third party Kubernetes client for Java. With the Kotlin terminology we say that the receiver of your lambda function is the KubernetesClient class.
-
-Both function are exception safe, meaning if an error occurs inside their scope, or during the k8s api call, they return a default value and include the error in the report instead of causing the entire report to fail. The default return value for `kubelist` is an empty list, for the `kubectl` it is null.
-
-Using this knowledge, create an aggregation group on the pods of the cluster:
-
-\begin{lstlisting}[caption={TODO},language=Kotlin,label=code:todo]
-report {
-  aggregation("Pods", kubelist { pods() }) {
-
-  }
-}
-\end{lstlisting}
-
-Inside the scope of the aggregation group we can add tags to mark the resources. A tag function has 2 arguments: The text of the tag, and a lambda defining the condition if the resource should be marked or not:
-
-\begin{lstlisting}[caption={TODO},language=Kotlin,label=code:todo]
-report {
-  aggregation("Pods", kubelist { pods() }) {
-    tag("Image not from company registry") {
-      item.spec.containers.any { !it.image.startsWith(companyPrefix) }
-    }
-  }
-}
-\end{lstlisting}
-
-Use the `item` keyword inside the scope of the tag function to refer to the items of the collection you are doing the aggregation on. Think of it like a foreach loop, where the `item` is the iterator, referring to each elements of the list.
-
-Now we only need to associate a clusterrole to the agent and we are done with the report. The clusterrole is needed, because we list the pods, and it requires authorization. The final agent dsl:
-
-\begin{lstlisting}[caption={TODO},language=Kotlin,label=code:todo]
-package me.btieger
-import me.btieger.dsl.*
-
-const val companyPrefix = "tiegris/"
-val companyPolicies = server("company-policies") {
-  clusterRole = ReadAny
-  report {
-    aggregation("Pods", kubelist { pods() }) {
-      tag("Image not from company registry") {
-        item.spec.containers.any { !it.image.startsWith(companyPrefix) }
-      }
-    }
-  }
-}
-\end{lstlisting}
-
-The line: `clusterRole = ReadAny` assigns the ReadAny clusterrole to the agent by creating a clusterrolebinding during the deployment of the agent. The ReadAny clusterrole is created with the Konstrainer installation, it gives read access to all resources in the cluster.
-
-Now lets do the enforcing part. Put this code inside the server block.
-
-\begin{lstlisting}[caption={TODO},language=Kotlin,label=code:todo]
-webhook("only-internal-registry") {
-  operations(CREATE, UPDATE)
-  apiGroups(APPS)
-  apiVersions(ANY)
-  resources(DEPLOYMENTS, STATEFULSETS, DAEMONSETS)
-  namespaceSelector { }
-  failurePolicy(FAIL)
-  behavior {
-    allowed {
-      podSpec!!.containers.all { it.image.startsWith(companyPrefix) }
-    }
-    status {
-      message = "All images must be from the company registry."
-    }
-  }
-}
-\end{lstlisting}
-
-To create a rule, we need to add a `webhook` block. It needs a unique name. Lets name it "only-internal-registry". We need to define which events should the webhook listen to. In this example the webhook listens to the creation or update of any deployments, statefulsets and daemonsets.
-
-The more interesting part is the behavior block. It describes how should the webhook behave when a request arrives. Inside the behavior block we can access the request body using many ways. One of them is the podSpec keyword. It is a shortcut to the `.spec.template.spec` of a deployment, statefulset or daemonset.
-
-In the allowed block we can specify when to allow or reject an event. In this case we only accept events when the all the containers of the pod has an image starting with the the company prefix.
-
-In the status block we define the error message in case the event is rejected.
-
-Lets deploy and test our newly created agent dsl. On the monitors view we can see that the pods inside the ired-test namespace use images outside of the company registry, and the mongodb also uses an image from docker.io instead of the company registry.
-
-We can also test that we can no longer create resources which use images outside from the company registry:
-
-\begin{lstlisting}[caption={TODO},language=bash,label=code:bashx]
-kubectl create ns policy-test
-kubectl apply -f k8s/test-policy.yaml -n policy-test
-\end{lstlisting}
-
-We should get this error:
-
-\begin{lstlisting}[caption={TODO},language=bash,label=code:todo]
-Error from server: error when creating "k8s/test-policy.yaml": admission webhook "only-internal-registry.btieger.me" denied the request: All images must be from the company registry.
-\end{lstlisting}
-
-\begin{lstlisting}[caption={TODO},language=bash,label=code:bashx]
-yq eval 'select(.kind == "Deployment").spec.template.spec.containers[0].image = "tiegris/apples-users"' k8s/test-policy.yaml -i
-kubectl apply -f k8s/test-policy.yaml -n policy-test
-\end{lstlisting}
-
-This error shows that our rule works and is enforced.
+TODO
 
 This is the end of the demo. In this demo we saw the basic capabilities of the Konstrainer platform, some use-cases, and how to create our own rules.
