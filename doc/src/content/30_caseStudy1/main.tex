@@ -14,9 +14,9 @@ Requirements:
 \begin{itemize}
     \item Text editor
     \item Docker
-    \item Sandbox Kubernetes cluster
+    \item Sandbox Kubernetes cluster (Tested with version: v1.27.2)
     \item Helm
-    \item yq (Tested with version: (\url{https://github.com/mikefarah/yq/}) version 4.18.)
+    \item yq (Tested with version: (\url{github.com/mikefarah/yq/}) version 4.18.)
 \end{itemize}
 
 The demo was tested on Ubuntu 22 with bash.
@@ -90,7 +90,7 @@ kubectl create ns ired-test || true
 kubectl apply -n ired-test -f $home/k8s/junk.yaml
 \end{lstlisting}
 
-The developers decided that they want to use a NoSQL database. They searched the internet and one of the first search results was this: \url{https://bitnami.com/stack/mongodb/helm}. This website shows a command which looks like it deploys a MongoDB. The engineers tested it, and it worked. They did not bother with reading the documentation or properly configuring the database, there was no time for that.
+The developers decided that they want to use a NoSQL database. They searched the internet and one of the first search results was this: \url{bitnami.com/stack/mongodb/helm}. This website shows a command which looks like it deploys a MongoDB. The engineers tested it, and it worked. They did not bother with reading the documentation or properly configuring the database, there was no time for that.
 
 \begin{lstlisting}[caption={Create first deployment},language=bash,label=code:bash5]
 kubectl create ns mongo
@@ -257,7 +257,7 @@ Now we fixed the node affinity problem, but there are still problems:
 Error from server: error when creating "k8s/accounting.yaml": admission webhook "deny-no-resources.btieger.me" denied the request: Deployment must have resource definitions!
 \end{lstlisting}
 
-It is possible to define resource requests and limitations for Pods. Here is a great blog post why defining them a best practice: [Kubernetes best practices: Resource requests and limits](https://cloud.google.com/blog/products/containers-kubernetes/kubernetes-best-practices-resource-requests-and-limits)
+It is possible to define resource requests and limitations for Pods. Here is a great blog post why defining them a best practice: [Kubernetes best practices: Resource requests and limits](cloud.google.com/blog/products/containers-kubernetes/kubernetes-best-practices-resource-requests-and-limits)
 
 Lets set some resource limits and requests, than redeploy the deployment:
 

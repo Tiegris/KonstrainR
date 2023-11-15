@@ -6,19 +6,31 @@
 \label{chap:relatedWorks}
 %----------------------------------------------------------------------------
 
-This chapter will introduce some similar project to my work.
+This chapter will introduce some similar project and solutions to my work.
 
 \section{Open Policy Agent}
 
-Open Policy Agent\footnote{OPA: \url{https://www.openpolicyagent.org/}} is a platform for a policy-based control for cloud native environments. It can declare and enforce policies not just for Kubernetes, but for a variety of platforms and tools, like Terraform and SQL. Sidenote: what OPA calls `policies', I call them `constraints', but they are basically the same in two platforms.
+I've heard about the existence of the Open Policy Agent when I was almost finished with the Konstrainer platform, but when I researched it for this chapter, I had to realize that OPA and Konstrainer are basically the same software. They provide the solution to the same problems, with a very similar approach. This section is a comparison between the two projects.
 
-OPA is very similar to my Konstrainer project. Both has a high-level DSL and can easily deploy and enforce policies. OPA supports many platforms, Konstrainer is Kubernetes specific. OPA is better in the sense that  one tool can be used to manage everything from the infrastructure level, through the platform level, to the application level. On the other hand, being specific to one platform allows my DSL to be more suited for managing the one platform it is designed for.
+Even dough OPA is an open source project started in 2015, with many active developers and around 400 contributors, there are features in my project that are better, but obviously OPA has more features, they could put more focus on security and over all OPA is more polished.
 
-My DSL is in form of a JVM library, so it is basically an extension to existing JVM languages, mainly Kotlin. On the other side, OPA created a language from scratch. Creating a new language is better in some sense, because there are no limitations, and you can tailor your DSL to your use-case the best. In contrast, it has many drawbacks, because you can't use existing libraries and tools of existing languages. You have to implement them on your own. You also have to implement a parser, transpiler or compiler. What is more, learning an absolutely new and unique language can be harder for the user, because there are few things they can relate to, and there are fewer documentation and tutorials available on the topic.
+OPA can declare and enforce policies not just for Kubernetes, but for a variety of platforms and tools, like Terraform and SQL. OPA is better in the sense that one tool can be used to manage everything from the infrastructure level, through the platform level, to the application level. On the other hand, being specific to one platform allows my DSL to be more suited for managing the one platform it is designed for.
+
+Sidenote: what OPA calls `policies', I call them `constraints', but they are essentially the same thing.
+
+My DSL is in form of a JVM library, so it is basically an extension to existing JVM languages, mainly Kotlin. On the other side, OPA has created a language from scratch, called \emph{Rego}\footnote{Rego: \url{www.openpolicyagent.org/docs/latest/policy-language/}}, however their platform can also be used as a \emph{Go} library. 
+
+Creating a new language is better in some sense, because there are no limitations, and you can tailor your DSL to your use-case the best. In contrast, it has many drawbacks, because it is hard to use existing libraries and tools of existing languages. You have to implement them on your own. A parser, transpiler or compiler also needs to be implemented. What is more, learning an absolutely new and unique language can be harder for the user, because there are few things they can relate to, and there are fewer documentation and tutorials available on the topic.
 
 Even dough it is easier to learn just a library, in my experience people rather learn something totally new, then learn a library for a foreign programming language. The explanation might be that if people know absolutely nothing about a language or platform, their curiosity drives them to explore and learn. Yet, when they encounter an existing language the only thing they know for sure, is that they don't know it. Kotlin also has a negative psychological effect, because it is mainly used for Android development and engineers might think that the language for Android development can not be used for Kubernetes.
 
-The two platforms are very on the deployment level.
+How you develop your policies or constraints with the two platform is also different. For OPA, there is a very nice online playground and VS Code extension. Both can be used to effectively develop and debug your scripts. My DSL requires a heavy-duty IDE, like IntelliJ IDEA. Debugging my DSL scripts without deploying the script to a live cluster is also harder. You need to wrap your script execution in a function which reads an input file from the disk, and call the proper function of the compiled server script object.
+
+Both OPA and Konstrainer uses the same concept for Kubernetes policy enforcement. On the language level OPA hides the k8s specific admission controllers a bit better, than my DSL, but under the hood both uses admission controller webhooks.
+
+The strongest advantage of my platform is the automation of deployment. In both cases, the policy platform can be easily deployed using a couple of commands and a helm chart, but how you deploy a policy is much different. In the Kubernetes tutorial of OPA
+\footnote{\url{www.openpolicyagent.org/docs/v0.58.0/kubernetes-tutorial/}} there is 
+
 
 \section{Kubernetes reporting tools}
 

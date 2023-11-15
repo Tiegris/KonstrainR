@@ -5,7 +5,7 @@ This chapter will introduce my domain specific language created for enforcing Ku
 
 \section{Top level}
 
-The main top level keyword is the `server', which declares a new agent. An agent is basically a web server which can create reports and implement Kubernetes admission webhooks. It is called server, because a web server will be generated from it. It takes 1 argument, its unique name, which must be in kebab-case\footnote{kebab-case: \url{https://developer.mozilla.org/en-US/docs/Glossary/Kebab_case}}, and opens a block. To be precise it takes 2 arguments, the second argument is a lambda, but in this context it is easier to refer to the last lambda argument of the server function as the `block of the server keyword', or the `server block'.
+The main top level keyword is the `server', which declares a new agent. An agent is basically a web server which can create reports and implement Kubernetes admission webhooks. It is called server, because a web server will be generated from it. It takes 1 argument, its unique name, which must be in kebab-case\footnote{kebab-case: \url{developer.mozilla.org/en-US/docs/Glossary/Kebab_case}}, and opens a block. To be precise it takes 2 arguments, the second argument is a lambda, but in this context it is easier to refer to the last lambda argument of the server function as the `block of the server keyword', or the `server block'.
 
 From now on, I will use this terminology whenever referring to the last lambda argument of a function.
 

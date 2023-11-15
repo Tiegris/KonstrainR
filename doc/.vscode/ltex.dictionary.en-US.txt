@@ -35,3 +35,4 @@ ClusterRoleBinding
 ResourceList
 transpiler
 least-privilaged
+Rego
