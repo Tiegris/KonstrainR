@@ -36,3 +36,6 @@ ResourceList
 transpiler
 least-privilaged
 Rego
+ValidatingWebhookConfiguration
+Kyverno
+GitOps
