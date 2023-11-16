@@ -44,16 +44,16 @@ Kyverno describes itself on their GitHub page like so:
 
 Kyverno takes on interesting approach to the problem. Instead of creating a language, it uses custom Kubernetes resources to describe policies. However, to describe k8s resources, the best way is to create YAML files. These YAML files are specific to describing policies, so basically Kyverno uses a YAML based DSL.
 
-Kyverno can essentially do the same as OPA and Konstrainer, but it has an additional feature. Kyverno can also be used to create or delete resources. Konstrainer can do that too, however I do not think that policy enforcer tools should automatically delete resources, so I advise against it. In the Kyverno quick start documentation\footnote{\url{kyverno.io/docs/introduction/\#quick-start}}, there is an example which shows how to create image pull secrets in all newly created namespaces. Konstrainer can also do this.
+Kyverno can essentially do the same as OPA and Konstrainer, but it has an additional feature. Kyverno can also be used to create or delete resources. Konstrainer can do that too, however I do not think that policy enforcer tools should automatically delete resources, so I advise against it. In the Kyverno quick start documentation\footnote{\url{kyverno.io/docs/introduction/\#quick-start}}, there is an example which shows how to create image pull secrets in all newly created namespaces. Konstrainer can also do this, but I didn't intend this to be a primary use-case.
 
 Just like OPA, Kyverno also has an online playground which makes development easy. Deploying policies is straightforward as well, it is just a `kubectl apply' command. Since it uses CLI commands instead of a Web UI, it is simpler to integrate it into CI/CD and to use GitOps. Integrating Konstrainer into a CI/CD pipeline is possible, however it would take some \emph{curl} calls.
 
 The grates advantage of Kyverno over my Konstrainer is the large available pre-made policy base. On the \url{https://kyverno.io/policies/} website, there were almost 300 policies at the time this thesis was written.
 
-The most significant advantage of Konstrainer over Kyverno, is its readability. For example, Kyverno supports patches, however it uses the JSON Patch standard as is, instead of creating an easy-to-use abstraction layer above it. Konstrainer creates an abstraction layer in this case. What is more, `joins' are 
+The most significant advantage of Konstrainer over Kyverno, is its readability. For example, Kyverno supports patches, however it uses the JSON Patch standard as is, instead of creating an easy-to-use abstraction layer above it. Konstrainer creates an abstraction layer in this case. What is more, creating `joins', when you want to create an association between two or more resources, seem much harder to read. Kyverno uses special operators, which can not be understood unless one reads the documentation. However, Konstrainer uses easy to read English keywords.
 
 \section{Kubernetes reporting tools}
 
+There are tools which can only create reports but not enforce policies. These tools mostly focus on metrics, like CPU requests, usage and limits. To give an example, the Kubernetes Resource Report project from Henning Jacobs on \url{https://codeberg.org/hjacobs/kube-resource-report} can create an HTML report from the resource requests and usages.
 
-
-
+I did not find any other mentionable project which can create reports that are more advanced than just simple metric request and usage reports, although it is possible to create advanced reports manually. The \emph{kubectl} CLI tool alongside with \emph{jq} can be used to get the list of Kubernetes resources which meet a criterion. This is fine if you only want to find violations of one simple policy, but for complex reports which can be generated at anytime it is not the best. The result will be in text format, what is more it is hard to handle errors in bash, so the edge cases will be handled poorly. Therefore, it is good idea to use something more sophisticated for writing complex reports.
