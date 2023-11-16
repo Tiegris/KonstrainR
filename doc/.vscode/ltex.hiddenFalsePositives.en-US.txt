@@ -1,3 +1,4 @@
 {"rule":"UPPERCASE_SENTENCE_START","sentence":"^\\Qkebab-case: \\E(?:Dummy|Ina|Jimmy-)[0-9]+$"}
 {"rule":"IF_IS","sentence":"^\\QIf the `if' statement evaluates to true,\\E$"}
 {"rule":"MORFOLOGIK_RULE_EN_US","sentence":"^\\QWe can reference this clusterrole with the `ReadAny' keyword.\\E$"}
+{"rule":"COMMA_PARENTHESIS_WHITESPACE","sentence":"^\\QExecute the initial setup script: ./initial-setup.sh This script establishes the initial state of the demo system by replicating commands that the developers of the system might have used, or running commands that simulate steps of the development process.\\E$"}

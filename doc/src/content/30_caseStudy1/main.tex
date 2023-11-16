@@ -1,13 +1,17 @@
 \chapter{Case study 1}
 \label{chap:case_study1}
 
-This chapter demonstrates the capabilities of the Konstrainer framework through a fictional company's business application. The case study first establishes the starting state of a demo application, then identifies several problems with the application, after that it proposes solutions to those problems, finally it establishes rules that prevent the future occurrence of those problems.
+This chapter showcases the capabilities of the Konstrainer framework through a fictional company's business application. The case study first establishes the starting state of a demo application, then identifies several problems with the application, after that it proposes solutions to those problems, finally it establishes rules that prevent the future occurrence of those problems.
 
-The fictional company is called Apples inc. They want to modernize their business operations. The mangers decided that buying an existing solution is too expensive, so they opted for a custom application built by their engineers. They also decided that it must be an application build on the `microservices' architecture and running in Kubernetes, mainly because this is trendy today, even thought they did not properly investigate whether it is the best solution for their use-case or not. Furthermore, their engineers had no previous experience with Kubernetes. The lack of experience, improper planning and rushed deadlines resulted in many mistakes.
+A fictional company, Apples Inc., embarked on a journey to modernize its business operations. The mangers decided that buying an existing solution is too expensive, so they opted for a custom application built by their engineers. They specifically mandated that the application be built upon the microservices architecture and run in Kubernetes, mainly because this is trendy today, even thought they did not properly investigate whether it is the best solution for their use-case or not. Moreover, the engineers lacked prior experience with Kubernetes. The combination of insufficient experience, inadequate planning, and tight deadlines led to numerous mistakes in the development process.
 
-Their app is still work in progress and has limited functionality, and it is just a small demo for the sake of this case study.
+Their application is still a work in progress, with limited functionality - it serves as a small demo solely for the purpose of this case study.
 
 \section{Setup}
+
+I have prepared this demo on GitHub: \url{https://github.com/Tiegris/KonstrainR/tree/main/main/DemoApp}
+
+The repository is publicly available, enabling readers to download it, try it out, and follow along with this demonstration. 
 
 Requirements:
 
@@ -21,14 +25,7 @@ Requirements:
 
 The demo was tested on Ubuntu 22 with bash.
 
-TODO: explain how to get the starting project
-
-TODO kedves olvaso tudja azt használni
-TODO I prepared this code in github link ....
-
-% Let's see what mistakes they made and let's prevent many future mistakes they might make using the power of the Konstrainer platform.
-
-Make sure that you are in the \emph{DemoApp} folder.
+If you follow along, make sure that you are in the \emph{DemoApp} folder.
 
 Optionally, you can build the Docker images for yourself, but they are publicly available, so this is optional. Run this, so the setups script builds the images for you. If you do this, you have to manually edit the items.yaml and users.yaml files to use your images.
 
@@ -37,16 +34,11 @@ export BUILD_IMAGES=1
 export REPO=<your-docker.io-account-name>
 \end{lstlisting}
 
-Run the initial setup script. This sets up the starting state of the demo system by replicating some commands the developers of the system might have used, or running commands that simulate steps of the development process.
-
-\begin{lstlisting}[caption={Run the setup script},language=bash,label=code:bash2]
-./initial-setup.sh
-\end{lstlisting}
-
+Execute the initial setup script: \texttt{./initial-setup.sh} This script establishes the initial state of the demo system by replicating commands that the developers of the system might have used, or running commands that simulate steps of the development process.
 
 \subsection{Breakdown of setup}
 
-This section breaks down the steps of the setup script and tells a story how the current state of the demo app got achieved.
+This section breaks down the steps of the setup script and explains each step, by telling a story what the developers did, to achieve the current state of the system.
 
 When the first two microservices of the app were created, the developers created a YAML file for each, and defined the most basic k8s resources needed for them:
 
