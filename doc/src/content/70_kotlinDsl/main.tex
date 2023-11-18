@@ -8,6 +8,8 @@
 
 \section{Choice of technology}
 
+TODO move this to introduciton??
+
 When designing a Domain Specific Language, some questions need to be answered first. What kind of things the language should express? Who are going to use the language? How important expandability is? Should it be a graphical or a text-based language?
 
 The first question is almost answered by the title of the topic. My high level goal is to create language, that can describe k8s admission webhook configurations, validation rules and mutations on k8s resources using the content of the incoming AdmissionReview requests. The first goal basically means that it should be able to describe simple data objects, like a JSON file. The second and third goal requires the language to be able to describe parameterized behaviors. This is not trivial and this is one of the main reasons I chose a general purpose language for implementing the DSL.
@@ -79,5 +81,8 @@ This pattern is the basic idea between most of the DSLs written in Kotlin.
 
 TODO
 
+TODO execution pattern
+    rewrite example
+    explain where item is accessible
 
 

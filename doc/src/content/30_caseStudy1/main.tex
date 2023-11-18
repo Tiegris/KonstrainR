@@ -1,4 +1,4 @@
-\chapter{Case study 1}
+\chapter{Case study 1: Default constraint set}
 \label{chap:case_study1}
 
 This chapter showcases the capabilities of the Konstrainer framework through a fictional company's business application. The case study first establishes the starting state of a demo application, then identifies several problems with the application, after that it proposes solutions to those problems, finally it establishes rules that prevent the future occurrence of those problems.
@@ -40,7 +40,7 @@ Execute the initial setup script: \texttt{./initial-setup.sh} This script establ
 
 This section breaks down the steps of the setup script and explains each step, by telling a story what the developers did, to achieve the current state of the system.
 
-When the first two microservices of the app were created, the developers created a YAML file for each, and defined the most basic k8s resources needed for them:
+When the initial two microservices for the app were developed, the developers created a YAML file for each and defined the essential Kubernetes resources required for them:
 
 \begin{lstlisting}[caption={Create first deployment},language=bash,label=code:bash3]
 # Initial creation of users app
@@ -58,7 +58,7 @@ The resource descriptions were generated using the VS Code Kubernetes extension 
 
 Note that the items.yaml contains an unused PVC. This could be the result of a copy and paste oversight, or just someone forgot to delete it. We will use Konstrainer to detect it.
 
-The `items' app went through a long development. The setup script simulated the multiple redeployment of the app like this:
+The `items' app went through a long development. The setup script simulates the multiple redeployment of the app like this:
 
 \begin{lstlisting}[caption={Create first deployment},language=bash,label=code:bash4]
 # Simulate a history of changes
@@ -70,7 +70,7 @@ done
 yq eval 'select(.kind == "Deployment").spec.template.metadata.annotations.v = "0"' $home/k8s/items.yaml -i
 \end{lstlisting}
 
-The engineers in charge of the Kubernetes deployments created test environments for themselves to just test some things and play around, but they forgot to delete them.
+The engineers in charge of the Kubernetes deployments set up test environments for experimentation and testing purposes, but they neglected to delete them.
 
 This is simulated by these commands:
 
@@ -79,7 +79,7 @@ This is simulated by these commands:
 kubectl create ns jathan-test || true
 # Simulate Ida Red creating test namespace and leaving some leftover junk in it
 kubectl create ns ired-test || true
-kubectl apply -n ired-test -f $home/k8s/junk.yaml
+kubectl apply -n ired-test -f $home/k8s/junk.yamlb     
 \end{lstlisting}
 
 The developers decided that they want to use a NoSQL database. They searched the internet and one of the first search results was this: \url{bitnami.com/stack/mongodb/helm}. This website shows a command which looks like it deploys a MongoDB. The engineers tested it, and it worked. They did not bother with reading the documentation or properly configuring the database, there was no time for that.
