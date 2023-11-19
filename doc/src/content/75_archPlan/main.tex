@@ -41,13 +41,21 @@ For dependency injection (DI), I utilized Koin\footnote{\url{https://insert-koin
 
 In conclusion, I would not recommend using Ktor for enterprise purposes due to the lack of guidelines, reliability issues, and missing features, which make it too risky for business applications. On the other hand, it is easy to learn and use, and enjoyable to work with. Therefore, for hobby projects, it can be a good idea, and perhaps in a couple of years, it will be mature enough for business applications as well.
 
+In the case of my thesis, it probably would have been wiser to use Spring Boot instead, but the exploration was worthwhile. I do not regret choosing Ktor.
+
 \subsection[Design Reflections]{Design Reflections: What could have been better}
 
-would have been better: 
-        one language for both webhooks and checks
-        mounting the compiled script as file instead of downloading
+Looking back at the finished project, I can see some things that I could have done better. I'm not referring to the features I didn't have enough time to polish, but rather the aspects that I implemented in a suboptimal way, and fixing them would require a significant effort. This section is dedicated to these design oversights.
+
+The first design oversight is that I essentially created two languages: one for creating admission webhooks and another for generating reports. Instead, it would have been better to create a unified language to describe constraints, because for every constraint, we would like to enforce it and list all the violations simultaneously. My solution is more flexible and might prove useful in some rare use cases; however, for the general use case, it would have been better to have one unified language.
+
+The second suboptimal design decision concerns how a script is served. With the current implementation, there is one Ktor server running for each deployed script, even though a single agent could handle the load of multiple running scripts. This setup can negatively impact resource allocations, as one agent receives very little load, but the minimal memory requirements of a Ktor server are relatively high, around 128 MiB. If necessary, the issue can be mitigated by joining multiple scripts together. But to be honest, if a company is large enough to need something like Konstrainer, wasting a couple of hundred megabytes of RAM is not likely to cause significant problems.
+
+These were the mayor design oversights, which would take a lot of work to fix. The remaining imperfect aspects are more about being unpolished than badly designed. Aspects such as the non-reactive UI or the CI/CD integration could be easily improved over time, but I had to set a limit on the scope.
 
 \subsection{Performance}
+
+It takes around 40 seconds to compile a script
 
 it is blazing fast
 one agent serves only one script, this could be improved, but noproblem, an agent is relatively lightweight
