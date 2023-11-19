@@ -28,61 +28,6 @@ One of the main advantages of using Kotlin for my DSL is that I do not need to w
 
 The second-greatest advantage is that the language will be very expressive and extendable without a huge time investment. If needed, all the language features of Kotlin an be used when writing a DSL function. This comes especially handy, when defining behavior and logic.
 
-\section{Software patterns}
 
-The most common software pattern for Kotlin DSLs is usually referred as the Type-safe builders pattern. It enables to create DSLs like this:
-
-\begin{lstlisting}[caption={Example DSL usage},language=Kotlin,label=code:pattern_example_usage]
-val myVillage = village {
-    name = "Loremvill"
-    houses {
-        ...
-    }
-}
-\end{lstlisting}
-
-There is a top level block, containing properties, and inner blocks. This can describe a structure of data in a type-safe manner. Here is the implementation:
-
-\begin{lstlisting}[caption={Pattern example},language=Kotlin,label=code:pattern_example_impl]
-@MyDslMarker
-fun village(setup: VillageBuilder.() -> Unit): Village {
-    val builder = VillageBuilder()
-    builder.setup()
-    return builder.build()
-}
-
-class VillageBuilder {
-    private var _houses: Houses by setOnce()
-
-    @MyDslMarker
-    var name: String by setOnce()
-
-    @MyDslMarker
-    fun houses(setup: Houses.() -> Unit): Houses {
-        ...
-    }
-
-    internal fun build(): Village {
-        // Validations
-        return Village(_houses, name)
-    }
-}
-
-data class Village(val houses: Houses, val name: String)
-\end{lstlisting}
-
-TODO reference braun marton
-
-The word `village', is basically a top-level function. Its only argument is an extension method on the VillageBuilder class. In Kotlin, whenever a function's last parameter is a function type, and that parameter is being fulfilled by a lambda, we can move that lambda outside the parentheses. Furthermore, the parentheses can be omitted if the lambda is the only parameter. The lambda definition must be put inside curly brackets. Since this lambda is an extension method on the VillageBuilder class, there is an implicit `this' before each statement in the block. So the line `name = "Loremvill"' is in fact a property assignment on an instance of a VillageBuilder.
-
-At the end of the outermost block, the definition of the setup lambda is done, and the village function is executed. It creates a new instance of the VillageBuilder, executes the setup function on it, and returns a built and final data class of the Village.
-
-This pattern is the basic idea between most of the DSLs written in Kotlin.
-
-TODO
-
-TODO execution pattern
-    rewrite example
-    explain where item is accessible
 
 

@@ -6,98 +6,49 @@
 \label{chap:archPlan}
 %----------------------------------------------------------------------------
 
-\section{Domain specific language}
+\subfile{content/75_archPlan/dsl.tex}
 
-\section{Architecture}
+\subfile{content/75_archPlan/arch.tex}
 
-After a research and the first POC, I designed an architecture for the system. I considered all the use cases, the technical nature of the platform and technologies.
-
-The \ref{fig:comp_arch} figure shows this architecture.
-
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=130mm, keepaspectratio]{content/75_archPlan/xarch.png}
-    \caption{Complex architecture plan}
-    \label{fig:comp_arch}
-\end{figure}
+\subfile{content/75_archPlan/process.tex}
 
 
-The main component in this setup is the KonstraineR-Core. This is an HTTP API server managing the whole application. DSL instances can be uploaded to it, and serves as a store for the uploaded and compiled DSL instances. It handles all tasks related to spawning, starting, configuring, and destroying agents. Most importantly it manages the TLS certificates and webhooks, which are crucial parts of the agent lifecycle management.
-
-In Kubernetes, webhooks need to communicate with the Kubernetes API on a secured connection. To achieve this, KonstraineR-Agent instances require a TLS certificate, and need to serve request using the HTTPS protocol. This certificate can be self signed, but in the webhook creation request the CA Key of the certificate must be sent to the Kubernetes API for signing. After this, the Kubernetes API will trust the certificate of the webhook.
-
-The mutating or validation webhooks have their own Kubernetes resource. It is either a \emph{MutatingWebhookConfiguration} or a \emph{ValidatingWebhookConfiguration}. These need to be created in the cluster, so Kubernetes can send the object creation requests to the Pod implementing the webhook.
-
-After the webhook is configured and created in Kubernetes, the Agent can be spawned. Agents are spawned as \emph{deployment}s and they also require a \emph{service}. There are two complicated tasks with the creation of the deployment. First the a TLS certificate must be mounted to the Agent container. Second, the compiled DSL must be also mounted to the container. At this point I haven't decided what is the best way to achieve this. Automated Agent spawning is not the scope of this semester. For now, I styed with copying the required files to the Agent container by hand.
-
-When an Agent is deleted there is a cleanup job to do. All the created Kubernetes resources associated with the given Agent must be deleted alongside with the \emph{WebhookConfiguration}. The deletion of the \emph{deployment}, \emph{service} and \emph{WebhookConfiguration} must be atomic.
-
-The status of the DSL instance represents the compilation state of the instance, whether it is being compiled, successfully compiled, or outdated and needs to be recompiled.
-
-Caching the compiled DSL instances is very important. A DSL instances are compiled to JVM byte code using gradle, so compilation can take long. Compiling a DSL before each launch of an agent would significantly increase the startup time of the agent. A long startup time would mean a relatively long outage when the pod of an already existing agent gets destroyed. This could happen for many reasons, such as the pod gets evicted, deleted manually by an administrator or just simply encounters a fatal error.
-
-An agent is a webserver that runs a DSL instance and implements a webhook. The core component spawns an agent for each deployed DSL instance.
-
-The agent is implemented as a lightweight Ktor server. It loads a compiled Dsl class at startup time. The configuration of the agent is done by the core component.
-
-The compilation task must be decoupled from the other components, because it is a short, but resource intensive task. Keeping it together with either the core or the agent would not be wise, since they are relatively lightweight components, requiring at most 128 MiB RAM and 100m CPU time each. Increasing the resources allocated for these components would waste expensive resources on the node. Keeping them low would result in very slow compilation times, or OOMKilled errors for the components compiling the DSL. An OOMKilled status means that the Pod tried to use more memory than its limit.
-
-
-The KonstraineR-Dsl is an easy to use, highly extendible and expressive domain specific language designed to define rules and constraints in Kubernetes cluster, implemented as a software module.
-
-\section{}
-
-TODO:
-    process of deployment of script
-        script is uploaded on uid
-        compilation starts
-            pull script
-            prepare file
-            gradle build
-            mention: caching, how the builder image is created
-            explain build health check and cleaing cycle
-        once compiled it can be started
-        process of starting:    
-            read script to memory, execute it to get the wh conf data
-            get tls cert
-            create k8s resources: deployment service, whsconf, crb
-            explain agent health check
-            explain rollback
-        agent starts, agent downloads script with curl
-            explain why is it good to precompile script
-            dynamically link compiled jar -cp ; custom class loader
-            use reflection to find the getServer method
-            configuring router
-            
-                
 \section{Packaging}
 how the agent and core containerised
 explain the helm chart installing them
 
-% Ktor web keretrendszer: lábbal hajtós, kényelmes könnyű dinamikus koncig, kiforratlan, nincsenek best practice-ek -> konklúzió
+
 
 \section{Security}
 security:
     passwds
         basic auth
     TLS for core server 
-ui tech
+
 
 
 \section{Evaluation}
 
-evaluation:
-    would have been better: 
-        one language for both webhooks and checks
-        mounting the compiled script as file instead of downloading
-    it is blazing fast
-    one agent serves only one script, this could be improved, but noproblem, an agent is relatively lightweight
-
 \subsection[Chosen technology]{Chosen technology: Do I recommend Ktor?}
+
+Since I chose Kotlin as the primary technology for my DSL, I needed to select a web server framework that supports Kotlin to easily serve the DSL scripts. Spring Boot would have been the least risky choice, as it is a mature, production ready, and widely used framework with numerous pre-existing libraries. The alternative option was Ktor, a relatively new framework built from the ground up using Kotlin and Coroutines. It claims to be lightweight and flexible. Despite having prior experience with Spring Boot, I wanted to try out Ktor. This thesis was also an experiment with the Ktor framework, and this section reflects my opinion on this new framework.
+
+This experiment was quite exciting, I have learned a lot from it. In my experience, it is relatively easy to create basic things, such as a REST API with authentication and persistent storage. However, it becomes significantly more challenging when you aim to integrate authorization with authentication or when you want to make your code testable. While there is sufficient documentation on the basics, there are no guidelines or best practices for the more advanced use cases, and the examples I mentioned are not even that advanced. Since this is a new framework, the community is small, so there are no forums or blogs on best practices. Many times, I had to figure out on my own how to use the framework effectively.
+
+For SQL persistence, Ktor recommends the Exposed\footnote{\url{https://github.com/JetBrains/Exposed}} ORM library, a lightweight SQL library built on top of JDBC driver for the Kotlin language. Over all, it is a good library, but just like with the core Ktor, figuring out the best practices was challenging. It was particularly difficult when I aimed to make the code testable, as dependency injection was never mentioned in any of the tutorials; instead, global variables were used. I also found that Exposed is not always reliable. When updating Ktor versions, I encountered runtime errors whit previously working code. I had to fix the function responsible for reading the compiled DSL script from the database three times.
+
+For dependency injection (DI), I utilized Koin\footnote{\url{https://insert-koin.io/}}, which is a quite good DI framework. It's unfortunate that it is not emphasized in the core Ktor documentation. It is yet another sign that Ktor needs more time to mature.
+
+In conclusion, I would not recommend using Ktor for enterprise purposes due to the lack of guidelines, reliability issues, and missing features, which make it too risky for business applications. On the other hand, it is easy to learn and use, and enjoyable to work with. Therefore, for hobby projects, it can be a good idea, and perhaps in a couple of years, it will be mature enough for business applications as well.
 
 \subsection[Design Reflections]{Design Reflections: What could have been better}
 
+would have been better: 
+        one language for both webhooks and checks
+        mounting the compiled script as file instead of downloading
+
 \subsection{Performance}
 
-
+it is blazing fast
+one agent serves only one script, this could be improved, but noproblem, an agent is relatively lightweight
 
