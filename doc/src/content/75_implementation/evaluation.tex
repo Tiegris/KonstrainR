@@ -1,32 +1,3 @@
-\setlength{\parindent}{0pt}
-\setlength{\parskip}{0.6em}
-
-%----------------------------------------------------------------------------
-\chapter{Implementation}
-\label{chap:archPlan}
-%----------------------------------------------------------------------------
-
-\subfile{content/75_archPlan/dsl.tex}
-
-\subfile{content/75_archPlan/arch.tex}
-
-\subfile{content/75_archPlan/process.tex}
-
-
-\section{Packaging}
-how the agent and core containerised
-explain the helm chart installing them
-
-
-
-\section{Security}
-security:
-    passwds
-        basic auth
-    TLS for core server 
-
-
-
 \section{Evaluation}
 
 \subsection[Chosen technology]{Chosen technology: Do I recommend Ktor?}
@@ -49,14 +20,14 @@ Looking back at the finished project, I can see some things that I could have do
 
 The first design oversight is that I essentially created two languages: one for creating admission webhooks and another for generating reports. Instead, it would have been better to create a unified language to describe constraints, because for every constraint, we would like to enforce it and list all the violations simultaneously. My solution is more flexible and might prove useful in some rare use cases; however, for the general use case, it would have been better to have one unified language.
 
-The second suboptimal design decision concerns how a script is served. With the current implementation, there is one Ktor server running for each deployed script, even though a single agent could handle the load of multiple running scripts. This setup can negatively impact resource allocations, as one agent receives very little load, but the minimal memory requirements of a Ktor server are relatively high, around 128 MiB. If necessary, the issue can be mitigated by joining multiple scripts together. But to be honest, if a company is large enough to need something like Konstrainer, wasting a couple of hundred megabytes of RAM is not likely to cause significant problems.
+The second suboptimal design decision concerns how a script is served. With the current implementation, there is one Ktor server running for each deployed script, even though a single agent could handle the load of multiple running scripts. This setup can negatively impact resource allocations, as one agent receives very little load, but the minimal memory requirements of a Ktor server are relatively high. If necessary, the issue can be mitigated by joining multiple scripts together. But to be honest, if a company is large enough to need something like Konstrainer, wasting a couple of hundred megabytes of RAM is not likely to cause significant problems.
 
 These were the mayor design oversights, which would take a lot of work to fix. The remaining imperfect aspects are more about being unpolished than badly designed. Aspects such as the non-reactive UI or the CI/CD integration could be easily improved over time, but I had to set a limit on the scope.
 
 \subsection{Performance}
 
-It takes around 40 seconds to compile a script
+Overall, Konstrainer has a good performance. It takes about 35 seconds to compile a script, and it takes less than 5 seconds to start enforcing constraints. Therefore, a script can be put into production in under a minute.
 
-it is blazing fast
-one agent serves only one script, this could be improved, but noproblem, an agent is relatively lightweight
+Report generation is also swift, requiring only a fraction of a second, even for complex reports, as seen in the case study.
 
+Additionally, the webhooks in the case study do not have a noticeable impact on the performance of the Kubernetes API. `kubectl' commands do not slow down; creating a resource with an enforced constraint is just as fast as without the extra auditing.
