@@ -6,6 +6,47 @@
 \label{chap:prerequisites}
 %----------------------------------------------------------------------------
 
+\section{Kubernetes}
+
+\section{Kotlin}
+
+\subsection{Extension functions}
+\label{sec:extension}
+
+TODO reference: https://kotlinlang.org/docs/extensions.html\#extension-functions
+
+An extension function can add new functionality to an existing class without modifying it. In Java, this can be implemented as shown in the \ref{code:lang3} code snippet. Although Java lacks native support for extension methods, there is a workaround using public static utility functions. In contrast, Kotlin supports extension functions natively, as demonstrated in the \ref{code:lang4} code snippet.
+
+\begin{lstlisting}[caption={Extension functions in Java},language=Java,label=code:lang3]
+public class MyClass {
+    ...
+}
+public class MyClassExtensions {
+    private MyClassExtensions() {}
+    public static void myExtensionFunction(MyClass self) {
+        self.doSomething();
+    }
+}
+// Invocation:
+final var myClass = new MyClass();
+myExtensionFunction(myClass);
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Extension functions in Kotlin},language=Kotlin,label=code:lang4]
+class MyClass {
+    ...
+}
+fun MyClass.myExtensionFunction() {
+    this.doSomething()
+    // Using the "this" keyword is optional
+}
+// Invokation:
+val myClass = MyClass()
+myClass.myExtensionFunction()
+\end{lstlisting}
+
+
+
 Kubernetes
 
 Kotlin: extension function, receiver

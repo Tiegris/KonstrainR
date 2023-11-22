@@ -1,58 +1,108 @@
 \section{Domain specific language}
 
-\subsection{Software patterns}
+This section explains how I created the Konstrainer DSL. I won't explain how I created each keyword, as most of them fall into specific categories, and every keyword in the same category is created using the same pattern.
 
-The most common software pattern for Kotlin DSLs is usually referred as the Type-safe builders pattern. It enables to create DSLs like this:
+\subsection{Basic concepts}
 
-\begin{lstlisting}[caption={Example DSL usage},language=Kotlin,label=code:pattern_example_usage]
-val myVillage = village {
-    name = "Loremvill"
-    houses {
-        ...
-    }
+My DSL has three mayor concepts: blocks, properties, and setter functions. The code snippet \ref{code:lang1} explains what they are and provides an example for each.
+
+\begin{lstlisting}[caption={Language concepts},language=Kotlin,label=code:lang1]
+// The car keyword opens a new block
+car { 
+    // The block of the car keyword starts here
+    color = "red" // This is a property
+    color("red") // This is a setter function
+    // The block of the car keyword ends here
 }
 \end{lstlisting}
 
-There is a top level block, containing properties, and inner blocks. This can describe a structure of data in a type-safe manner. Here is the implementation:
+Properties and setter functions usually can only be used within the context of a block. This is how it makes sense in the language, for example you can set the color of the car, but it does not make sense to set the color of the top level world. Additionally, the implementation of a block also restricts where other keywords can be used.
 
-\begin{lstlisting}[caption={Pattern example},language=Kotlin,label=code:pattern_example_impl]
-@MyDslMarker
-fun village(setup: VillageBuilder.() -> Unit): Village {
-    val builder = VillageBuilder()
-    builder.setup()
-    return builder.build()
+The \ref{code:lang1} example can be implemented similarly like in the \ref{code:lang2} code snippet.
+
+\begin{lstlisting}[caption={Basic idea behind a block},language=Kotlin,label=code:lang2]
+class CarModel(val color: String)
+class CarBuilder {
+    var color: String ...
+    fun color(value: String) ...
 }
-
-class VillageBuilder {
-    private var _houses: Houses by setOnce()
-
-    @MyDslMarker
-    var name: String by setOnce()
-
-    @MyDslMarker
-    fun houses(setup: Houses.() -> Unit): Houses {
-        ...
-    }
-
-    internal fun build(): Village {
-        // Validations
-        return Village(_houses, name)
-    }
+fun car(setup: CarBuilder.() -> Unit): CarModel {
+    ...
 }
-
-data class Village(val houses: Houses, val name: String)
 \end{lstlisting}
 
-TODO reference braun marton
+The `car' keyword is implemented as a function with a single lambda argument. In Kotlin, functions are first-class objects, meaning they can be used like any other object. In this example the variable `setup' is an extension function on the CarBuilder class. It takes zero arguments and returns Unit. Extension methods are already explained in the \nameref{sec:extension} section. The Unit return type is also important. It does not imply that the `car' block does not return anything, it only means that the lambda itself does not return anything. However, the `car' block can still return something, as in this case, it returns a CarModel object.
 
-The word `village', is basically a top-level function. Its only argument is an extension method on the VillageBuilder class. In Kotlin, whenever a function's last parameter is a function type, and that parameter is being fulfilled by a lambda, we can move that lambda outside the parentheses. Furthermore, the parentheses can be omitted if the lambda is the only parameter. The lambda definition must be put inside curly brackets. Since this lambda is an extension method on the VillageBuilder class, there is an implicit `this' before each statement in the block. So the line `name = "Loremvill"' is in fact a property assignment on an instance of a VillageBuilder.
 
-At the end of the outermost block, the definition of the setup lambda is done, and the village function is executed. It creates a new instance of the VillageBuilder, executes the setup function on it, and returns a built and final data class of the Village.
+\subsection{Blocks}
 
-This pattern is the basic idea between most of the DSLs written in Kotlin.
+\subsubsection{Startup-time evaluated blocks}
 
-TODO
+Type-safe builders pattern
 
-TODO execution pattern
-    rewrite example
-    explain where item is accessible
+\subsubsection{Runtime evaluated blocks}
+
+\subsection{`setExactlyOnce' and `setMaxOnce'}
+
+\subsection{JSON utilities}
+
+The language has unique keywords for JSON parsing. They do not fall into the main categories of blocks and properties, but they are unique. They look more like continuous natural English language. Their implementation is a bit complicated and to understand it, you must first understand some basic concepts of Kotlin.
+
+In Kotlin there are infix functions. You can add the `infix' modifier to an extension function to make it callable using the infix notation. See the \ref{code:infix} code snippet for an example or read the official documentation for more details: \url{https://kotlinlang.org/docs/functions.html#infix-notation}
+
+\begin{lstlisting}[caption={Infix functions},language=Kotlin,label=code:infix]
+infix fun Int.plus(that: Int): Int {
+    return this + that
+}
+// Invocation:
+val x = 5 plus 6  // Infix notation
+val y = 5.plus(6) // This does the same as above
+\end{lstlisting}
+
+The second concept you must understand is treating objects as tokens. Objects can be utilized in various ways, but what's important for this section is their ability to create special tokens. You can define two functions with the same name but different arguments. If these arguments are of this kind of tokens, they can be used for pattern matching as shown in the \ref{code:patternobj} code snippet.
+
+\begin{lstlisting}[caption={Pattern matching},language=Kotlin,label=code:patternobj]
+object Token1
+object Token2
+
+fun foo(o: Token1) {
+    ...
+}
+fun foo(o: Token2) {
+    ...
+}
+// Invocation
+val x = Token2
+foo(x)      // Runs the second foo function
+foo(Token1) // Runs the first foo function
+\end{lstlisting}
+
+Combining these Kotlin language features can be used to create fluent, natural language-like constructs. The \ref{code:jqx} code snippet demonstrates how these language concepts are employed to implement the JSON parsing aspects of the Konstrainer DSL.
+
+\begin{lstlisting}[caption={jqx implementation},language=Kotlin,label=code:jqx]
+infix fun JsonElement.jqx(selector: String): JsonElement {
+    ...
+}
+
+object int
+object bool
+object double
+object string
+
+infix fun JsonElement.parseAs(type: int): Int? = 
+    nullGuard { /* Function defining how to get JSON field as Int*/ }
+infix fun JsonElement.parseAs(type: bool): Boolean? = nullGuard { ... }
+infix fun JsonElement.parseAs(type: double): Double? = nullGuard { ... }
+infix fun JsonElement.parseAs(type: string): String? = nullGuard { ... }
+
+// Usage:
+val x = jsonElement jqx "/foo/bar" parseAs string
+\end{lstlisting}
+
+`jqx' is an infix function with a return type of JsonElement. `parseAs' is also an infix function with the type JsonElement as a receiver, so `jqx' and `parseAs' commands can be chained. There is a token created for every the primitive types that can occur in a JSON, and there is a corresponding `parseAs' function for each token. This setup facilitates the extraction of all types from a JSON structure. The `nullGuard' is a private function that return null if the conversion can not happen, for instance, due to a type mismatch or non-existing JSON field. Otherwise, it returns the converted value. The conversion function is defined in its block.
+
+
+\subsection{Unmarshallers}
+
+\subsection{DslMarker annotation}
+

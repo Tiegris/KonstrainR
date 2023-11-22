@@ -42,3 +42,5 @@ GitOps
 Ktor
 Coroutines
 Koin
+CarBuilder
+CarModel
