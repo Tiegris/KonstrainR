@@ -1,7 +1,7 @@
 \section{Domain specific language}
 \label{sec:dsl}
 
-This section explains how I created the Konstrainer DSL. I won't explain how I created each keyword, as most of them fall into specific categories, and every keyword in the same category is created using the same pattern.
+This section explains how I created the Konstrainer DSL. I won't explain the details of creating each keyword, as many of them belong to specific categories and share similar patterns within the same category.
 
 \subsection{Basic concepts}
 
@@ -34,7 +34,6 @@ fun car(setup: CarBuilder.() -> Unit): CarModel {
 
 The `car' keyword is implemented as a function with a single lambda argument. In Kotlin, functions are first-class objects, meaning they can be used like any other object. In this example the variable `setup' is an extension function on the CarBuilder class. It takes zero arguments and returns Unit. Extension methods are already explained in the \nameref{sec:extension} section. The Unit return type is also important. It does not imply that the `car' block does not return anything, it only means that the lambda itself does not return anything. However, the `car' block can still return something, as in this case, it returns a CarModel object.
 
-
 \subsection{Blocks}
 
 \subsubsection{Startup-time evaluated blocks}
@@ -45,7 +44,75 @@ Type-safe builders pattern
 
 \subsection{`setExactlyOnce' and `setMaxOnce'}
 
+All properties can only be set once, or in the case of setter functions, invoked once. This is to avoid inadvertent overwrites and to enhance script readability. The enforcement of this language constraint is carried out through the `setExactlyOnce' and 7setMaxOnce' property delegates. Kotlin has unique a feature called property delegates, which enables to define a custom behavior to a set of properties. This custom behavior can be added to a library, eliminating the need to copy and paste the behavior into every getter and setter. Instead, you simply utilize the delegate. For detailed information, read the official Kotlin documentation on the topic: \url{https://kotlinlang.org/docs/delegated-properties.html}. Here, I will just show a small example and explain how my custom property delegates work.
 
+\begin{lstlisting}[caption={Lazy getter in Java},language=Java,label=code:lazy0]
+class A {
+    private String foo;
+    public getFoo() {
+        if (foo == null) 
+            foo = calculateFoo(); // This is a resource intese operation
+        return foo;
+    }
+}
+\end{lstlisting}
+    
+\begin{lstlisting}[caption={Lazy property in Kotlin},language=Kotlin,label=code:lazy1]
+class A {
+    val foo by lazy(::calculateFoo)
+}
+\end{lstlisting}
+
+The \ref{code:lazy0} and \ref{code:lazy1} code snippets illustrates how the lazy\footnote{\url{https://en.wikipedia.org/wiki/Lazy_initialization}} behavior can be implemented in Java and in Kotlin. The lazy behavior involves delaying the calculation of a value until it is read, after which it is cached. The Java code snippet shows the issue. When implementing custom behavior for a getter, it must be written each time for every getter with the same behavior. In Kotlin, this behavior can be delegated, making the code not only less bloated but also less prone to copy and paste errors.
+
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[caption={setExactlyOnce implementation},language=Kotlin,label=code:setonce]
+class setExactlyOnce<T : Any>() : ReadWriteProperty<Any, T> {
+    constructor(default: T?) : this() {
+        _value = default
+    }
+
+    private var _alreadySet = false
+    private var _value: T? = null
+
+    override fun getValue(thisRef: Any, property: KProperty<*>): T {
+        return _value ?: throw FieldNotSetException(
+            "Property ${property.name} not set."
+        )
+    }
+
+    override fun setValue(thisRef: Any, property: KProperty<*>, value: T) {
+        if (_alreadySet)
+            throw MultipleSetException(
+                "Property ${property.name} can only be set once."
+            )
+        _alreadySet = true
+        _value = value;
+    }
+}
+
+// Usage:
+// A clusterRole can assigned to an agend maximum once
+var clusterRole by setMaxOnce<ClusterRoleName>()
+// behavior of webhook can only be set exactly once,
+// and has no default value
+private var behavior: WebhookBehaviorProvider by setExactlyOnce()
+// operations of a webhook can only be set exactly once,
+// and has a default value
+private var _operations: Array<out String>
+    by setExactlyOnce(defaults.operations)
+\end{lstlisting}
+\end{minipage}
+
+The \ref{code:setonce} code snippet demonstrates how the `setExactlyOnce' property delegate is implemented. To fully understand why this seemingly complicated syntax was needed, read the official documentation which explains it in detail. What's important here is, that there is an optional default value which can be set when creating a property. The default value is stored in a private backing field: `\_value', which is null, in case there is no default value. 
+
+When the value is set, the delegate checks the `\_alreadySet' flag. If it is true, an exception is raised; otherwise, it sets the value and the flag. The inclusion of the flag is necessary because a simple null check cannot differentiate between an already set value and a default value.
+
+When the value is read, the delegated checks if the `\_value' is null. If it is, then it raises an exception. However, in the case of the `setMaxOnce' delegate, this check does not exist.
+
+I will not show the implementation of `setMaxOnce' because it closely resembles `setExactlyOnce'.
+
+Error messages are not currently aggregated into a centralized view; instead, they can be found in the logs of either the core component or the agent. A potential future improvement could involve collecting and displaying these error messages as build-time errors.
 
 \subsection{JSON utilities}
 
@@ -110,3 +177,9 @@ val x = jsonElement jqx "/foo/bar" parseAs string
 
 \subsection{DslMarker annotation}
 
+
+
+
+\begin{lstlisting}[caption={TODO},language=Kotlin,label=code:todo]
+
+\end{lstlisting}
