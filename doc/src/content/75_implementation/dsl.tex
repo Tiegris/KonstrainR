@@ -1,4 +1,5 @@
 \section{Domain specific language}
+\label{sec:dsl}
 
 This section explains how I created the Konstrainer DSL. I won't explain how I created each keyword, as most of them fall into specific categories, and every keyword in the same category is created using the same pattern.
 
@@ -43,6 +44,8 @@ Type-safe builders pattern
 \subsubsection{Runtime evaluated blocks}
 
 \subsection{`setExactlyOnce' and `setMaxOnce'}
+
+
 
 \subsection{JSON utilities}
 
@@ -101,8 +104,9 @@ val x = jsonElement jqx "/foo/bar" parseAs string
 
 `jqx' is an infix function with a return type of JsonElement. `parseAs' is also an infix function with the type JsonElement as a receiver, so `jqx' and `parseAs' commands can be chained. There is a token created for every the primitive types that can occur in a JSON, and there is a corresponding `parseAs' function for each token. This setup facilitates the extraction of all types from a JSON structure. The `nullGuard' is a private function that return null if the conversion can not happen, for instance, due to a type mismatch or non-existing JSON field. Otherwise, it returns the converted value. The conversion function is defined in its block.
 
-
 \subsection{Unmarshallers}
+
+
 
 \subsection{DslMarker annotation}
 
