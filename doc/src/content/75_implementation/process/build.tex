@@ -1,7 +1,3 @@
-\section[Script to Agent]{Script to Agent: From code to deployment}
-
-This section describes the process of deploying a DSL script, from to code, to a functioning agent enforcing rules and generating reports.
-
 \subsection{Compilation}
 
 Deploying a script requires two outside interactions. The first is when the script is uploaded. The \ref{fig:seq0} figure shows how it is done.
@@ -39,7 +35,6 @@ This detail is not marked on the diagram, but the Builder starts with adding the
 
 If the build succeeds, the compiled jar is uploaded to the Core server, which will first load it, to extract some metadata, than save it to the database. In this case the following updates will occur on the database record:
 
-\begin{minipage}{\linewidth}
 \begin{itemize}
     \item The name of the script will be updated from the filename, to the server name defined in the script.
     \item The compiled jar will be added to the record.
@@ -47,16 +42,13 @@ If the build succeeds, the compiled jar is uploaded to the Core server, which wi
     \item A boolean flag is set whether the script has a report block.
     \item A boolean flag is set whether the script has webhooks.
 \end{itemize}
-\end{minipage}
 
 In case of an error, an error message is sent, and the following changes will take place on the record in the database:
 
-\begin{minipage}{\linewidth}
 \begin{itemize}
     \item The build status flag will be set to "Failed".
     \item The error message will be saved.
 \end{itemize}
-\end{minipage}
 
 \subsubsection{Builder job detailed implementation}
 
@@ -68,7 +60,6 @@ The builder image also includes a prepared Gradle project with an empty script i
 
 The \ref{code:builder0} code snippet show the important parts of the builder script, however the entire script can be found in the appendix, referenced by: \ref{appendix:builder} \nameref{appendix:builder}. Some lesser important details are replaced by dots: `\dots'
 
-\begin{minipage}{\linewidth}
 \begin{lstlisting}[caption={Builder script},language=bash,label=code:builder0]
 cp "/app/tls-cert/rootCa.pem" /usr/local/share/ca-certificates/rootCa.crt
 update-ca-certificates
@@ -99,7 +90,6 @@ function error_report() {
 
 try_compile || error_report
 \end{lstlisting}
-\end{minipage}
 
 First, the trusted certificates are updated using the `update-ca-certificates' command from the `ca-certificates' Ubuntu package. The renaming of the certificate file is crucial because the `update-ca-certificates' command only adds certificates whose file extensions are `.crt'. Files with the `.pem' extension are ignored, a lesson I've learned the hard way.
 
@@ -117,7 +107,6 @@ I've explained how graceful errors are handled during compilation, but there mig
 
 There is a periodic task running inside the Core server, which cleans up the misteriously lost builds. The \ref{code:cleaner} code snippet shows the pseudo code of this task.
 
-\begin{minipage}{\linewidth}
 \begin{lstlisting}[caption={Job cleaner loop},language=Kotlin,label=code:cleaner]
 while(true) {
     delay(interval)
@@ -136,31 +125,5 @@ fun runCleaner() {
     }
 }
 \end{lstlisting}
-\end{minipage}
 
 The cleaner tries to find the Kubernetes job resource for every DSL with the status: `Building'. If it can find it, then it is still compiling. Kubernetes eventually deletes all completed jobs, even if they finished with an error. So, if the cleaner cannot find the job resource, it means that the build failed, and the error report was lost. In this case, the status of the DSL in the database is updated to `Failed'.
-
-\subsection{Agent startup}
-
-The second outside interaction is required to start the agent.
-
-script is uploaded on uid
-compilation starts
-    pull script
-    prepare file
-    gradle build
-    mention: caching, how the builder image is created
-    explain build health check and cleaing cycle
-once compiled it can be started
-process of starting:    
-    read script to memory, execute it to get the wh conf data
-    get tls cert
-    create k8s resources: deployment service, whsconf, crb
-    explain agent health check
-    explain rollback
-agent starts, agent downloads script with curl
-    explain why is it good to precompile script
-    dynamically link compiled jar -cp ; custom class loader
-    use reflection to find the getServer method
-    configuring router
-

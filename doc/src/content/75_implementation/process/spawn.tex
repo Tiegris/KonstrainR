@@ -1,0 +1,30 @@
+\subsection{Agent startup}
+
+The second outside interaction is required to spawn the agent. To spawn an agent, the user must send an HTTP Post request to the `/api/v1/servers/\{dslId\}/start' endpoint of the Core server. The \ref{fig:start1} figure shows how the service layer of the Core server handles the request.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=130mm, keepaspectratio]{seq5.png}
+    \caption{Spawning of an agent}
+    \label{fig:start1}
+\end{figure}
+
+script is uploaded on uid
+compilation starts
+    pull script
+    prepare file
+    gradle build
+    mention: caching, how the builder image is created
+    explain build health check and cleaing cycle
+once compiled it can be started
+process of starting:    
+    read script to memory, execute it to get the wh conf data
+    get tls cert
+    create k8s resources: deployment service, whsconf, crb
+    explain agent health check
+    explain rollback
+agent starts, agent downloads script with curl
+    explain why is it good to precompile script
+    dynamically link compiled jar -cp ; custom class loader
+    use reflection to find the getServer method
+    configuring router
