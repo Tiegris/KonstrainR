@@ -19,6 +19,8 @@ car {
 
 Properties and setter functions usually can only be used within the context of a block. This is how it makes sense in the language, for example you can set the color of the car, but it does not make sense to set the color of the top level world. Additionally, the implementation of a block also restricts where other keywords can be used.
 
+\subsection{Blocks}
+ 
 The \ref{code:lang1} example can be implemented similarly like in the \ref{code:lang2} code snippet.
 
 \begin{lstlisting}[caption={Basic idea behind a block},language=Kotlin,label=code:lang2]
@@ -26,21 +28,79 @@ class CarModel(val color: String)
 class CarBuilder {
     var color: String ...
     fun color(value: String) ...
+    internal fun build(): CarModel ...
 }
 fun car(setup: CarBuilder.() -> Unit): CarModel {
     ...
 }
 \end{lstlisting}
 
-The `car' keyword is implemented as a function with a single lambda argument. In Kotlin, functions are first-class objects, meaning they can be used like any other object. In this example the variable `setup' is an extension function on the CarBuilder class. It takes zero arguments and returns Unit. Extension methods are already explained in the \nameref{sec:extension} section. The Unit return type is also important. It does not imply that the `car' block does not return anything, it only means that the lambda itself does not return anything. However, the `car' block can still return something, as in this case, it returns a CarModel object.
+Most blocks follow the same pattern. There is builder function: `car' in this case, whose last argument is an extension method on a builder class, in this case the `CarBuilder.' Newly accessible keywords in the `car' block are all member functions or properties of the builder class. Lastly, there is a model class, specifically the `CarModel' which holds all the necessary data for a car in this case. The builder function always has an internal build function, making it inaccessible to the DSL user, and it returns an instance of the model class.
 
-\subsection{Blocks}
+There are two kinds of blocks. The first kind simply describes a configuration or calculates a value, like the `namespaceSelector' or `webhookConfigBundle'. The other describes a complex behavior, which can only be evaluated at certain events, for example the `report', `kubectl' and `behavior' blocks. I refer to the first group as `startup-time' evaluated blocks because a model object can be built without an input. This typically occurs when the agent running the script starts up. I call the second group as `runtime-evaluated blocks' because an input is required to evaluate them, such as a webhook request, or a Kubernetes client.
 
-\subsubsection{Startup-time evaluated blocks}
+The pattern I'm using for the startup-time block has a name, it is the Type-safe builders\footnote{\url{https://kotlinlang.org/docs/type-safe-builders.html}} pattern. The \ref{code:lang3} code snippet highlights the most important elements of the pattern.
 
-Type-safe builders pattern
+\begin{lstlisting}[caption={Type-safe builders example},language=Kotlin,label=code:lang3]
+typealias CarBuilderFunction = CarBuilder.() -> Unit
+class CarModel(...)
+class CarBuilder {
+    ...
+    internal fun build(): CarModel {
+        // Validations
+        ...
+        return CarModel(...)
+    }
+}
+fun car(setup: CarBuilderFunction): CarModel {
+    val builder = CarBuilder()
+    builder.setup()
+    return builder.build()
+}
+// This is tha same, but shorter
+fun car(setup: CarBuilderFunction) = CarBuilder().apply(setup).build()
+\end{lstlisting}
 
-\subsubsection{Runtime evaluated blocks}
+Runtime-evaluated blocks are created differently. Their builder functions don't call the `build' function of the builder class, because the input required to create the model does not exist yet. I will use the `report' block to explain how they are implemented.
+
+\begin{lstlisting}[caption={Builder function of the report block},language=Kotlin,label=code:runtimeblock0]
+class ServerModel(..., val _report: ReportProviderFunction?)
+class ServerBuilder {
+    private val _report: ReportProviderFunction? by setMaxOnce()
+    fun report(behavior: ReportProviderFunction) {
+        _report = behavior
+    }
+    internal fun build() = Server(..., _report)
+}
+\end{lstlisting}
+
+The \ref{code:runtimeblock0} snippet shows how the builder function of a runtime block, specifically the `report' block looks like. The `build' function is not called here; instead, the behavior lambda is stored in a variable of the parent block. The invocation of the `build' function is moved to the code of the agent. This isn't how it is actually implemented, but the \ref{code:runtimeblock1} gives the basic idea of how it could be implemented. Here, the input data is a Kubernetes client, and it is passed to the constructor of the builder class.
+
+\begin{lstlisting}[caption={Build a report},language=Kotlin,label=code:runtimeblock1]
+fun generateReport(
+        k8s: KubernetesClient, 
+        provider: ReportProviderFunction
+    ): Report {
+    val builder = ReportBuilder(k8s)
+    builder.provider()
+    return builder.build()
+}
+\end{lstlisting}
+
+The \ref{code:runtimeblock2} snippet show the implementation of the builder class and the provider.
+
+\begin{lstlisting}[caption={Report builder class and provider},language=Kotlin,label=code:runtimeblock2]
+typealias ReportProviderFunction = ReportBuilder.() -> Unit
+class ReportBuilder(private val k8s: KubernetesClient) {
+    // All the child keywords of the report block
+    ...
+    fun build(): Report {
+        ...
+    }
+}
+\end{lstlisting}
+
+The actual implementations of the runtime-evaluated blocks vary in the codebase due to the evolution of the DSL. Still, this section explains the core idea. It could be a potential future improvement to streamline the implementation of each block.
 
 \subsection{`setExactlyOnce' and `setMaxOnce'}
 
@@ -170,16 +230,3 @@ val x = jsonElement jqx "/foo/bar" parseAs string
 \end{lstlisting}
 
 `jqx' is an infix function with a return type of JsonElement. `parseAs' is also an infix function with the type JsonElement as a receiver, so `jqx' and `parseAs' commands can be chained. There is a token created for every the primitive types that can occur in a JSON, and there is a corresponding `parseAs' function for each token. This setup facilitates the extraction of all types from a JSON structure. The `nullGuard' is a private function that return null if the conversion can not happen, for instance, due to a type mismatch or non-existing JSON field. Otherwise, it returns the converted value. The conversion function is defined in its block.
-
-\subsection{Unmarshallers}
-
-
-
-\subsection{DslMarker annotation}
-
-
-
-
-\begin{lstlisting}[caption={TODO},language=Kotlin,label=code:todo]
-
-\end{lstlisting}

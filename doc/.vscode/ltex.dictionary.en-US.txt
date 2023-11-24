@@ -47,3 +47,4 @@ CarModel
 nullGuard
 parseAs
 Unmarshallers
+typealias
