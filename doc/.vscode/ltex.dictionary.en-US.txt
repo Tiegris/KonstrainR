@@ -48,3 +48,6 @@ nullGuard
 parseAs
 Unmarshallers
 typealias
+ByteArray
+createDsl
+logsfile

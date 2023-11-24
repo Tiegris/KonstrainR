@@ -173,14 +173,45 @@ spec:
 \end{lstlisting}
 
 %----------------------------------------------------------------------------
-\clearpage\section{Válasz az Élet, a világmindenség, meg minden kérdésére}
+\clearpage\section{Builder script}
 %----------------------------------------------------------------------------
-A Pitagorasz-tételből levezetve
-\begin{align}
-c^2=a^2+b^2=42.
-\end{align}
-A Faraday-indukciós törvényből levezetve
-\begin{align}
-\rot E=-\frac{dB}{dt}\hspace{1cm}\longrightarrow \hspace{1cm}
-U_i=\oint\limits_\mathbf{L}{\mathbf{E}\mathbf{dl}}=-\frac{d}{dt}\int\limits_A{\mathbf{B}\mathbf{da}}=42.
-\end{align}
+
+\begin{lstlisting}[caption={Builder script},language=bash,label=appendix:builder]
+#!/bin/bash
+
+function log() {
+  echo "$1" >> $logsfile
+}
+
+base_url="https://${KSR_CORE_BASE_URL}:8080/api/v1/dsls"
+dsl_id="${KSR_DSL_ID}"
+secret="${KSR_SECRET}"
+
+logsfile='/app/logs'
+file='/app/framework/lib/src/main/kotlin/me/btieger/DslInstance.kt'
+jar='/app/framework/lib/build/libs/lib.jar'
+
+cp "/app/tls-cert/rootCa.pem" /usr/local/share/ca-certificates/rootCa.crt
+update-ca-certificates
+
+log "=== BEGIN ERROR REPORT ==="
+log "BASE_URL = $base_url"
+log "DSL_ID = $dsl_id"
+
+function try_do() {
+  wget "${base_url}/${dsl_id}/file" -O "${file}" && log "Download done" || { log "Download failed" && error_report; }
+  sed -i 's/package .*/package me.btieger/' "${file}" && log "Sed done" || { log "Sed failed" && error_report; }
+  cd /app/framework
+  ./gradlew jar >> $logsfile 2>&1 && log "Build done" || { log "Build failed" && error_report; }
+  log "Compilation done"
+  curl -F filename="${jar}" -F upload=@${jar} -H "Content-Type: application/java-archive" "${base_url}/${dsl_id}/jar" || { log "Upload failed" && error_report; }
+}
+
+function error_report() {
+  log "=== END ERROR REPORT ==="
+  curl -H "Content-Type: text/plain" -X POST --data "$(cat /app/logs)" "${base_url}/${dsl_id}/jar"
+  exit 1
+}
+
+try_do || error_report
+\end{lstlisting}
