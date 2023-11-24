@@ -187,7 +187,7 @@
         </mxGraphModel>
     </diagram>
     <diagram name="Copy of Page-2" id="a5JG3vgdXDS3aouaaDYc">
-        <mxGraphModel dx="466" dy="375" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+        <mxGraphModel dx="675" dy="543" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
             <root>
                 <mxCell id="0touS1AEJUGKjj6mapaU-0"/>
                 <mxCell id="0touS1AEJUGKjj6mapaU-1" parent="0touS1AEJUGKjj6mapaU-0"/>
@@ -221,7 +221,7 @@
                     <mxGeometry x="45" y="310" width="10" height="20" as="geometry"/>
                 </mxCell>
                 <mxCell id="0touS1AEJUGKjj6mapaU-14" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;" parent="0touS1AEJUGKjj6mapaU-11" vertex="1">
-                    <mxGeometry x="45" y="220" width="10" height="20" as="geometry"/>
+                    <mxGeometry x="45" y="210" width="10" height="20" as="geometry"/>
                 </mxCell>
                 <mxCell id="0touS1AEJUGKjj6mapaU-18" value="BuilderJob" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;" parent="0touS1AEJUGKjj6mapaU-1" vertex="1">
                     <mxGeometry x="360" y="250" width="100" height="390" as="geometry"/>
