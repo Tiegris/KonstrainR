@@ -1,0 +1,33 @@
+\subsection{Agent startup}
+
+Agents have custom startup sequence. First the root CA is added to the trusted certificate authorities, as seen with the Builder. After that the agent certificate and keys are converted from PEM encoded to a Java KeyStore\footnote{\url{https://en.wikipedia.org/wiki/Java_KeyStore}}, like demonstrated in the \ref{code:jks} code snippet. This is essential because Ktor cannot be configured to use HTTPS with PEM files; it only accepts JKS files.
+
+\begin{lstlisting}[caption={From PEM to JKS transormation},language=Kotlin,label=code:jks]
+openssl pkcs12 -export -in $ssl_root/cert.pem -inkey $ssl_root/key.pem -out $app_root/keystore.p12 -name "AgentCert" -password pass:$secret
+keytool -importkeystore -srckeystore $app_root/keystore.p12 -srcstoretype pkcs12 -destkeystore /app/keystore.jks -deststorepass $secret -srcstorepass $secret
+\end{lstlisting}
+
+The next step is to download the compiled script JAR file. It is downloaded from the Core server using the wget command. 
+
+Afterwards, the downloaded JAR is appended to classpath of the java command running the agent. Finally, the agent is started, as demonstrated on the \ref{code:startup0} code snippet.
+
+\begin{lstlisting}[caption={Starting the agent JAR},language=Kotlin,label=code:startup0]
+echo ":/app/libs/agentdsl.jar" >> "/app/jib-classpath-file"
+java -cp "@/app/jib-classpath-file" me.btieger.ApplicationKt
+\end{lstlisting}
+
+The file `/app/jib-classpath-file' contains all the names of the JARs added to the classpath in a colon-separated list. For the java command, the `-cp' switch can be used to add JARs to the classpath.
+
+The following events are happening inside the code of the agent Ktor server:
+
+\begin{itemize}
+    \item The server is configured to use HTTPS.
+    \item The server object from the compiled script is created.
+    \item The `/aggregator' endpoint is generated if the script has a report block.
+    \item An HTTP Post endpoint is created for all webhooks.
+    \item The Agent server starts to server requests.
+\end{itemize}
+
+The Agent has an echo endpoint which indicates that it has started serving requests. The Core component waits for this endpoint to return HTTP 200 OK, before creating the \emph{MutatingWebhookConfiguration}.
+
+After this lengthy process, the agent is now running, and Kubernetes is configured. As a result, the constraints defined in the script are live, and the report can be generated.

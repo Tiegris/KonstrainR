@@ -101,6 +101,8 @@ This pattern ensures that if the command succeeds, the fact of the success is lo
 
 The call of the Gradle build on line 14 is unique. The \lstinline*./gradlew jar >> $logsfile 2>&1* bash magic appends the standard output (stdout) and the standard error (stderr) to the logsfile.
 
+TODO: show screenshot of an error report
+
 \subsubsection{Builder job cleanup loop}
 
 I've explained how graceful errors are handled during compilation, but there might be fatal errors, where the error report does not reach the Core component. In this case the DSL would remain in "Building" state indefinitely if not for the job health check loop.

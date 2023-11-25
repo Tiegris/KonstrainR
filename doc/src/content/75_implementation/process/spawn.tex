@@ -1,4 +1,4 @@
-\subsection{Agent startup}
+\subsection{Spawning of an agent}
 
 The second outside interaction is required to spawn the agent. To spawn an agent, the user must send an HTTP Post request to the `/api/v1/servers/\{dslId\}/start' endpoint of the Core server. The \ref{fig:start1} figure shows how the service layer of the Core server handles the request.
 
@@ -9,22 +9,57 @@ The second outside interaction is required to spawn the agent. To spawn an agent
     \label{fig:start1}
 \end{figure}
 
-script is uploaded on uid
-compilation starts
-    pull script
-    prepare file
-    gradle build
-    mention: caching, how the builder image is created
-    explain build health check and cleaing cycle
-once compiled it can be started
-process of starting:    
-    read script to memory, execute it to get the wh conf data
-    get tls cert
-    create k8s resources: deployment service, whsconf, crb
-    explain agent health check
-    explain rollback
-agent starts, agent downloads script with curl
-    explain why is it good to precompile script
-    dynamically link compiled jar -cp ; custom class loader
-    use reflection to find the getServer method
-    configuring router
+First, the compiled script is loaded from the database. Secondly, the status of the DSL script is set to `Spawning'. The rest is done on another thread, and the `startServer' function returns.
+
+All agents use HTTPS, so they require a TLS certificate, which can be requested from the TlsService.
+After a new certificate is created, the next step is to execute the compiled script, to extract information, such as the name of the \emph{ClusterRole}, or the webhook configurations, all of which are required during the spawning of the agent.
+
+In the \ref{fig:start1} diagram, the steps of spawning an agent are not detailed; instead, these steps are abstracted by the `spawnAgent' function. The \ref{code:start2} pseudocode better summarizes the steps of the `spawnAgent' function than a sequence diagram.
+
+\begin{lstlisting}[caption={Spawning of an agent},language=Kotlin,label=code:start2]
+val server = executeScript(compiledDsl)
+
+k8s.create(Secret(rootCa, certificates))
+
+val dep = Deployment(server)
+val svc = Service(server)
+if (server.hasClusterRole() == true) {
+    val sa = ServiceAccount(server)
+    val crb = ClusterRoleBinding(server)
+    k8s.create(sa)
+    k8s.create(crb)
+    dep.serviceAccountName = sa.name
+}
+k8s.create(dep)
+k8s.create(svc)
+...
+\end{lstlisting}
+
+First, a Kubernetes \emph{Secret} resource is created with the certificates and keys needed for the Agent. This will be mounted to the \emph{Deployment}.
+After that, a \emph{Deployment} and a \emph{Service} object are created locally using the configuration from the server object. If the server has the `clusterRole' keyword set, a \emph{ServiceAccount} and a \emph{ClusterRoleBinding} are created as well, and the previously created \emph{Deployment} is set to use the \emph{ServiceAccount}. After that, the \emph{Deployment} and the \emph{Service} are created on the cluster too.
+
+The creation of the \emph{Deployment} does not imply that the agent is ready to serve requests, so the spawning has to wait for the agent to become available. The \emph{MutatingWebhookConfiguration} should not be created before the agent can serve requests because that would result in an unstable state, where an admission webhook has no actual server implementing it. The details of how an agent actually starts up are described in the next section. For now, let's focus on what's happening inside the Core component.
+
+The \ref{code:start3} pseudocode shows how the startup of the agent is awaited, and what additional steps are done.
+
+\begin{lstlisting}[caption={Spawning of an agent},language=Kotlin,label=code:start3]
+...
+try {
+    k8s.waitUntilAvailable(dep)
+    success = true
+} catch (e: TimeoutException) {
+    doRollback()
+    success = false
+}
+        
+if (success) {
+    k8s.create(MutatingWebhookConfiguration(server, rootCa))
+    setDslStatus(id, "Running")
+} else {
+    setDslStatus(id, "Error")
+}
+\end{lstlisting}
+
+If the agent becomes available before the timeout, the \emph{MutatingWebhookConfiguration} is created too. Otherwise, a rollback is performed, deleting all the previously created resources.
+
+Finally, the status of the agent is updated in the database.

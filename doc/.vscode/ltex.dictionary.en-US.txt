@@ -51,3 +51,11 @@ typealias
 ByteArray
 createDsl
 logsfile
+startServer
+spawnAgent
+TlsService
+ServiceAccount
+KeyStore
+wget
+classpath
+JARs
