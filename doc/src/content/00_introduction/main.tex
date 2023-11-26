@@ -6,20 +6,60 @@
 \label{chap:intro}
 %----------------------------------------------------------------------------
 
+\section{Enforcing policies}
 
-\paragraph{Kontextus.} 
+There can be several reasons why a company would want to enforce policies. These policies typically address non-functional requirements related to security, availability, or dependability. Ensuring adherence to these policies is essential for maintaining the integrity and robustness of the overall system.
 
+Enforcing policies has two main aspects. The first is detecting policy violations, which requires monitoring of the system. The second is ensuring that no action can be performed that would introduce a new violation.
 
-\paragraph{Problémafelvetés.}
+By inspecting the current state of the cluster, a report can be created of the policy violations, and engineers can fix the violations with the help of the report.
 
+Reviewing events in the cluster provides an opportunity to either reject events that would violate a policy or modify them to ensure policy compliance.
 
-\paragraph{Célkitűzés.}
+While it is possible to automatically fix violating resources during a report, I consider it a bad practice for several reasons. Firstly, the incorrect version will persist in version control, concealing the problem from engineers. Furthermore, it can cause instability, outages, and longer update times. When deploying a new version of the application, the fixed version would be overwritten with the new faulty one, creating complications in the CI/CD pipeline.
 
+\section{Domain specific languages}
 
-\paragraph{Kontribúció.}
+When designing a Domain Specific Language (DSL), several critical questions must be addressed early in the development process:
 
+\begin{itemize}
+    \item \textbf{Expression Scope:} What kind of concepts or entities should the language express? For this DSL, the scope extends to creating reports on Kubernetes resources and describing the configuration and behavior of Kubernetes admission webhooks. Deciding on the scope and purpose of the DSL helps define its boundaries.
+    \item \textbf{User Base:} Who are the intended users of the language? In the case of this DSL, the users are developers, DevOps engineers, and system administrators. Since these users are all engineers with a basic knowledge of programming or declarative description, making the language overly natural language-like is not a top priority.
+    \item \textbf{Expandability:} How important is the ability to extend the language? In this case, extensibility is crucial, given that Kubernetes is a highly extendable technology.
+    \item \textbf{Representation Format:} Should the DSL be graphical or text-based? I decided to make the language text-based. The users of the language are engineers who generally prefer writing to dragging boxes on a GUI. Additionally, a text-based language is easier to create and extend.
+\end{itemize}
 
-\paragraph{Hozzáadott érték.}
+Addressing these questions early on lays a solid foundation for the DSL's design and functionality.
 
+The task is to create an easy-to-extend, text-based language capable of describing both behaviors and static information. Given the project's scope and time constraints, the implementation timeline is relatively short, making efficiency a key consideration for the DSL development.
 
-\paragraph{A dolgozat felépítése.}
+While there are many options for creating DSLs, such as ANTLR, Xtext, and MPS, each with a well-rounded toolset for language development, including support for parsing, syntax checking, semantics checking, and some level of code generation, I found them slow to work with and time-consuming to extend. Despite their capabilities, creating an expressive language using these technologies would have been challenging and time-consuming.
+
+As language creation tools were not suitable for my purpose, I opted for a general-purpose programming language to write my DSL. Specifically, I chose Kotlin, a highly expressive, modern, statically-typed JVM language. Due to its expressiveness and syntactic sugars, Kotlin is capable of creating DSLs that closely resemble natural language. Creating DSLs in general-purpose languages is not a new concept; notable examples include Gradle, a build tool using a Groovy or Kotlin-based DSL, and Ktor, a web server technology for Kotlin. Ktor utilizes a Kotlin DSL to configure the server, define routing, and even create HTML documents.
+
+One of the main advantages of using Kotlin for my DSL is that I don't need to write a parser, syntax checker, code generator, or any other complex components for my language, as it essentially functions as a software library. The compilation is done by the JDK, compiling to JVM bytecode. The compiled script can then be run as any Java application. Syntax highlighting, intellisense, and error detection can be handled by any Kotlin IDE, providing a streamlined development experience.
+
+The second-greatest advantage is that the language will be very expressive and extendable without a huge time investment. If needed, all the language features and libraries of Kotlin and Java can be utilized alongside my DSL when writing a script.
+
+\section{Contributions}
+
+In the course of my thesis work, I successfully implemented a comprehensive solution for enforcing constraints in Kubernetes using a high-level DSL. The key milestones in this endeavor include:
+
+\begin{itemize}
+    \item \textbf{Examination of Constraint Enforcement in Kubernetes:} Conducted a thorough exploration of the possibilities and challenges related to constraint enforcement in the Kubernetes environment.
+    \item \textbf{DSL Design and Implementation:} Designed and implemented a DSL capable of creating Kubernetes reports and admission webhooks, providing a powerful tool for expressing constraints.
+    \item \textbf{Framework Design for Admission Webhooks:} Developed a framework capable of provisioning Kubernetes admission webhooks.
+    \item \textbf{Case Study Development:} Created a comprehensive case study to showcase the practical capabilities of the implemented solution, demonstrating its effectiveness in real-world scenarios.
+    \item \textbf{Constraint rule set:} Created a general rule set describing some real-world Kubernetes best practices as an example DSL script.
+    \item \textbf{Evaluation of Implementation:} Conducted an evaluation of the implementation, considering aspects such as design decisions, performance, and the technologies chosen for the solution.
+\end{itemize}
+
+\section{Thesis structure}
+
+Chapter 2 introduces the concepts and technologies essential to understand my thesis.
+
+Chapter 3 and chapter 5 are the case study. The first part tells the story of a fictional company with many bad practices. In that chapter I apply the general best practice rule set to their cluster to highlight their mistakes and propose fixes.
+
+Chapter 4 interrupts the case study, as it explains the DSL in detail. This information is required for the last chapter dedicated to the case study, as it show how to write new scripts in my Domain Specific Language.
+
+Chapter 5 is about the implementation details of the platform.
