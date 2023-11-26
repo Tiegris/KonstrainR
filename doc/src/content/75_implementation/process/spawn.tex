@@ -1,4 +1,5 @@
 \subsection{Spawning of an agent}
+\label{sec:spawning}
 
 The second outside interaction is required to spawn the agent. To spawn an agent, the user must send an HTTP Post request to the `/api/v1/servers/\{dslId\}/start' endpoint of the Core server. The \ref{fig:start1} figure shows how the service layer of the Core server handles the request.
 
@@ -63,3 +64,5 @@ if (success) {
 If the agent becomes available before the timeout, the \emph{MutatingWebhookConfiguration} is created too. Otherwise, a rollback is performed, deleting all the previously created resources.
 
 Finally, the status of the agent is updated in the database.
+
+Note: Both start and delete operations on an agent must be atomic. Given that an agent is composed of multiple Kubernetes resources, it is crucial that during creation, all components are created without errors, and during deletion, all components are destroyed. The Core component is implemented to ensure this atomic behavior.

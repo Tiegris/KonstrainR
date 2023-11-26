@@ -1,0 +1,1 @@
+{"rule":"FIRST_OF_ALL","sentence":"^\\QFirst of all, caching the compiled DSL scripts is crucial.\\E$"}

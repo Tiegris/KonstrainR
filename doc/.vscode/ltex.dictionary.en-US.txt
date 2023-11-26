@@ -60,3 +60,5 @@ wget
 classpath
 JARs
 OOMKilled
+bytecode
+BasicDiagnostics
