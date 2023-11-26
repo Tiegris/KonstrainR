@@ -23,6 +23,8 @@ Properties and setter functions usually can only be used within the context of a
  
 The \ref{code:lang1} example can be implemented similarly like in the \ref{code:lang2} code snippet.
 
+Most blocks follow the same pattern. There is builder function: `car' in this case, whose last argument is an extension method on a builder class, in this case the `CarBuilder.' Newly accessible keywords in the `car' block are all member functions or properties of the builder class. Lastly, there is a model class, specifically the `CarModel' which holds all the necessary data for a car in this case. The builder function always has an internal build function, making it inaccessible to the DSL user, and it returns an instance of the model class.
+
 \begin{lstlisting}[caption={Basic idea behind a block},language=Kotlin,label=code:lang2]
 class CarModel(val color: String)
 class CarBuilder {
@@ -34,8 +36,6 @@ fun car(setup: CarBuilder.() -> Unit): CarModel {
     ...
 }
 \end{lstlisting}
-
-Most blocks follow the same pattern. There is builder function: `car' in this case, whose last argument is an extension method on a builder class, in this case the `CarBuilder.' Newly accessible keywords in the `car' block are all member functions or properties of the builder class. Lastly, there is a model class, specifically the `CarModel' which holds all the necessary data for a car in this case. The builder function always has an internal build function, making it inaccessible to the DSL user, and it returns an instance of the model class.
 
 There are two kinds of blocks. The first kind simply describes a configuration or calculates a value, like the `namespaceSelector' or `webhookConfigBundle'. The other describes a complex behavior, which can only be evaluated at certain events, for example the `report', `kubectl' and `behavior' blocks. I refer to the first group as `startup-time' evaluated blocks because a model object can be built without an input. This typically occurs when the agent running the script starts up. I call the second group as `runtime-evaluated blocks' because an input is required to evaluate them, such as a webhook request, or a Kubernetes client.
 

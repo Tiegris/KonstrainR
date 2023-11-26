@@ -1,51 +1,51 @@
 <mxfile host="65bd71144e">
     <diagram id="nW18ixeJ_GSDz91-Pg-Q" name="Page-1">
-        <mxGraphModel dx="979" dy="787" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+        <mxGraphModel dx="792" dy="473" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
-                <mxCell id="11" value="KonstraineR-Core" style="swimlane;" parent="1" vertex="1">
-                    <mxGeometry x="310" y="60" width="255" height="90" as="geometry"/>
+                <mxCell id="11" value="Konstrainer Core" style="swimlane;" parent="1" vertex="1">
+                    <mxGeometry x="310" y="60" width="265" height="90" as="geometry"/>
                 </mxCell>
-                <mxCell id="12" value="Main manager component&lt;br&gt;Manages lifecycles of agents and webhooks&lt;br&gt;Provisions k8s resources&lt;br&gt;Provisions ssl certificates" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="11" vertex="1">
-                    <mxGeometry x="5" y="25" width="250" height="60" as="geometry"/>
+                <mxCell id="12" value="Main orchestrator component&lt;br&gt;Manages lifecycles of agents and webhooks&lt;br&gt;Provisions k8s resources&lt;br&gt;Provisions ssl certificates" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="11" vertex="1">
+                    <mxGeometry x="5" y="20" width="260" height="70" as="geometry"/>
                 </mxCell>
-                <mxCell id="14" value="KonstraineR-Ui" style="swimlane;" parent="1" vertex="1">
-                    <mxGeometry x="600" y="150" width="180" height="80" as="geometry"/>
+                <mxCell id="14" value="Konstrainer UI" style="swimlane;" parent="1" vertex="1">
+                    <mxGeometry x="610" y="150" width="195" height="80" as="geometry"/>
                 </mxCell>
-                <mxCell id="15" value="Web UI for KonstrainR-Core&lt;br&gt;Upload, list, inspect Dsls&lt;br&gt;Start, stop agents" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="14" vertex="1">
-                    <mxGeometry x="5" y="25" width="170" height="50" as="geometry"/>
+                <mxCell id="15" value="Web UI for the Core API&lt;br&gt;Upload, list, inspect DSL scripts&lt;br&gt;Start, stop agents" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="14" vertex="1">
+                    <mxGeometry x="5" y="20" width="190" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="16" value="KonstraineR-Db" style="swimlane;" parent="1" vertex="1">
-                    <mxGeometry x="55" y="150" width="215" height="80" as="geometry"/>
+                <mxCell id="16" value="Konstrainer DB" style="swimlane;" parent="1" vertex="1">
+                    <mxGeometry x="55" y="150" width="225" height="80" as="geometry"/>
                 </mxCell>
-                <mxCell id="17" value="Stores data of uploaded Dsls&lt;br&gt;Stores desired Agent states&lt;br&gt;Serves as a cache for agent binaries" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="16" vertex="1">
-                    <mxGeometry x="5" y="25" width="210" height="50" as="geometry"/>
+                <mxCell id="17" value="Stores data of uploaded DSL scripts&lt;br&gt;Stores desired Agent states&lt;br&gt;Serves as a cache for agent binaries" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="16" vertex="1">
+                    <mxGeometry x="5" y="20" width="220" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="18" value="KonstraineR-Compiler" style="swimlane;" parent="1" vertex="1">
-                    <mxGeometry x="470" y="270" width="215" height="80" as="geometry"/>
+                <mxCell id="18" value="Konstrainer Compiler" style="swimlane;" parent="1" vertex="1">
+                    <mxGeometry x="470" y="260" width="235" height="80" as="geometry"/>
                 </mxCell>
-                <mxCell id="19" value="Runs as k8s job with high resources&lt;br&gt;Compiles Dsls to jars&lt;br&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="18" vertex="1">
-                    <mxGeometry x="5" y="35" width="210" height="30" as="geometry"/>
+                <mxCell id="19" value="Runs as a k8s job with high resources&lt;br&gt;Compiles scripts to JARs" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="18" vertex="1">
+                    <mxGeometry x="5" y="30" width="230" height="40" as="geometry"/>
                 </mxCell>
-                <mxCell id="28" value="KonstraineR-Agent" style="swimlane;" parent="1" vertex="1">
-                    <mxGeometry x="110" y="270" width="265" height="80" as="geometry"/>
+                <mxCell id="28" value="Konstrainer Agent" style="swimlane;" parent="1" vertex="1">
+                    <mxGeometry x="110" y="260" width="275" height="80" as="geometry"/>
                 </mxCell>
-                <mxCell id="29" value="Enforces contraints defined by a dsl instance&lt;br&gt;Allows or rejects the creaton of k8s resources&lt;br&gt;Can patch k8s resources being created" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="28" vertex="1">
-                    <mxGeometry x="5" y="25" width="260" height="50" as="geometry"/>
+                <mxCell id="29" value="Enforces contraints defined by DSL scripts&lt;br&gt;Allows or rejects the creaton of k8s resources&lt;br&gt;Can patch k8s resources being created" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="28" vertex="1">
+                    <mxGeometry x="5" y="20" width="270" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="30" value="KonstraineR-Dsl" style="swimlane;" parent="1" vertex="1">
-                    <mxGeometry x="300" y="450" width="240" height="60" as="geometry"/>
+                <mxCell id="30" value="Konstrainer DSL" style="swimlane;" parent="1" vertex="1">
+                    <mxGeometry x="300" y="400" width="250" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="31" value="Kotlin Dsl package for defining constraints" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="30" vertex="1">
-                    <mxGeometry y="30" width="240" height="20" as="geometry"/>
+                <mxCell id="31" value="Kotlin DSL package for defining constraints" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="30" vertex="1">
+                    <mxGeometry y="25" width="250" height="30" as="geometry"/>
                 </mxCell>
-                <mxCell id="32" value="Store Data" style="endArrow=none;startArrow=classic;html=1;exitX=0.75;exitY=0;exitDx=0;exitDy=0;entryX=-0.03;entryY=0.55;entryDx=0;entryDy=0;entryPerimeter=0;endFill=0;" parent="1" source="16" target="12" edge="1">
+                <mxCell id="32" value="Persistence" style="endArrow=none;startArrow=classic;html=1;exitX=0.75;exitY=0;exitDx=0;exitDy=0;entryX=-0.03;entryY=0.55;entryDx=0;entryDy=0;entryPerimeter=0;endFill=0;" parent="1" source="16" target="12" edge="1">
                     <mxGeometry width="50" height="50" relative="1" as="geometry">
                         <mxPoint x="230" y="240" as="sourcePoint"/>
                         <mxPoint x="280" y="190" as="targetPoint"/>
                         <Array as="points">
-                            <mxPoint x="216" y="118"/>
+                            <mxPoint x="230" y="118"/>
                         </Array>
                     </mxGeometry>
                 </mxCell>
@@ -94,16 +94,39 @@
                         <mxPoint x="320" y="360" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="39" value="" style="endArrow=classic;html=1;exitX=0.232;exitY=1.083;exitDx=0;exitDy=0;exitPerimeter=0;" parent="1" source="12" edge="1">
+                <mxCell id="39" value="" style="endArrow=classic;html=1;exitX=0.222;exitY=1.01;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.78;entryY=0.002;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="12" edge="1" target="28">
                     <mxGeometry width="50" height="50" relative="1" as="geometry">
                         <mxPoint x="350" y="170.00000000000003" as="sourcePoint"/>
                         <mxPoint x="330" y="270" as="targetPoint"/>
-                        <Array as="points"/>
+                        <Array as="points">
+                            <mxPoint x="340" y="210"/>
+                        </Array>
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="40" value="Provision" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="39" vertex="1" connectable="0">
                     <mxGeometry x="0.2375" y="1" relative="1" as="geometry">
                         <mxPoint y="-12" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="41" value="" style="endArrow=classic;html=1;entryX=0.346;entryY=1.024;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.877;exitY=0.021;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="28" target="12">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="420" y="250" as="sourcePoint"/>
+                        <mxPoint x="340" y="280" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="390" y="210"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="42" value="Pull compiled&lt;br&gt;script" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="41">
+                    <mxGeometry x="0.2375" y="1" relative="1" as="geometry">
+                        <mxPoint x="8" y="3" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="44" value="Extends" style="endArrow=block;endSize=16;endFill=0;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.997;entryY=0.351;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="18" target="29">
+                    <mxGeometry x="-0.0678" width="160" relative="1" as="geometry">
+                        <mxPoint x="390" y="350" as="sourcePoint"/>
+                        <mxPoint x="550" y="350" as="targetPoint"/>
+                        <mxPoint as="offset"/>
                     </mxGeometry>
                 </mxCell>
             </root>
