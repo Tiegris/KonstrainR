@@ -1,1 +1,3 @@
 {"rule":"FIRST_OF_ALL","sentence":"^\\QFirst of all, caching the compiled DSL scripts is crucial.\\E$"}
+{"rule":"MISSING_GENITIVE","sentence":"^\\QKotlin extension functions\\E$"}
+{"rule":"MORFOLOGIK_RULE_EN_US","sentence":"^\\QTo BLOB or Not To BLOB: Large Object Storage in a Database or a Filesystem\\E$"}

@@ -6,22 +6,36 @@
 \label{chap:prerequisites}
 %----------------------------------------------------------------------------
 
+Kotlin: elvis, nullability
+
+DSL
+
+terminology: script, dsl, Konstrainer, block
+
 \section{Kubernetes}
+
+This is how Kubernetes introduces itself on its website\cite{K8s}: `Kubernetes, also known as K8s, is an open-source system for automating deployment, scaling, and management of containerized applications.'
+
+This one of the most popular platform for operating large scale distributed applications. As the complexity of modern applications continues to grow, Kubernetes provides a robust and flexible solution to streamline the orchestration and management of containerized workloads.
+
+One of Kubernetes' key strengths lies in its declarative approach to configuration. Engineers define the desired state of their applications and infrastructure using YAML manifests, specifying details such as container images, resource requirements, and scaling policies. Kubernetes then takes on the responsibility of ensuring that the current state matches the declared state, automatically managing container placement, scaling, and load balancing.
+
+As it solves a very complex problem Kubernetes itself is very complex and hard to do right. It is very easy to do thing suboptimal. 
 
 \subsection{Dynamic Admission Control}
 
+admission webhooks
+
 \section{Kotlin}
 
-\subsection{Ktor}
+Kotlin is a multi paradigm modern JVM language, with full interoperability with Java, and many features that are not present in languages like Java. These features are used extensively in my DSL, and this chapter is meant to introduce them.
 
 \subsection{Extension functions}
 \label{sec:extension}
 
-TODO reference: https://kotlinlang.org/docs/extensions.html\#extension-functions
+An extension function can add new functionality to an existing class without modifying it\cite{KExt}. In Java, this can be implemented as shown in the \ref{code:prelimkext1} code snippet. Although Java lacks native support for extension methods, there is a workaround using public static utility functions. In contrast, Kotlin supports extension functions natively, as demonstrated in the \ref{code:prelimkext2} code snippet.
 
-An extension function can add new functionality to an existing class without modifying it. In Java, this can be implemented as shown in the \ref{code:lang3} code snippet. Although Java lacks native support for extension methods, there is a workaround using public static utility functions. In contrast, Kotlin supports extension functions natively, as demonstrated in the \ref{code:lang4} code snippet.
-
-\begin{lstlisting}[caption={Extension functions in Java},language=Java,label=code:lang3]
+\begin{lstlisting}[caption={Extension functions in Java},language=Java11,label=code:prelimkext1]
 public class MyClass {
     ...
 }
@@ -36,7 +50,7 @@ final var myClass = new MyClass();
 myExtensionFunction(myClass);
 \end{lstlisting}
 
-\begin{lstlisting}[caption={Extension functions in Kotlin},language=Kotlin,label=code:lang4]
+\begin{lstlisting}[caption={Extension functions in Kotlin},language=Kotlin,label=code:prelimkext2]
 class MyClass {
     ...
 }
@@ -49,10 +63,20 @@ val myClass = MyClass()
 myClass.myExtensionFunction()
 \end{lstlisting}
 
-Kubernetes
+\subsection{Receivers}
 
-Kotlin: extension function, receiver, elvis, nullability
+The term `receiver' is closely associated with extension functions, where it refers to the class to which the function is adding new functionality. When discussinglambdas, the block of the lambda might also have a receiver. In both cases, the receiver can be accessed with the `this' keyword, similar to the containing object reference. Implicit receivers also exist, where the `this' keyword is not used explicitly.
 
-DSL
+\subsection{Null safety}
 
-terminology: script, dsl, Konstrainer, block
+Kotlin is a null-safe language, which means it has native support to address the challenges and errors associated with null or undefined values. The key concepts are:
+
+\begin{itemize}
+    \item \textbf{Nullable and non-nullable types (`String?' and `String'):} There are distinct types for values that can never be null and types for values that might be null during the program's execution. If a value is allowed to be null, its type is marked with a question mark (?).
+    \item \textbf{Safe calls (?.):} Calling a function on a nullable type is not allowed with the dot (.) operator, as it might result in a null pointer exception Instead, the safe call operator (?.) shall be used. The safe call only invokes the function if it is not null; otherwise, the entire expression will return null.
+    \item \textbf{Elvis operator (?:):} It is an infix operator that returns its left-hand side operand if it's not null; otherwise, it returns it's right-hand side operand.
+\end{itemize}
+
+Unfortunately, when calling libraries written in Java, the strict null-safety rules need to be relaxed, as Java does not ensure null safety. In such cases, it is the responsibility of the programmer to handle values as either nullable or null-safe. This presented a significant challenge during my work, requiring the development of strategies to manage unsafe calls in my DSL scripts.
+
+For more information on the relation of Kotlin null-safety and Java interoperability, I recommend reading the official documentation on the topic: \url{https://kotlinlang.org/docs/java-interop.html\#null-safety-and-platform-types}

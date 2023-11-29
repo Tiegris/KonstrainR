@@ -11,7 +11,7 @@ My project is not just a language and a compiler for it, but rather a much large
 
 \subsection{Core component}
 
-The main component in this setup is the Konstrainer Core. This is an HTTP API server managing the whole platform. DSL scripts can be uploaded to it, and serves as a store for the uploaded and compiled DSL instances. It handles all tasks related to compiling, spawning, configuring, and destroying agents. Most importantly it manages the TLS certificates and Kubernetes resources for the agents, which are crucial parts of the agent lifecycle.
+The main component in this setup is the Konstrainer Core. This is an HTTP API server, implemented using the Ktor framework, managing the whole platform. DSL scripts can be uploaded to it, and serves as a store for the uploaded and compiled DSL instances. It handles all tasks related to compiling, spawning, configuring, and destroying agents. Most importantly it manages the TLS certificates and Kubernetes resources for the agents, which are crucial parts of the agent lifecycle.
 
 In Kubernetes, webhooks need to communicate with the Kubernetes API on a secured connection. To achieve this, Konstrainer Agent instances require a TLS certificate, and need to serve request using the HTTPS protocol. This certificate can be self-signed, but in the webhook creation request the root CA of the certificate must be sent to the Kubernetes API. After this, the Kubernetes API will trust the certificate of the webhook. This is why TLS handling is a crucial part of the Core component.
 
