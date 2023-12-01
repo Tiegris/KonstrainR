@@ -6,25 +6,43 @@
 \label{chap:prerequisites}
 %----------------------------------------------------------------------------
 
-Kotlin: elvis, nullability
-
-DSL
-
-terminology: script, dsl, Konstrainer, block
+In this chapter, I will provide a brief introduction to the technologies that may not be considered common knowledge for computer engineers but are essential to understanding my thesis.
 
 \section{Kubernetes}
 
 This is how Kubernetes introduces itself on its website\cite{K8s}: `Kubernetes, also known as K8s, is an open-source system for automating deployment, scaling, and management of containerized applications.'
 
-This one of the most popular platform for operating large scale distributed applications. As the complexity of modern applications continues to grow, Kubernetes provides a robust and flexible solution to streamline the orchestration and management of containerized workloads.
+It stands as one of the most popular platforms for operating large-scale distributed applications. In response to the growing complexity of modern applications, Kubernetes offers a robust and flexible solution to streamline the orchestration and management of containerized workloads.
 
-One of Kubernetes' key strengths lies in its declarative approach to configuration. Engineers define the desired state of their applications and infrastructure using YAML manifests, specifying details such as container images, resource requirements, and scaling policies. Kubernetes then takes on the responsibility of ensuring that the current state matches the declared state, automatically managing container placement, scaling, and load balancing.
+A key strength of Kubernetes lies in its declarative approach to configuration. The desired state of the applications is defined using YAML manifests, specifying details such as container images, resource requirements, and scaling policies. Kubernetes then takes on the responsibility of ensuring that the current state matches the declared state, automatically managing container lifecycles, scaling, and load balancing.
 
-As it solves a very complex problem Kubernetes itself is very complex and hard to do right. It is very easy to do thing suboptimal. 
+However, given the inherent complexity of the problems Kubernetes addresses, implementing it correctly can be challenging. Suboptimal configurations are common, and my thesis project seeks to provide a solution for optimizing the operation of applications in Kubernetes.
 
-\subsection{Dynamic Admission Control}
+\subsection{Admission controllers}
 
-admission webhooks
+The official documentation\cite{K8sAdmissionOfficial} explains admission controllers as the following:
+
+`An admission controller is a piece of code that intercepts requests to the Kubernetes API server prior to persistence of the object, but after the request is authenticated and authorized.'
+
+A very informative blog\cite{K8sAdmissionBlog} on the topic, which I recommend reading, summarizes them like this:
+
+`In a nutshell, Kubernetes admission controllers are plugins that govern and enforce how the cluster is used. They can be thought of as a gatekeeper that intercept (authenticated) API requests and may change the request object or deny the request altogether.' 
+
+For detailed information, I recommend reading the cited\cite{K8sAdmissionBlog} source or referring to the official documentation\cite{K8sAdmissionOfficial}.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=130mm, keepaspectratio]{content/10_prerequisites/dynadm.png}
+    \caption{Admission Controller Phases\cite{K8sAdmissionBlog}}
+    \label{fig:dynadm}
+\end{figure}
+
+In my thesis uses these 
+
+\url{https://www.baeldung.com/java-kubernetes-admission-controller}
+\url{https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/}
+
+
 
 \section{Kotlin}
 
