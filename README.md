@@ -1,6 +1,6 @@
 # KonstrainR
 
-
+TODO: Write a readme
 
 
 
