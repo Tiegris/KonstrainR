@@ -12,7 +12,7 @@
 %----------------------------------------------------------------------------
 \section{Case study resources}
 %----------------------------------------------------------------------------
-\begin{lstlisting}[caption={TODO},language=bash,label=appendix:todo]
+\begin{lstlisting}[caption={initial-setup.sh},language=bash,label=appendix:csr:setup]
 #!/bin/bash
 set -e
 
@@ -72,7 +72,7 @@ yq eval 'select(.kind == "Deployment").spec.template.spec.containers[0].env[1].v
 kubectl apply -n items -f $home/k8s/items.yaml
 \end{lstlisting}
 
-\begin{lstlisting}[caption={accounting.yaml},language=YAML,label=appendix:todo]
+\begin{lstlisting}[caption={accounting.yaml},language=YAML,label=appendix:csr:accounting]
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -93,7 +93,7 @@ spec:
             - containerPort: 8079
 \end{lstlisting}
 
-\begin{lstlisting}[caption={items.yaml},language=bash,label=appendix:YAML]
+\begin{lstlisting}[caption={items.yaml},language=YAML,label=appendix:csr:items]
 apiVersion: v1
 kind: Service
 metadata:
@@ -148,28 +148,130 @@ spec:
     - ReadWriteOnce
 \end{lstlisting}
 
-\begin{lstlisting}[caption={TODO},language=bash,label=appendix:YAML]
+\begin{lstlisting}[caption={users.yaml},language=YAML,label=appendix:csr:users]
+apiVersion: v1
+kind: Service
+metadata:
+  name: users
+spec:
+  selector:
+    app: users
+  ports:
+  - port: 8080
+    targetPort: 8079
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user
+spec:
+  selector:
+    matchLabels:
+      app: user
+  template:
+    metadata:
+      labels:
+        app: user
+    spec:
+      containers:
+      - name: user
+        image: tiegris/apples-users:latest
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8079
+        volumeMounts:
+          - mountPath: "/app/data"
+            name: user-storage
+      volumes:
+      - name: user-storage
+        persistentVolumeClaim:
+          claimName: users-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: users-pvc
+spec:
+  resources:
+    requests:
+      storage: 50M
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+
 
 \end{lstlisting}
 
-\begin{lstlisting}[caption={TODO},language=bash,label=appendix:YAML]
-
+\begin{lstlisting}[caption={junk.yaml},language=YAML,label=appendix:csr:junk]
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-test-2
+  labels:
+    app: my-test-2
+spec:
+  containers:
+  - name: myapp
+    image: "there-is-no-way-an-image-exists-with-this-tag-on-docker.io"
+    command: ["sleep", "infinity"]
+    resources:
+      limits:
+        memory: "128Mi"
+        cpu: "500m"
+    ports:
+      - containerPort: 8443
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-test
+  labels:
+    app: my-test
+spec:
+  containers:
+  - name: myapp
+    image: alpine
+    command: ["sleep", "infinity"]
+    resources:
+      limits:
+        memory: "128Mi"
+        cpu: "500m"
+    ports:
+      - containerPort: 8443
 \end{lstlisting}
 
-\begin{lstlisting}[caption={TODO},language=bash,label=appendix:YAML]
-
+\begin{lstlisting}[caption={test-policy.yaml},language=YAML,label=appendix:csr:testpolicy]
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: policy-test
+spec:
+  selector:
+    matchLabels:
+      app: policy-test
+  template:
+    metadata:
+      labels:
+        app: policy-test
+    spec:
+      containers:
+        - image: alpine
+          name: policy-test
+          command: ["sleep", "infinity"]
 \end{lstlisting}
 
-\begin{lstlisting}[caption={TODO},language=bash,label=appendix:YAML]
-
-\end{lstlisting}
-
-\begin{lstlisting}[caption={TODO},language=bash,label=appendix:YAML]
-
-\end{lstlisting}
-
-\begin{lstlisting}[caption={TODO},language=bash,label=appendix:YAML]
-
+\begin{lstlisting}[caption={readPods.yaml},language=YAML,label=appendix:csr:readpods]
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: read-pods
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "watch", "list"]
 \end{lstlisting}
 
 %----------------------------------------------------------------------------

@@ -10,7 +10,7 @@ In this chapter, I will provide a brief introduction to the technologies that ma
 
 \section{Kubernetes}
 
-This is how Kubernetes introduces itself on its website\cite{K8s}: `Kubernetes, also known as K8s, is an open-source system for automating deployment, scaling, and management of containerized applications.'
+This is how Kubernetes introduces itself on its website~\cite{K8s}: `Kubernetes, also known as K8s, is an open-source system for automating deployment, scaling, and management of containerized applications.'
 
 It stands as one of the most popular platforms for operating large-scale distributed applications. In response to the growing complexity of modern applications, Kubernetes offers a robust and flexible solution to streamline the orchestration and management of containerized workloads.
 
@@ -20,20 +20,22 @@ However, given the inherent complexity of the problems Kubernetes addresses, imp
 
 \subsection{Admission controllers}
 
-The official documentation\cite{K8sAdmissionOfficial} explains admission controllers as the following:
+TODO global add ~ before \textbackslash cite
+
+The official documentation~\cite{K8sAdmissionOfficial} explains admission controllers as the following:
 
 `An admission controller is a piece of code that intercepts requests to the Kubernetes API server prior to persistence of the object, but after the request is authenticated and authorized.'
 
-A very informative blog\cite{K8sAdmissionBlog} on the topic, which I recommend reading, summarizes them like this:
+A very informative blog~\cite{K8sAdmissionBlog} on the topic, which I recommend reading, summarizes them like this:
 
 `In a nutshell, Kubernetes admission controllers are plugins that govern and enforce how the cluster is used. They can be thought of as a gatekeeper that intercept (authenticated) API requests and may change the request object or deny the request altogether.' 
 
-For detailed information, I recommend reading the cited\cite{K8sAdmissionBlog} source or referring to the official documentation\cite{K8sAdmissionOfficial}.
+For detailed information, I recommend reading the cited~\cite{K8sAdmissionBlog} source or referring to the official documentation~\cite{K8sAdmissionOfficial}.
 
 \begin{figure}[h]
     \centering
     \includegraphics[width=130mm, keepaspectratio]{content/10_prerequisites/dynadm.png}
-    \caption{Admission Controller Phases\cite{K8sAdmissionBlog}}
+    \caption{Admission Controller Phases~\cite{K8sAdmissionBlog}}
     \label{fig:dynadm}
 \end{figure}
 
@@ -51,7 +53,7 @@ Kotlin is a multi paradigm modern JVM language, with full interoperability with 
 \subsection{Extension functions}
 \label{sec:extension}
 
-An extension function can add new functionality to an existing class without modifying it\cite{KExt}. In Java, this can be implemented as shown in the \ref{code:prelimkext1} code snippet. Although Java lacks native support for extension methods, there is a workaround using public static utility functions. In contrast, Kotlin supports extension functions natively, as demonstrated in the \ref{code:prelimkext2} code snippet.
+An extension function can add new functionality to an existing class without modifying it~\cite{KExt}. In Java, this can be implemented as shown in the \ref{code:prelimkext1} code snippet. Although Java lacks native support for extension methods, there is a workaround using public static utility functions. In contrast, Kotlin supports extension functions natively, as demonstrated in the \ref{code:prelimkext2} code snippet.
 
 \begin{lstlisting}[caption={Extension functions in Java},language=Java11,label=code:prelimkext1]
 public class MyClass {

@@ -193,7 +193,14 @@ Lets deploy the new component of the company app. First, lets create a namespace
 
 ```bash
 cd DemoApp
-kubectl apply -f k8s/ns.yaml
+kubectl apply -f - <<EOF
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: accounting
+  labels:
+    managed: "true"
+EOF
 ```
 
 Now let's deploy the new app, but intentionally forget to switch to the newly created namespace:

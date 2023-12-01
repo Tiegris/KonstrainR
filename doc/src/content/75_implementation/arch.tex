@@ -38,7 +38,7 @@ First of all, caching the compiled DSL scripts is crucial. Since scripts are com
 
 There are two reasons why the compiled scripts are stored in a database. Firstly, it was easier to implement. Secondly it has better performance, since compiled script JARs are very small. For example the BasicDiagnostics.kt script used in the case study compiles to an only 60 KiB big JAR.
 
-There are two reasons why the compiled scripts are stored in a database. Firstly, it was easier to implement. Secondly, it offers better performance since compiled script JARs are very small. For example, the BasicDiagnostics.kt script used in the case study compiles to a JAR that is only 60K in size. According to a\cite{DbSmall} report from Microsoft, objects smaller than 256K are best stored in a database.
+There are two reasons why the compiled scripts are stored in a database. Firstly, it was easier to implement. Secondly, it offers better performance since compiled script JARs are very small. For example, the BasicDiagnostics.kt script used in the case study compiles to a JAR that is only 60K in size. According to a~\cite{DbSmall} report from Microsoft, objects smaller than 256K are best stored in a database.
 
 \subsubsection{UI and persistence}
 
@@ -47,6 +47,8 @@ The web UI is implemented within the Core component. While logically a separate 
 The Konstrainer DB is also just logically considered a separate component. For simplicity, I utilized a built-in database that stores data in a single file within the Core component's container. However, the data is saved onto a persistent volume, ensuring persistence between \emph{Pod} restarts.
 
 \subsection{Agent}
+
+TODO note it implements webhooks
 
 The agent is a web server implemented using the Ktor framework. It dynamically loads compiled scripts at startup time using a custom class loader and uses them to implement admission webhooks and generate reports.
 
