@@ -68,3 +68,4 @@ ANTLR
 DSLs
 intellisense
 PersistentVolumeClaim
+RapidMiner

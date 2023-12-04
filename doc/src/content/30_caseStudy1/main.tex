@@ -17,21 +17,14 @@ Requirements:
 
 \begin{itemize}
     \item Docker
-    \item Sandbox Kubernetes cluster (Tested with version: v1.27.2)
+    \item Playground Kubernetes cluster (Tested with version: v1.27.2)
     \item Helm
     \item yq (Tested with version: (\url{github.com/mikefarah/yq/}) version 4.18.)
 \end{itemize}
 
 The demo was tested on Ubuntu 22 with bash.
 
-If you follow along, make sure that you are in the \emph{DemoApp} folder of the repository.
-
-Optionally, you can build the Docker images for yourself, but they are publicly available, so this is optional. Run the \ref{code:bash1} code snippet in your terminal, so the setup script builds the images for you. If you do this, you have to manually edit the items.yaml (\ref{appendix:csr:items}) and users.yaml (\ref{appendix:csr:users}) files to use your images.
-
-\begin{lstlisting}[caption={Optional: Build images},language=bash,label=code:bash1]
-export BUILD_IMAGES=1
-export REPO=<your-docker.io-account-name>
-\end{lstlisting}
+If you follow along, make sure that you are in the \emph{main/DemoApp} folder of the repository.
 
 Execute the initial setup script: \lstinline|./initial-setup.sh| This script establishes the initial state of the demo system by replicating commands that the developers of the system might have used, or running commands that simulate steps of the development process.
 
@@ -57,7 +50,7 @@ Note that the items.yaml (\ref{appendix:csr:items}) contains an unused \emph{Per
 
 The `items' app went through a long development. The setup script simulates the multiple redeployment of the app, as shown in the \ref{code:bash4} snippet.
 
-\begin{lstlisting}[caption={Create first deployment},language=bash,label=code:bash4]
+\begin{lstlisting}[caption={Simulate redeployment of the `items' app},language=bash,label=code:bash4]
 # Simulate a history of changes
 for v in {1..14}; do
     yq eval 'select(.kind == "Deployment").spec.template.metadata.annotations.v = env(v)' $home/k8s/items.yaml -i
@@ -67,38 +60,31 @@ done
 yq eval 'select(.kind == "Deployment").spec.template.metadata.annotations.v = "0"' $home/k8s/items.yaml -i
 \end{lstlisting}
 
-TODO I was here
-
 The engineers in charge of the Kubernetes deployments set up test environments for experimentation and testing purposes, but they neglected to delete them. This is simulated by the \ref{code:bash5} code snippet.
 
-\begin{lstlisting}[caption={Create first deployment},language=bash,label=code:bash5]
-# Simulate John Athan creating test namespace
-kubectl create ns jathan-test || true
-# Simulate Ida Red creating test namespace and leaving some leftover resources in it
-kubectl create ns ired-test || true
-kubectl apply -n ired-test -f $home/k8s/junk.yaml
+\begin{lstlisting}[caption={Simulate leftover resources},language=bash,label=code:bash5]
+  # Simulate John Athan creating test namespace
+  kubectl create ns jathan-test || true
+  # Simulate Ida Red creating test namespace and leaving some leftover resources in it
+  kubectl create ns ired-test || true
+  kubectl apply -n ired-test -f $home/k8s/junk.yaml
 \end{lstlisting}
 
-The developers decided that they want to use a NoSQL database. They searched the internet and one of the first search results was this: \url{bitnami.com/stack/mongodb/helm}. This website shows a command which looks like it deploys a MongoDB. The engineers tested it, and it worked. They did not bother with reading the documentation or properly configuring the database, there was no time for that.
+The developers decided that they want to use a NoSQL database. They searched the internet, and one of the first search results was this: \url{bitnami.com/stack/mongodb/helm}. This website shows a command that looks like it deploys a MongoDB. The engineers tested it, and it worked. They did not bother with reading the documentation or properly configuring the database; there was no time for that. The \ref{code:bash5b} snippet shows how they used the code from the website.
 
-\begin{lstlisting}[caption={Create first deployment},language=bash,label=code:bash5]
+\begin{lstlisting}[caption={Deploy MongoDB},language=bash,label=code:bash5b]
 kubectl create ns mongo
 helm install -n mongo my-release \
   oci://registry-1.docker.io/bitnamicharts/mongodb
 \end{lstlisting}
 
-The output of the command has some helpful tips. The engineers deploying MongoDB followed them like this:
+After deploying MongoDB, the engineers configured the `items' service to use it. They manually edited the items.yaml file and changed the code based on the first tutorial they could find. The image used by the `items' deployment already uses MongoDB; the commands in the \ref{code:bash7} code snippet only emulate this process.
 
-\begin{lstlisting}[caption={Create first deployment},language=bash,label=code:bash6]
+\begin{lstlisting}[caption={Configuring the `items' app to use MongoDB},language=bash,label=code:bash7]
 export MONGODB_ROOT_PASSWORD=$(kubectl get secret --namespace mongo \
   my-release-mongodb -o jsonpath="{.data.mongodb-root-password}" \
   | base64 -d)
 export MONGO_HOST="my-release-mongodb.mongo.svc.cluster.local"
-\end{lstlisting}
-
-They configured the `items' service to use MongoDB. They manually edited the items.yaml file and changed the code based on the first tutorial they could find. The image used by the `items' deployment already uses MongoDB, the commands in the \ref{code:bash7} code snippet only emulate this process.
-
-\begin{lstlisting}[caption={Configure the `items' app to use MongoDB},language=bash,label=code:bash7]
 yq eval 'select(.kind == "Deployment").spec.template.spec.containers[0].env[0].value = env(MONGODB_ROOT_PASSWORD)' $home/k8s/items.yaml -i
 yq eval 'select(.kind == "Deployment").spec.template.spec.containers[0].env[1].value = env(MONGO_HOST)' $home/k8s/items.yaml -i
 kubectl apply -n items -f $home/k8s/items.yaml
@@ -106,53 +92,54 @@ kubectl apply -n items -f $home/k8s/items.yaml
 
 At this point, we have a demo application running which resembles a system with many mistakes.
 
-\subsection{Testing the app}
+\subsection{Test and teardown the demo application}
 
-TODO
+If you have followed along, make sure to test the deployment. First check the status of all \emph{Pod}s, by executing: \lstinline|kubectl get pods -A| All the \emph{Pod}s should have the status: `Running', except the `my-test-2' \emph{Pod}.
 
-Check if you done everything correctly.
+You can also test the integration of the items app and the MongoDB by executing the commands in the \ref{code:bash8} snippet.
 
-Let's test the app.
-
-\begin{lstlisting}[caption={TODO},language=bash,label=code:bash8]
+\begin{lstlisting}[caption={Test the integration of the items app and MongoDB},language=bash,label=code:bash8]
 kubectl port-forward -n items service/items 8080:8080
 # In a separate terminal
 curl http://localhost:8080/items
+# You should get a valid JSON as result
 \end{lstlisting}
 
-If you got some valid JSON response, that means the setup was successful.
-
-TODO pods status
+If you wish to uninstall the demo and the Konstrainer application run the code in the \ref{code:bash9} snippet.
 
 \begin{lstlisting}[caption={Teardown},language=bash,label=code:bash9]
+# Uninstall demo app
 helm uninstall my-release -n mongo
 kubectl delete ns users items jathan-test ired-test mongo
+# Uninstall Konstrainer
+helm uninstall konstrainr-core -n konstrainer-ns
+kubectl delete ns konstrainer-ns
 \end{lstlisting}
 
-\section{Running Konstrainer}
+\section{Introduce policies}
 
-Install the Konstrainer helm chart.
+To follow along, you can install the Konstrainer application using a helm chart, as shown in the \ref{code:bashk1} code snippet.
 
-\begin{lstlisting}[caption={TODO},language=bash,label=code:bashx]
+\begin{lstlisting}[caption={Install Konstrainer},language=bash,label=code:bashk1]
 cd ../charts
 kubectl create ns konstrainer-ns
 helm upgrade konstrainr-core konstrainr-core -n konstrainer-ns --install
 \end{lstlisting}
 
-Wait for it to start, then port forward the core component.
-
-\begin{lstlisting}[caption={TODO},language=bash,label=code:bashx]
-kubectl port-forward service/konstrainer-core 8443:8080 -n konstrainer-ns
-\end{lstlisting}
+Wait for it to start, then port forward the core component: \lstinline|kubectl port-forward service/konstrainer-core 8443:8080 -n konstrainer-ns|
+This will allow you to access its frontend in your browser.
 
 \subsection{Basic Diagnostics}
 
-First let's run the basic diagnostics on the cluster.
+I have collected a set of best practices, and implemented them in my DSL. I implemented them in two files, the first file contains a script which creates a diagnostics report on the cluster including potential bugs and bad practices. This is the \emph{basic diagnostic} script.
 
-The Basic Diagnostics is a build dsl file, which generates a report of the most common best-practice violations in the cluster.
+If you visit the Konstrainer Web UI at \url{https://localhost:8443}, and configure your browser to trust the self-signed certificate you should see the TODO ref image. For login use \emph{admin:admin}. 
 
-Go to \url{https://localhost:8443}. The site has a self signed certificate, configure your browser to trust it. For login use \emph{admin:admin}. Upload the basic diagnostics dsl:
-\url{../Konstrainer-Dsl/src/main/kotlin/me/btieger/builtins/BasicDiagnostic.kt}
+TODO insert webui screenshot here
+
+
+Upload the basic diagnostics script, which can be found in the repository at:
+\url{$PROJECT_ROOT/main/Konstrainer-Dsl/src/main/kotlin/me/btieger/builtins/BasicDiagnostic.kt}
 Use browse, than submit. Wait for it to compile. The site does not refresh automatically, refresh the page after about 20 seconds to see if it's compiled. You should see: `Build status: Ready'
 
 Click `Start Server'. Wait for it to start. After about 5 seconds refresh the page. You should see: `Server status: Up'
@@ -160,6 +147,8 @@ Click `Start Server'. Wait for it to start. After about 5 seconds refresh the pa
 Click `Monitors' in the navigation menu. You should see the report generated by the BasicDiagnostic. Let's inspect it.
 
 Here we can see many of the problem with our cluster.
+
+TODO report screenshot
 
 Read the report like this:
 
@@ -194,11 +183,14 @@ The last group is the Pods. It has two items. The first is the pod 'my-test' in 
 
 \subsection{Introducing basic rule enforcement}
 
-Upload and start the \url{../Konstrainer-Dsl/src/main/kotlin/me/btieger/builtins/BasicEnforce.kt} DSL script file.
-
+The second script I prepared for the case study does not create a report, but rather enforces best practices by intercepting requests to the Kubernetes API.
 This file describes basic rules that are evaluated upon events, like deployment creation. This can be used to prevent the creation of poorly configured resources, and can enforce best practices from the beginning.
 
+To follow along, upload the \emph{basic enforce} script located at the same directory as the \emph{basic diagnostics} script.
+
 Let's deploy the new component of the company app. First, let's create a namespace for it:
+
+TODO managed label
 
 \begin{lstlisting}[caption={TODO},language=bash,label=code:bashx]
 cd DemoApp
@@ -215,7 +207,8 @@ EOF
 Now let's deploy the new app, but intentionally forget to switch to the newly created namespace:
 
 \begin{lstlisting}[caption={TODO},language=bash,label=code:bashx]
-# make sure you are in the default namespace
+
+# Make sure you are in the default namespace
 kubectl config set-context --current --namespace=default
 kubectl apply -f k8s/accounting.yaml
 \end{lstlisting}
@@ -280,7 +273,9 @@ Describe the newly created deployment and we can see that the revisionHistoryLim
 kubectl get deployment accounting -n accounting -o yaml | yq '.spec.revisionHistoryLimit'
 \end{lstlisting}
 
+This chapter showed the motivation behind the Konstrainer project by showcasing some common easy mistakes and how easy it is to make them. After that it demonstrated the power of the Konstrainer platform and showed the capabilities of my pre-made scripts. 
+
+
+
 
 TODO
-
-This is the end of the demo. In this demo we saw the basic capabilities of the Konstrainer platform, some use-cases, and how to create our own rules.
