@@ -275,6 +275,200 @@ rules:
 \end{lstlisting}
 
 %----------------------------------------------------------------------------
+\clearpage\section{Case study DSL scripts}
+%----------------------------------------------------------------------------
+
+\begin{lstlisting}[caption={BasicDiagnostics.kt},language=Kotlin,label=appendix:csr:bdkt]
+package me.btieger.builtins
+
+import me.btieger.dsl.*
+
+val diagnosticsServer = server("basic-diagnostics") {
+  clusterRole = ReadAny
+
+  report {
+    val pods = kubelist { pods() }
+    val podLabels = pods.map { it.metadata.labels }.toHashSet()
+
+    val services = kubelist { services() }
+    aggregation("Services", services) {
+      tag("Has external IP") {
+        item.spec.externalIPs.isNotEmpty()
+      }
+      tag("No backend") {
+        podLabels.none { podLabel ->
+          item.spec.selector.all { podLabel.entries.contains(it) }
+        }
+      }
+    }
+
+    val deployments = kubelist { apps().deployments() }
+    aggregation("Deployments", deployments) {
+      tag("No resources defined") {
+        item.spec.template.spec.containers.any { 
+          it.resources.limits.isNullOrEmpty() || it.resources.requests.isNullOrEmpty() 
+        }
+      }
+      tag("No probes") {
+        item.spec.template.spec.containers.any { it.livenessProbe == null }
+      }
+      tag("Has long history") {
+        item.spec.revisionHistoryLimit > 4
+      }
+      tag("No node affinity") {
+        val podSpec = item.spec.template.spec
+        podSpec.affinity == null && 
+        podSpec.nodeSelector.isNullOrEmpty() && 
+        podSpec.nodeName == null
+      }
+    }
+
+    val pvcs = kubelist { persistentVolumeClaims() }
+    aggregation("PVCs", pvcs) {
+      tag("Unused") {
+        pods.none { pod ->
+          pod.metadata.namespace == item.metadata.namespace &&
+          pod.spec.volumes.any { 
+            volume -> volume.persistentVolumeClaim?.claimName == 
+              item.metadata.name 
+          }
+        }
+      }
+    }
+
+    val nss = kubelist(omittedNss = none) { namespaces() }
+      .filter { it.metadata.name !in nonUserNss }
+    aggregation("Namespaces", nss) {
+      tag("Has no pods") {
+        pods.none { pod -> pod.metadata.namespace == item.metadata.name }
+      }
+    }
+
+    aggregation("Pods", pods) {
+      tag("Not running or not succeeded") {
+        item.status.phase != "Running" && item.status.phase != "Succeeded"
+      }
+      tag("Image pull backoff") {
+        item.status.containerStatuses.any { it.state.waiting?.reason == "ImagePullBackOff" } ||
+        item.status.containerStatuses.any { it.state.waiting?.reason == "ErrImagePull" }
+      }
+      tag("Dangling pod") {
+        item.metadata.ownerReferences.isEmpty()
+      }
+      tag("Not Running") {
+        item.status.containerStatuses.any { it.state.running == null }
+      }
+      tag("No security context") {
+        item.spec.securityContext == null
+      }
+    }
+  }
+}
+\end{lstlisting}
+
+\clearpage
+
+\begin{lstlisting}[caption={BasicEnforce.kt},language=Kotlin,label=appendix:csr:bekt]
+package me.btieger.builtins
+
+import io.fabric8.kubernetes.api.model.LabelSelectorRequirement
+import kotlinx.serialization.json.JsonNull
+import me.btieger.dsl.*
+
+val whcb = webhookConfigBundle {
+  operations(CREATE, UPDATE)
+  apiGroups(APPS)
+  apiVersions(ANY)
+  resources(DEPLOYMENTS, STATEFULSETS, DAEMONSETS)
+  namespaceSelector {
+    matchLabels = mapOf(
+      "managed" to "true"
+    )
+  }
+  failurePolicy(FAIL)
+  logRequest = true
+}
+
+val webhookServer = server("basic-enforce") {
+  clusterRole = ReadAny
+
+  webhook("warn-no-security-context", whcb) {
+    behavior {
+      warnings {
+        if (request jqx "/object/spec/template/spec/securityContext" == JsonEmpty)
+          warning("No security context")
+      }
+    }
+  }
+
+  webhook("node-affinity", whcb) {
+    behavior {
+      val podSpec = (request jqx "/object/spec/template/spec")
+      val affinity = podSpec jqx "affinity"
+      val nodeSelector = podSpec jqx "nodeSelector"
+      val nodeName = podSpec jqx "nodeName"
+      allowed {
+        !(affinity is JsonNull && nodeSelector is JsonNull && nodeName is JsonNull)
+      }
+      status {
+        message = "Deployment must have some kind of node affinity! (affinity, nodeSelector, nodeName)"
+      }
+    }
+  }
+  webhook("cut-history", whcb) {
+    behavior {
+      val revisionHistoryLimit = (request jqx "/object/spec/revisionHistoryLimit" parseAs int) ?: 10
+      warnings {
+        if (revisionHistoryLimit > 4) 
+          warning("RevisionHistoryLimit was set to 4, from original: $revisionHistoryLimit")
+      }
+      patch {
+        if (revisionHistoryLimit > 4) 
+          replace("/spec/revisionHistoryLimit", 4)
+      }
+    }
+  }
+  webhook("deny-no-resources", whcb) {
+    behavior {
+      val containers = podSpec?.containers ?: listOf()
+      allowed {
+        containers.all {
+          it.resources?.limits?.isNotEmpty() == true &&
+          it.resources?.requests?.isNotEmpty() == true
+        }
+      }
+      status {
+        message = "${currentObject?.kind} must have resource definitions!"
+      }
+    }
+  }
+  webhook("warn-default-ns") {
+    operations(CREATE, UPDATE, DELETE)
+    apiGroups(ANY)
+    apiVersions(ANY)
+    resources(ANY)
+    failurePolicy(IGNORE)
+    namespaceSelector {
+      matchExpressions = listOf(
+        LabelSelectorRequirement().apply {
+          operator = "In"
+          key = "kubernetes.io/metadata.name"
+          values = listOf("default")
+        }
+      )
+    }
+    behavior {
+      var ns = request jqx "/object/metadata/namespace" parseAs string
+      if (ns == null) // In case of delete, the object is stored in oldObject.
+        ns = request jqx "/oldObject/metadata/namespace" parseAs string
+      warnings {
+        warning("You are working in the namespace: $ns")
+      }
+    }
+  }
+}
+\end{lstlisting}
+%----------------------------------------------------------------------------
 \clearpage\section{Builder script}
 %----------------------------------------------------------------------------
 

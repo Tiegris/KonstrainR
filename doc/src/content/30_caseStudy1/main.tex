@@ -131,7 +131,7 @@ This will allow you to access its frontend in your browser.
 
 \subsection{Basic Diagnostics}
 
-I have collected a set of best practices, and implemented them in my DSL. I implemented them in two files, the first file contains a script which creates a diagnostics report on the cluster including potential bugs and bad practices. This is the \emph{basic diagnostic} script, which can be found in the project repository at the \url{$PROJECT_ROOT/main/Konstrainer-Dsl/src/main/kotlin/me/btieger/builtins/} folder.
+I have gathered a set of best practices and implemented them in my DSL. These implementations are split into two files. The first file contains a script that generates a diagnostics report on the cluster, highlighting potential bugs and bad practices. This is the \emph{basic diagnostic} script, available in the project repository at \url{$PROJECT_ROOT/main/Konstrainer-Dsl/src/main/kotlin/me/btieger/builtins/}. Additionally, abbreviated versions of the scripts are included in the appendix: \ref{appendix:csr:bdkt} BasicDiagnostics.kt and \ref{appendix:csr:bekt} BasicEnforce.kt.
 
 If you visit \url{https://localhost:8443}, and configure your browser to trust the self-signed certificate you should see the Web UI. For login, use \emph{admin:admin}. 
 
@@ -144,7 +144,7 @@ After uploading the \emph{basic diagnostic} script, we will see something like i
   \label{fig:case_1}
 \end{figure}
 
-The Web UI had a low priority when creating the project, so the site does not refresh automatically, refresh the page after about 20 seconds to see if it's compiled. You should see: `Build status: Ready'
+The Web UI had a low priority when creating the project, so the site does not refresh automatically, refresh the page after about 20 seconds to see if the script is compiled. You should see: `Build status: Ready'
 
 Click `Start Server'. Wait for it to start. After about 5 seconds refresh the page. You should see: `Server status: Up'
 
@@ -266,6 +266,3 @@ Upon inspecting the newly created deployment, we can observe that the revisionHi
 In this chapter, I presented the motivation behind the Konstrainer project by highlighting some common and easily overlooked mistakes. Following that, I demonstrated the power of the Konstrainer platform and showcased the capabilities of my pre-made scripts for enforcing best practices. 
 
 The next chapter interrupts the case study to provide a detailed explanation of my DSL. Understanding the core concepts and language features is crucial for the upcoming sections of the case study, which will be continued in Chapter \ref{chap:case_study2}~\nameref{chap:case_study2}.
-
-TODO put scripts in appendix
-
