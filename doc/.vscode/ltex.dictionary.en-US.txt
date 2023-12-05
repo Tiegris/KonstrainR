@@ -74,3 +74,5 @@ revisionHistoryLimit
 PVCs
 PVCs can
 statefulset
+ReadAny
+KubernetesClient
