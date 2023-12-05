@@ -71,15 +71,13 @@ The `webhookConfigBundle' is a top-level keyword, similar to the server.' Within
 
 \subsection{Behavior block}
 
-Everything so far about the webhook block was processed at startup time, however the behavior block runs when the webhook is triggered. The implementation of it is detailed in TODO chapter. 
+Everything discussed about the webhook block so far was processed at startup time. However, the action to be performed when the webhook is triggered needs to be evaluated multiple times during runtime. Therefore, I created a new block for the behavior.
 
-To understand the structure of the behavior block, let's quickly review how an admission webhook works. This is detailed in the \ref{sec:admcont} section of the \nameref{chap:prerequisites} chapter, but basically when a request arrives to the webhook, the webhook processes the request, makes a decision, than assembles a response.
-
-TODO
+To understand the structure of the behavior block, let's quickly review how an admission webhook works. This process is detailed in the \ref{sec:admcont} section of the \nameref{chap:prerequisites} chapter. In essence, when a request is sent to the Kubernetes API, it is intercepted by a webhook. The behavior block describes how to handle the intercepted request, involving processing the request, making a decision, and ultimately assembling a response.
 
 \subsubsection{Processing request}
 
-For processing requests, I implemented several tools. The request arrives in the form of an \emph{AdmissionRequest}\footnote{\url{kubernetes.io/docs/reference/config-api/apiserver-admission.v1/}} object. The only field required for the custom logic we want to define in the \emph{AdmissionRequest} object is the `request' field. The behavior block provides access to this field using the `request' keyword, represented as a \emph{kotlinx.serialization.json.JsonObject} object. Since processing it with regular Kotlin tools is cumbersome, I have provided two main approaches: unmarshalling the request into Java objects from the fabric8 library, and a jq\footnote{jq is a lightweight and flexible command-line JSON processor, \url{jqlang.github.io/jq/}}-like JSON processor language feature.
+For processing requests, I implemented several tools. The request arrives in the form of an \emph{AdmissionRequest}\footnote{\url{kubernetes.io/docs/reference/config-api/apiserver-admission.v1/}} object. The only field required for the custom logic we want to define in the \emph{AdmissionRequest} object is the `request' field. The behavior block provides access to this field using the `request' keyword, represented as a \emph{kotlinx.serialization.json.JsonObject} object. Since processing it with regular Kotlin tools is cumbersome, I have provided two main approaches: unmarshalling the request into Java objects from the fabric8 library, and a jq-like\footnote{jq is a lightweight and flexible command-line JSON processor, \url{jqlang.github.io/jq/}} JSON processor language feature.
 
 Now, let's discuss the JSON processor. It offers a way to null-safely read data from \emph{JsonElement}s and convert the end result to a string, number, or boolean.
 
