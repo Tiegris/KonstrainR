@@ -107,7 +107,7 @@ class PatchBuilder {
     @DslMarkerBlock
     fun test(path: String, value: String) {
         _patches += buildJsonObject {
-            put("op", "add")
+            put("op", "test")
             put("path", path)
             put("value", value)
         }

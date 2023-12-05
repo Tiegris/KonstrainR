@@ -31,6 +31,7 @@ fun HelmService.mutatingWebhookConfiguration(server: Server, cert: String, agent
                         apiGroups = it.apiGroups
                         apiVersions = it.apiVersion
                         resources = it.resources
+                        scope = it.scope
                     }
                 )
                 namespaceSelector = it.namespaceSelector

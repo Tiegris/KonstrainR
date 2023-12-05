@@ -105,7 +105,7 @@ val STATEFULSETS = "statefulsets"
 val DAEMONSETS = "daemonsets"
 
 @DslMarkerConstant
-val CLUSTER = "Clustered"
+val CLUSTERED = "Clustered"
 @DslMarkerConstant
 val NAMESPACED = "Namespaced"
 
