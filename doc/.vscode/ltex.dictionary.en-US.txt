@@ -69,3 +69,8 @@ DSLs
 intellisense
 PersistentVolumeClaim
 RapidMiner
+replicasets
+revisionHistoryLimit
+PVCs
+PVCs can
+statefulset
