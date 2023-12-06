@@ -67,26 +67,26 @@ update-ca-certificates
 
 echo "=== BEGIN ERROR REPORT ===" > $logsfile
 function log() {
-    echo "$1" >> $logsfile
+  echo "$1" >> $logsfile
 }
     
 function try_compile() {
-    # Download script file
-    wget ... && log "Download done" || \
-        { log "Download failed" && error_report; }
-    # Compile script
-    ./gradlew jar >> $logsfile 2>&1 && log "Build done" || \
-        { log "Build failed" && error_report; }
-    log "Compilation done"
-    # Upload compiled jar
-    curl ... || { log "Upload failed" && error_report; }
+  # Download script file
+  wget ... && log "Download done" || \
+    { log "Download failed" && error_report; }
+  # Compile script
+  ./gradlew jar >> $logsfile 2>&1 && log "Build done" || \
+    { log "Build failed" && error_report; }
+  log "Compilation done"
+  # Upload compiled jar
+  curl ... || { log "Upload failed" && error_report; }
 }
 
 function error_report() {
-    log "=== END ERROR REPORT ==="
-    # Send error report
-    curl ...
-    exit 1
+  log "=== END ERROR REPORT ==="
+  # Send error report
+  curl ...
+  exit 1
 }
 
 try_compile || error_report
@@ -112,20 +112,20 @@ There is a periodic task running inside the Core server, which cleans up the mis
 
 \begin{lstlisting}[caption={Job cleaner loop},language=Kotlin,label=code:cleaner]
 while(true) {
-    delay(interval)
-    runCleaner()
+  delay(interval)
+  runCleaner()
 }
 
 fun runCleaner() {
-    /* Get the list of DSL records where the status == "Building" */
-    val inProgressBuilds = ...
-    inProgressBuilds.forEach { dsl ->
-        val matchingJob = k8sClient.findJobForDsl(dsl)
-        if (matchingJob == null) {
-            /* Set DSL status to "Failed" */
-            /* Set DSL error message to: "Lost in space." */
-        }
+  /* Get the list of DSL records where the status == "Building" */
+  val inProgressBuilds = ...
+  inProgressBuilds.forEach { dsl ->
+    val matchingJob = k8sClient.findJobForDsl(dsl)
+    if (matchingJob == null) {
+      /* Set DSL status to "Failed" */
+      /* Set DSL error message to: "Lost in space." */
     }
+  }
 }
 \end{lstlisting}
 

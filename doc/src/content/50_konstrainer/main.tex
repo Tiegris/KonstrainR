@@ -34,10 +34,10 @@ Most properties, such as the `clusterRole' keyword, can only be set once within 
 
 \begin{lstlisting}[caption={Usage of the clusterRole keyword},language=Kotlin,label=code:clusterrole_usage]
 val server1 = server("server1") {
-    clusterRole = ReadAny
+  clusterRole = ReadAny
 }
 val server2 = server("server2") {
-    clusterRole = "my-custom-cluster-role"
+  clusterRole = "my-custom-cluster-role"
 }
 \end{lstlisting}
 

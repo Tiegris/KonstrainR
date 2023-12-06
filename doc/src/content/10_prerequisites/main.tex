@@ -58,13 +58,13 @@ An extension function can add new functionality to an existing class without mod
 
 \begin{lstlisting}[caption={Extension functions in Java},language=Java11,label=code:prelimkext1]
 public class MyClass {
-    ...
+  ...
 }
 public class MyClassExtensions {
-    private MyClassExtensions() {}
-    public static void myExtensionFunction(MyClass self) {
-        self.doSomething();
-    }
+  private MyClassExtensions() {}
+  public static void myExtensionFunction(MyClass self) {
+    self.doSomething();
+  }
 }
 // Invocation:
 final var myClass = new MyClass();
@@ -73,11 +73,11 @@ myExtensionFunction(myClass);
 
 \begin{lstlisting}[caption={Extension functions in Kotlin},language=Kotlin,label=code:prelimkext2]
 class MyClass {
-    ...
+  ...
 }
 fun MyClass.myExtensionFunction() {
-    this.doSomething()
-    // Using the "this" keyword is optional
+  this.doSomething()
+  // Using the "this" keyword is optional
 }
 // Invocation:
 val myClass = MyClass()

@@ -10,10 +10,10 @@ My DSL has three mayor concepts: blocks, properties, and setter functions. The c
 \begin{lstlisting}[caption={Language concepts},language=Kotlin,label=code:lang1]
 // The car keyword opens a new block
 car { 
-    // The block of the car keyword starts here
-    color = "red" // This is a property
-    color("red") // This is a setter function
-    // The block of the car keyword ends here
+  // The block of the car keyword starts here
+  color = "red" // This is a property
+  color("red") // This is a setter function
+  // The block of the car keyword ends here
 }
 \end{lstlisting}
 
@@ -28,12 +28,12 @@ Most blocks follow the same pattern. There is builder function: `car' in this ca
 \begin{lstlisting}[caption={Basic idea behind a block},language=Kotlin,label=code:lang2]
 class CarModel(val color: String)
 class CarBuilder {
-    var color: String ...
-    fun color(value: String) ...
-    internal fun build(): CarModel ...
+  var color: String ...
+  fun color(value: String) ...
+  internal fun build(): CarModel ...
 }
 fun car(setup: CarBuilder.() -> Unit): CarModel {
-    ...
+  ...
 }
 \end{lstlisting}
 
@@ -45,17 +45,17 @@ The pattern I'm using for the startup-time block has a name, it is the Type-safe
 typealias CarBuilderFunction = CarBuilder.() -> Unit
 class CarModel(...)
 class CarBuilder {
+  ...
+  internal fun build(): CarModel {
+    // Validations
     ...
-    internal fun build(): CarModel {
-        // Validations
-        ...
-        return CarModel(...)
-    }
+    return CarModel(...)
+  }
 }
 fun car(setup: CarBuilderFunction): CarModel {
-    val builder = CarBuilder()
-    builder.setup()
-    return builder.build()
+  val builder = CarBuilder()
+  builder.setup()
+  return builder.build()
 }
 // This is tha same, but shorter
 fun car(setup: CarBuilderFunction) = CarBuilder().apply(setup).build()
@@ -66,11 +66,11 @@ Runtime-evaluated blocks are created differently. Their builder functions don't 
 \begin{lstlisting}[caption={Builder function of the report block},language=Kotlin,label=code:runtimeblock0]
 class ServerModel(..., val _report: ReportProviderFunction?)
 class ServerBuilder {
-    private val _report: ReportProviderFunction? by setMaxOnce()
-    fun report(behavior: ReportProviderFunction) {
-        _report = behavior
-    }
-    internal fun build() = Server(..., _report)
+  private val _report: ReportProviderFunction? by setMaxOnce()
+  fun report(behavior: ReportProviderFunction) {
+    _report = behavior
+  }
+  internal fun build() = Server(..., _report)
 }
 \end{lstlisting}
 
@@ -78,12 +78,12 @@ The \ref{code:runtimeblock0} snippet shows how the builder function of a runtime
 
 \begin{lstlisting}[caption={Build a report},language=Kotlin,label=code:runtimeblock1]
 fun generateReport(
-        k8s: KubernetesClient, 
-        provider: ReportProviderFunction
-    ): Report {
-    val builder = ReportBuilder(k8s)
-    builder.provider()
-    return builder.build()
+    k8s: KubernetesClient, 
+    provider: ReportProviderFunction
+  ): Report {
+  val builder = ReportBuilder(k8s)
+  builder.provider()
+  return builder.build()
 }
 \end{lstlisting}
 
@@ -92,11 +92,11 @@ The \ref{code:runtimeblock2} snippet show the implementation of the builder clas
 \begin{lstlisting}[caption={Report builder class and provider},language=Kotlin,label=code:runtimeblock2]
 typealias ReportProviderFunction = ReportBuilder.() -> Unit
 class ReportBuilder(private val k8s: KubernetesClient) {
-    // All the child keywords of the report block
+  // All the child keywords of the report block
+  ...
+  fun build(): Report {
     ...
-    fun build(): Report {
-        ...
-    }
+  }
 }
 \end{lstlisting}
 
@@ -108,18 +108,18 @@ All properties can only be set once, or in the case of setter functions, invoked
 
 \begin{lstlisting}[caption={Lazy getter in Java},language=Java,label=code:lazy0]
 class A {
-    private String foo;
-    public getFoo() {
-        if (foo == null) 
-            foo = calculateFoo(); // This is a resource intese operation
-        return foo;
-    }
+  private String foo;
+  public getFoo() {
+    if (foo == null) 
+      foo = calculateFoo(); // This is a resource intese operation
+    return foo;
+  }
 }
 \end{lstlisting}
     
 \begin{lstlisting}[caption={Lazy property in Kotlin},language=Kotlin,label=code:lazy1]
 class A {
-    val foo by lazy(::calculateFoo)
+  val foo by lazy(::calculateFoo)
 }
 \end{lstlisting}
 
@@ -128,27 +128,27 @@ The \ref{code:lazy0} and \ref{code:lazy1} code snippets illustrates how the lazy
 \begin{minipage}{\linewidth}
 \begin{lstlisting}[caption={setExactlyOnce implementation},language=Kotlin,label=code:setonce]
 class setExactlyOnce<T : Any>() : ReadWriteProperty<Any, T> {
-    constructor(default: T?) : this() {
-        _value = default
-    }
+  constructor(default: T?) : this() {
+    _value = default
+  }
 
-    private var _alreadySet = false
-    private var _value: T? = null
+  private var _alreadySet = false
+  private var _value: T? = null
 
-    override fun getValue(thisRef: Any, property: KProperty<*>): T {
-        return _value ?: throw FieldNotSetException(
-            "Property ${property.name} not set."
-        )
-    }
+  override fun getValue(thisRef: Any, property: KProperty<*>): T {
+    return _value ?: throw FieldNotSetException(
+      "Property ${property.name} not set."
+    )
+  }
 
-    override fun setValue(thisRef: Any, property: KProperty<*>, value: T) {
-        if (_alreadySet)
-            throw MultipleSetException(
-                "Property ${property.name} can only be set once."
-            )
-        _alreadySet = true
-        _value = value;
-    }
+  override fun setValue(thisRef: Any, property: KProperty<*>, value: T) {
+    if (_alreadySet)
+      throw MultipleSetException(
+        "Property ${property.name} can only be set once."
+      )
+    _alreadySet = true
+    _value = value;
+  }
 }
 
 // Usage:
@@ -182,7 +182,7 @@ In Kotlin there are infix functions. You can add the `infix' modifier to an exte
 
 \begin{lstlisting}[caption={Infix functions},language=Kotlin,label=code:infix]
 infix fun Int.plus(that: Int): Int {
-    return this + that
+  return this + that
 }
 // Invocation:
 val x = 5 plus 6  // Infix notation
@@ -196,10 +196,10 @@ object Token1
 object Token2
 
 fun foo(o: Token1) {
-    ...
+  ...
 }
 fun foo(o: Token2) {
-    ...
+  ...
 }
 // Invocation
 val x = Token2
@@ -211,7 +211,7 @@ Combining these Kotlin language features can be used to create fluent, natural l
 
 \begin{lstlisting}[caption={jqx implementation},language=Kotlin,label=code:jqx]
 infix fun JsonElement.jqx(selector: String): JsonElement {
-    ...
+  ...
 }
 
 object int
@@ -220,7 +220,7 @@ object double
 object string
 
 infix fun JsonElement.parseAs(type: int): Int? = 
-    nullGuard { /* Function defining how to get JSON field as Int*/ }
+  nullGuard { /* Function defining how to get JSON field as Int*/ }
 infix fun JsonElement.parseAs(type: bool): Boolean? = nullGuard { ... }
 infix fun JsonElement.parseAs(type: double): Double? = nullGuard { ... }
 infix fun JsonElement.parseAs(type: string): String? = nullGuard { ... }

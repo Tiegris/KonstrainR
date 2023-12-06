@@ -20,19 +20,19 @@ set -e
 home=$(pwd)
 
 if [ "$BUILD_IMAGES" = "1" ]; then
-    # Build images
-    repo=${REPO:-tiegris}
-    cd $home/apps/items
-    docker build -t $repo/apples-items:latest .
-    docker push $repo/apples-items:latest
-    cd $home/apps/users
-    docker build -t $repo/apples-users:latest .
-    docker push $repo/apples-users:latest
-    cd $home/apps/accounting
-    docker build -t $repo/apples-accounting:latest .
-    docker push $repo/apples-accounting:latest
+  # Build images
+  repo=${REPO:-tiegris}
+  cd $home/apps/items
+  docker build -t $repo/apples-items:latest .
+  docker push $repo/apples-items:latest
+  cd $home/apps/users
+  docker build -t $repo/apples-users:latest .
+  docker push $repo/apples-users:latest
+  cd $home/apps/accounting
+  docker build -t $repo/apples-accounting:latest .
+  docker push $repo/apples-accounting:latest
 else
-    echo "Skipping build images"
+  echo "Skipping build images"
 fi
 
 
@@ -47,8 +47,8 @@ kubectl apply -n items -f $home/k8s/items.yaml
 # Simulate a history of changes
 export v
 for v in {1..10}; do
-    yq eval 'select(.kind == "Deployment").spec.template.metadata.annotations.v = env(v)' $home/k8s/items.yaml -i
-    kubectl apply -n items -f $home/k8s/items.yaml
+  yq eval 'select(.kind == "Deployment").spec.template.metadata.annotations.v = env(v)' $home/k8s/items.yaml -i
+  kubectl apply -n items -f $home/k8s/items.yaml
 done
 # Restore yaml file
 yq eval 'select(.kind == "Deployment").spec.template.metadata.annotations.v = "0"' $home/k8s/items.yaml -i

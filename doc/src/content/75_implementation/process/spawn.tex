@@ -27,11 +27,11 @@ k8s.create(Secret(rootCa, certificates))
 val dep = Deployment(server)
 val svc = Service(server)
 if (server.hasClusterRole() == true) {
-    val sa = ServiceAccount(server)
-    val crb = ClusterRoleBinding(server)
-    k8s.create(sa)
-    k8s.create(crb)
-    dep.serviceAccountName = sa.name
+  val sa = ServiceAccount(server)
+  val crb = ClusterRoleBinding(server)
+  k8s.create(sa)
+  k8s.create(crb)
+  dep.serviceAccountName = sa.name
 }
 k8s.create(dep)
 k8s.create(svc)
@@ -48,18 +48,18 @@ The \ref{code:start3} pseudocode shows how the startup of the agent is awaited, 
 \begin{lstlisting}[caption={Spawning of an agent},language=Kotlin,label=code:start3]
 ...
 try {
-    k8s.waitUntilAvailable(dep)
-    success = true
+  k8s.waitUntilAvailable(dep)
+  success = true
 } catch (e: TimeoutException) {
-    doRollback()
-    success = false
+  doRollback()
+  success = false
 }
         
 if (success) {
-    k8s.create(MutatingWebhookConfiguration(server, rootCa))
-    setDslStatus(id, "Running")
+  k8s.create(MutatingWebhookConfiguration(server, rootCa))
+  setDslStatus(id, "Running")
 } else {
-    setDslStatus(id, "Error")
+  setDslStatus(id, "Error")
 }
 \end{lstlisting}
 

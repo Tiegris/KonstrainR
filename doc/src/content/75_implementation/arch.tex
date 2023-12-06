@@ -66,13 +66,13 @@ For every admission webhook that the agent implements, there is an HTTP POST end
 
 \begin{lstlisting}[caption={Dynamically create endpoints},language=Kotlin,label=code:agent]
 fun Application.configureRouting(webhooks: List<Webhook>) {
-    routing {
-        webhooks.forEach { webhook ->
-            post(webhook.path) {
-                ...
-            }
-        }
+  routing {
+    webhooks.forEach { webhook ->
+      post(webhook.path) {
+        ...
+      }
     }
+  }
 }
 \end{lstlisting}
 
@@ -80,9 +80,9 @@ When a webhook request is received, the agent calculates a decision by executing
 
 \begin{lstlisting}[caption={Make webhook decision},language=Kotlin,label=code:agent2]
 val decision = WebhookBehaviorBuilder(request, k8sClient)
-    .apply(webhook.provider).build()
+  .apply(webhook.provider).build()
 val response = buildJsonObject {
-    ...
+  ...
 }
 \end{lstlisting}
 

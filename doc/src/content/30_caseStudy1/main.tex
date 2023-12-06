@@ -53,8 +53,8 @@ The `items' app went through a long development. The setup script simulates the 
 \begin{lstlisting}[caption={Simulate redeployment of the `items' app},language=bash,label=code:bash4]
 # Simulate a history of changes
 for v in {1..14}; do
-    yq eval 'select(.kind == "Deployment").spec.template.metadata.annotations.v = env(v)' $home/k8s/items.yaml -i
-    kubectl apply -n items -f $home/k8s/items.yaml
+  yq eval 'select(.kind == "Deployment").spec.template.metadata.annotations.v = env(v)' $home/k8s/items.yaml -i
+  kubectl apply -n items -f $home/k8s/items.yaml
 done
 # Restore yaml file
 yq eval 'select(.kind == "Deployment").spec.template.metadata.annotations.v = "0"' $home/k8s/items.yaml -i
@@ -63,11 +63,11 @@ yq eval 'select(.kind == "Deployment").spec.template.metadata.annotations.v = "0
 The engineers in charge of the Kubernetes deployments set up test environments for experimentation and testing purposes, but they neglected to delete them. This is simulated by the \ref{code:bash5} code snippet.
 
 \begin{lstlisting}[caption={Simulate leftover resources},language=bash,label=code:bash5]
-  # Simulate John Athan creating test namespace
-  kubectl create ns jathan-test || true
-  # Simulate Ida Red creating test namespace and leaving some leftover resources in it
-  kubectl create ns ired-test || true
-  kubectl apply -n ired-test -f $home/k8s/junk.yaml
+# Simulate John Athan creating test namespace
+kubectl create ns jathan-test || true
+# Simulate Ida Red creating test namespace and leaving some leftover resources in it
+kubectl create ns ired-test || true
+kubectl apply -n ired-test -f $home/k8s/junk.yaml
 \end{lstlisting}
 
 The developers decided that they want to use a NoSQL database. They searched the internet, and one of the first search results was this: \url{bitnami.com/stack/mongodb/helm}. This website shows a command that looks like it deploys a MongoDB. The engineers tested it, and it worked. They did not bother with reading the documentation or properly configuring the database; there was no time for that. The \ref{code:bash5b} snippet shows how they used the code from the website.
