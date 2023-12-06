@@ -21,17 +21,17 @@ However, given the inherent complexity of the problems Kubernetes addresses, imp
 \subsection{Admission controllers}
 \label{sec:admcont}
 
-TODO global add ~ before \textbackslash cite
-
 The official documentation~\cite{K8sAdmissionOfficial} explains admission controllers as the following:
 
 `An admission controller is a piece of code that intercepts requests to the Kubernetes API server prior to persistence of the object, but after the request is authenticated and authorized.'
 
-A very informative blog~\cite{K8sAdmissionBlog} on the topic, which I recommend reading, summarizes them like this:
+A blog~\cite{K8sAdmissionBlog} on the topic, which I recommend reading, summarizes them like this:
 
 `In a nutshell, Kubernetes admission controllers are plugins that govern and enforce how the cluster is used. They can be thought of as a gatekeeper that intercept (authenticated) API requests and may change the request object or deny the request altogether.' 
 
 For detailed information, I recommend reading the cited~\cite{K8sAdmissionBlog} source or referring to the official documentation~\cite{K8sAdmissionOfficial}.
+
+The \ref{fig:dynadm} figure visualizes how webhooks work. 
 
 \begin{figure}[h]
     \centering
