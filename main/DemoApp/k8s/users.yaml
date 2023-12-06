@@ -6,8 +6,8 @@ spec:
   selector:
     app: users
   ports:
-  - port: 8080
-    targetPort: 8079
+  - port: 8078
+    targetPort: 8078
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -30,7 +30,7 @@ spec:
             memory: "128Mi"
             cpu: "500m"
         ports:
-        - containerPort: 8079
+        - containerPort: 8078
         volumeMounts:
           - mountPath: "/app/data"
             name: user-storage

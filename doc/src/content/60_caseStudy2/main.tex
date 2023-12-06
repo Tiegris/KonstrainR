@@ -1,7 +1,7 @@
 \chapter{Case study 2: Creating new constraints}
 \label{chap:case_study2}
 
-Chapter \ref{chap:case_study1} showcased the motivation and the general capabilities of my project but did not show actual DSL scripts, because the \nameref{chap:konst_dsl} chapter was a prerequisite for that. This chapter will continue the case study, demonstrating how to write scripts in my DSL. Initially, I'll show how to write a report, followed by an example of writing a webhook for the same policy. Lastly, I'll present an advanced use-case.
+Chapter \ref{chap:case_study1} showcased the motivation and the general capabilities of my project but did not show actual DSL scripts, because the \nameref{chap:konst_dsl} chapter was a prerequisite for that. This chapter will continue the case study, demonstrating how to write scripts in my DSL. Initially, I'll show how to write a report, followed by an example of writing a webhook for the same policy. Lastly, I'll introduce an advanced use case to showcase the robust error-handling features of my platform.
 
 \section{Creating a report}
 
@@ -104,10 +104,49 @@ This command creates a test \emph{Pod} (see \ref{appendix:csr:testpolicy}) with 
 
 If we modify the image to, for example, `tiegris/apples-users' and redeploy the \emph{Pod}, the command will succeed. This test serves as confirmation that our policy-enforcing script is effective.
 
-\section{Advanced rules}
+\clearpage
+\section{Advanced example: log analysis}
 
+In this section, I'll present an advanced use case by demonstrating how to analyze logs with my tool and showcasing the error-handling features of my platform. Suppose we aim to detect if sensitive information, such as passwords, is leaking into logs within the `users' namespace. In this scenario, we can implement a script similar to the one in \ref{code:c2_5}.
 
+\begin{lstlisting}[caption={Detecting leaking of credentials},language=Kotlin,label=code:c2_5]
+val usersPods = kubelist(namesapce = "users") { pods() }
+val usersLogs = usersPods.associateWith {
+  kubectl {
+    pods()
+      .inNamespace(it.metadata.namespace)
+      .withName(it.metadata.name)
+      .log
+  }
+}
+aggregation("Users App", usersLogs.entries) {
+  tag("Leaks secret in logs") {
+    item.value?.contains("pass", true) ?: false
+  }
+}
+\end{lstlisting}
 
+By appending the code from the snippet in \ref{code:c2_5} to the report block of our script and redeploying it, we can witness the error-handling functionality of my platform. This is also depicted in image \ref{fig:report_err}.
 
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=150mm, keepaspectratio]{content/60_caseStudy2/error.png}
+  \caption{Error handling in the report}
+  \label{fig:report_err}
+\end{figure}
 
-This is the end of the demo. In this demo we saw the basic capabilities of the Konstrainer platform, some use-cases, and how to create our own rules.
+We can observe an error at the top of the report, but the rest of the report still generates successfully. The cause of the error is easily identifiable by reading the error message: `Error during kubectl call: Failure executing: GET at: (...). Message: pods "user-(...)" is forbidden: User "system:serviceaccount:konstrainer-ns:company-policies" cannot get resource "pods/log" in API group "" in the namespace "users".' As a reminder, we previously configured a custom cluster role for our agent, allowing only read and list operations on pods. Since pod logs are a different resource, we need to grant the agent access to the logs as well. Changing the `clusterRole' property to `ReadAny' resolves the error.
+
+After resolving the error, we can proceed to test the new rule. By port-forwarding a pod of the users service and attempting to log in with invalid credentials, the pod will be included in the report (after refreshing the page), tagged with the label: `Leaks secret in logs.' The steps to perform these actions are outlined in the \ref{code:c2_6} code snippet.
+
+\begin{lstlisting}[caption={Invalid login atempt},language=bash,label=code:c2_6]
+kubectl port-forward -n users pod/<pod_name> 8078:8078
+# Start a new terminal
+curl http://localhost:8078/login -H "Content-Type: application/json" -d '{"user": "John A. Gold", "passwd": "appels"}'
+# Command output: "Invalid pass"
+# Refresh the report now, to see that the pod is tagged.
+\end{lstlisting}
+
+Upon inspecting the logs using the command \lstinline|kubectl logs -n users pod/<pod_name>|, we can identify potential leakage of sensitive data: `WARNING:root:Invalid login attempt: {'user': 'John A. Gold', 'passwd': 'appels'}'
+
+This concludes the case study where I have showcased the majority of features of my platform through various examples.
