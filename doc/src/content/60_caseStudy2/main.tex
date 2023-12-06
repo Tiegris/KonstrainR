@@ -1,17 +1,14 @@
 \chapter{Case study 2: Creating new constraints}
 \label{chap:case_study2}
 
-The \ref{chap:case_study1} chapter only showed the capabilities of the Konstrainer framework, but did not show how to write a more advanced script, because the \nameref{chap:konst_dsl} chapter was a prerequisite for that. This chapter will continue the case study.
+Chapter \ref{chap:case_study1} showcased the motivation and the general capabilities of my project but did not show actual DSL scripts, because the \nameref{chap:konst_dsl} chapter was a prerequisite for that. This chapter will continue the case study, demonstrating how to write scripts in my DSL. Initially, I'll show how to write a report, followed by an example of writing a webhook for the same policy. Lastly, I'll present an advanced use-case.
 
-\section{Writing your own policies}
+\section{Creating a report}
 
-Let's assume the company has introduced some custom policies and, now they want to enforce them using Konstrainer. Start with a very simple policy: All images must come from the internal company registry.
+Let's consider a very simple policy: `All images must come from the internal company registry.' To enforce this, we'll start by detecting which pods violate this policy. Create a new file using the template from the \ref{code:server_boilerplate} code snippet. Add a report block with an aggregation group on the pods. The \ref{code:c2_1} code snippet shows how it should look.
 
-To enforce this, first let's detect which pods violate this policy:
-
-Create a file with the company-policies.kt file with the following content:
-
-\begin{lstlisting}[caption={Report skeleton},language=Kotlin,label=code:todo]
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[caption={Report skeleton},language=Kotlin,label=code:c2_1]
 package me.btieger
 
 import me.btieger.dsl.*
@@ -19,41 +16,37 @@ import me.btieger.dsl.*
 const val companyPrefix = "tiegris/"
 val companPolicies = server("company-policies") {
   report {
-
-  }
-}
-\end{lstlisting}
-
-This script has an empty report so far. As described in the \ref{sec:report} section, we should fetch the list of pods and create an aggregation group. In this case, no additional processing is needed.
-
-\begin{lstlisting}[caption={Aggregation group},language=Kotlin,label=code:todo]
-report {
-  val pods = kubelist { pods() }
-  aggregation("Pods", pods) {
-
-  }
-}
-\end{lstlisting}
-
-To decide if all the containers of a pod are using images only from the company registry, we must specify this requirement with mathematical precision, using first order logic. Here are two continuous sentences which, express the requirement with first order logic.
-
-`Tag the pod, if any of its containers image does not start with the company prefix.'
-
-`Do not tag the pod, if all of its containers image starts with the company prefix.'
-
-\begin{lstlisting}[caption={Tag pods},language=Kotlin,label=code:todo]
-report {
-  aggregation("Pods", kubelist { pods() }) {
-    tag("Image not from company registry") {
-      item.spec.containers.any { !it.image.startsWith(companyPrefix) }
+    aggregation("Pods", kubelist { pods() }) {
+  
     }
   }
 }
 \end{lstlisting}
+\end{minipage}
 
-The script accesses the Kubernetes API, but to do that successfully, it needs authorization. We need to associate a \emph{ClusterRole} to the agent. In the demo files there is also a \emph{ClusterRole} definition. We want our agent to be least privileged, so we are only giving it read access to the pods.
+To determine whether all the containers of a pod are using images only from the company registry, we need to express this requirement with mathematical precision using first-order logic. Here are two continuous sentences that express the requirement:
 
-\begin{lstlisting}[caption={TODO},language=Kotlin,label=code:todo]
+`Tag the pod if any of its container's images do not start with the company prefix.'
+
+`Do not tag the pod, if all of its container's images start with the company prefix.'
+
+The \ref{code:c2_2} code snippet demonstrates how to implement the first expression in code.
+
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[caption={Tag pods},language=Kotlin,label=code:c2_2]
+aggregation("Pods", kubelist { pods() }) {
+  tag("Image not from company registry") {
+    item.spec.containers.any { !it.image.startsWith(companyPrefix) }
+  }
+}
+\end{lstlisting}
+\end{minipage}
+
+The script retrieves the list of pods from the Kubernetes API, but to do that successfully, it needs authorization. To achieve this, we need to associate a \emph{ClusterRole} with the agent. In the demo files, there is a \emph{ClusterRole} definition in the readPods.yaml file (\ref{appendix:csr:readpods}). We want our agent to be least privileged, so we are only giving it read access to the pods with the \emph{read-pods} \emph{ClusterRole}.
+
+The \ref{code:c2_3} code snippet shows the final script. After creating the \emph{read-pods} \emph{ClusterRole} with the \lstinline|kubectl apply -f <filename>| command and deploying the script, we should observe the same report as shown in the \ref{fig:report} figure.
+
+\begin{lstlisting}[caption={Final reporting script},language=Kotlin,label=code:c2_3]
 package me.btieger
 import me.btieger.dsl.*
 
@@ -70,22 +63,23 @@ val companyPolicies = server("company-policies") {
 }
 \end{lstlisting}
 
-The line: `clusterRole = ReadAny` assigns the ReadAny clusterrole to the agent by creating a clusterrolebinding during the deployment of the agent. The ReadAny clusterrole is created with the Konstrainer installation, it gives read access to all resources in the cluster.
-
-Let's test the script now. If we upload, and deploy the script, we should see it working:
-
 \begin{figure}[h]
   \centering
-  \includegraphics[width=130mm, keepaspectratio]{content/60_caseStudy2/company_policies_1.png}
+  \includegraphics[width=150mm, keepaspectratio]{content/60_caseStudy2/company_policies_1.png}
   \caption{Report generated by the script}
   \label{fig:report}
 \end{figure}
 
 The report shows that there are 3 pods, which use images outside from the company registry.
 
-Now lets do the enforcing part. Put this code inside the server block.
+\clearpage
+\section{Creating a webhook}
 
-\begin{lstlisting}[caption={TODO},language=Kotlin,label=code:todo]
+Now, let's move on to the enforcement aspect. Utilizing the description provided in Section \ref{sec:webhooks}, we can develop this segment of the script. The only non-trivial consideration is determining the type of events to intercept. We aim to capture user actions rather than controller resource actions. Therefore, we should specifically monitor the creation of deployments, stateful sets, and daemon sets, instead of just pod creations. To be more precise, we could extend our monitoring to include various resources that can create pods, including pod creations, but for the purpose of this demo, we'll keep it simple.
+
+The code snippet in \ref{code:c2_4} illustrates this webhook. It is designed to listen for the creation and updates of deployment, statefulset, and daemonset resources across any namespace. It permits these actions only if all Docker images within their pod's containers start with the company prefix; otherwise, it returns a descriptive error message.
+
+\begin{lstlisting}[caption={Company policy enforcer webhook},language=Kotlin,label=code:c2_4]
 webhook("only-internal-registry") {
   operations(CREATE, UPDATE)
   apiGroups(APPS)
@@ -104,34 +98,16 @@ webhook("only-internal-registry") {
 }
 \end{lstlisting}
 
-To create a rule, we need to add a `webhook` block. It needs a unique name. Lets name it "only-internal-registry". We need to define which events should the webhook listen to. In this example the webhook listens to the creation or update of any deployments, statefulsets and daemonsets.
+If we incorporate the webhook from the code snippet in \ref{code:c2_4} into the script and redeploy it, we can observe it in action. Execute the following command from the correct directory: \lstinline|kubectl create ns policy-test && kubectl apply -f k8s/test-policy.yaml -n policy-test|
 
-The more interesting part is the behavior block. It describes how should the webhook behave when a request arrives. Inside the behavior block we can access the request body using many ways. One of them is the podSpec keyword. It is a shortcut to the `.spec.template.spec` of a deployment, statefulset or daemonset.
+This command creates a test \emph{Pod} (see \ref{appendix:csr:testpolicy}) with a container using a Docker image from Docker Hub. In response, we should encounter the following error message: `Error from server: error when creating "k8s/test-policy.yaml": admission webhook "only-internal-registry.btieger.me" denied the request: All images must be from the company registry.'
 
-In the allowed block we can specify when to allow or reject an event. In this case we only accept events when the all the containers of the pod has an image starting with the the company prefix.
+If we modify the image to, for example, `tiegris/apples-users' and redeploy the \emph{Pod}, the command will succeed. This test serves as confirmation that our policy-enforcing script is effective.
 
-In the status block we define the error message in case the event is rejected.
+\section{Advanced rules}
 
-Lets deploy and test our newly created agent dsl. On the monitors view we can see that the pods inside the ired-test namespace use images outside of the company registry, and the mongodb also uses an image from docker.io instead of the company registry.
 
-We can also test that we can no longer create resources which use images outside from the company registry:
 
-\begin{lstlisting}[caption={TODO},language=bash,label=code:bashx]
-kubectl create ns policy-test
-kubectl apply -f k8s/test-policy.yaml -n policy-test
-\end{lstlisting}
 
-We should get this error:
-
-\begin{lstlisting}[caption={TODO},language=bash,label=code:todo]
-Error from server: error when creating "k8s/test-policy.yaml": admission webhook "only-internal-registry.btieger.me" denied the request: All images must be from the company registry.
-\end{lstlisting}
-
-\begin{lstlisting}[caption={TODO},language=bash,label=code:bashx]
-yq eval 'select(.kind == "Deployment").spec.template.spec.containers[0].image = "tiegris/apples-users"' k8s/test-policy.yaml -i
-kubectl apply -f k8s/test-policy.yaml -n policy-test
-\end{lstlisting}
-
-This error shows that our rule works and is enforced.
 
 This is the end of the demo. In this demo we saw the basic capabilities of the Konstrainer platform, some use-cases, and how to create our own rules.
