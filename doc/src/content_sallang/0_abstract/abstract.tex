@@ -11,6 +11,15 @@
 %----------------------------------------------------------------------------
 \chapter*{Kivonat}\addcontentsline{toc}{chapter}{Kivonat}
 
+Manapság az alkalmazásfejlesztés fő trendje a rendszer több komponensre bontása és ezeknek a komponenseknek konténerekbe csomagolása, valamint harmadik féltől származó megoldásokkal való integrálása. Az ilyen több komponensű elosztott alkalmazások tipikus üzemeltetési környezete a Kubernetes, amely rugalmas megoldást kínál ebben a témakörben felmerülő legtöbb problémára.
+
+Egy Kubernetesre írt alkalmazás megfelelő üzemeltetése nagy kihívás az elosztott rendszerek üzemeltetéséből eredő komplexitás miatt. Egy működőképes rendszer összeállítása nem mindig elegendő. Éppen ezért a megfelelő működésen felül lehetnek nem funkcionális követelmények is a rendszerrel szemben, például rendelkezésreállási vagy biztonsági követelmények. Az ilyen követelmények betartatása nem triviális.
+
+Dolgozatom célja egy kényszerek leírását lehetővé tevő szakterület-specifikus nyelv megalkotása és egy kényszerek betartatását segítő keretrendszer kialakítása, amely keretrendszer jelentősen megkönnyíti a Kubernetes alapú rendszerekben nem funkcionális követelmények betartatását és ellenőrzését.
+
+Az elkészített nyelv egy Kotlin DSL, ami a Kotlin programozási nyelvhez készült szoftverkönyvtárat jelenti. A nyelven kívül a keretrendszer része egy fordító a nyelvhez, egy kényszereket futtató ágens és egy menedzser komponens, ami felügyeli az ágenseket, és intézi a telepítésüket és konfigurálásukat.
+
+Az általam megtervezett és megvalósított keretrendszer lehetőséget ad kényszerek megsértésének detektálására, valamint olyan új események megvétózására vagy módosítására, amik megsértenének bizonyos kényszereket. Továbbá összeállítottam egy csokor Kubernetes világában bevált gyakorlatot (best practice), és a nyelv segítségével leírtam azokat. Az elkészült rendszert és bevált gyakorlatokat demonstráltam egy élethű esettanulmányon keresztül.
 
 \vfill
 \selectenglish
@@ -21,6 +30,15 @@
 %----------------------------------------------------------------------------
 \chapter*{Abstract}\addcontentsline{toc}{chapter}{Abstract}
 
+These days, the main trend in application development is to split the system into several components and package these components in containers and integrate them with third-party solutions. A typical operating environment for such multi-component distributed applications is Kubernetes, which offers a flexible solution to most of the problems that arise in this field.
+
+The proper operation of an application written on Kubernetes is a big challenge due to the complexity resulting from the operation of distributed systems. Putting together a workable system is not always enough. That is why, in addition to proper operation, there may also be non-functional requirements for the system, such as availability or security requirements. Compliance with such requirements is not trivial.
+
+The objective of my thesis is to develop a domain-specific language that enables the description of constraints and create a framework that facilitates the enforcement of these constraints, significantly easing compliance and control of non-functional requirements in Kubernetes-based systems.
+
+The created language is a Kotlin DSL, which is essentially a software library for the Kotlin programming language. In addition to the language, the framework includes a compiler for the language, an agent that runs the constraints, and a manager component that oversees the agents and manages their installation and configuration.
+
+The framework I designed and implemented provides the capability to detect violations of constraints, as well as to veto or modify new events that would violate certain constraints. Furthermore, I collected a set of Kubernetes best practices and implemented them using my language. I demonstrated the implemented system and set of best practices through a true-to-life case study.
 
 \vfill
 \cleardoublepage
