@@ -46,8 +46,7 @@ The \ref{tree:str_literals} figure shows the complete list of constants, their v
 
 \subfile{str_literals.tex}
 
-Let's talk about the `namespaceSelector'. I will only write about it on the DSL level, to understand what it actually does, see the official documentation\footnote{\url{kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/\#matching-requests-namespaceselector}}. 
-This keyword opens a new block with the LabelSelector class from the fabric8 package as the receiver. The created LabelSelector will be passed to the MutatingWebhookConfiguration as is. This gives full control, but also requires the user to fully understand the topic. This is also an aspect that could be improved in the future.
+Let's talk about the `namespaceSelector'. I will only write about it on the DSL level, to understand it in depth, see the official documentation~\cite{K8sExtensibleNSS}. This keyword opens a new block with the LabelSelector class from the fabric8 package as the receiver. The created LabelSelector will be passed to the MutatingWebhookConfiguration as is. This gives full control, but also requires the user to fully understand the topic. This is also an aspect that could be improved in the future.
 
 The \ref{code:wh_conf} example also shows two fields: `logRequest' and the `logResponse'. These are tools for developing and debugging your webhooks. If they are set to true, the incoming webhook request or the given response is logged in a JSON format by the agent. These logs can be used to troubleshoot your webhooks, however I recommend turning them off in production.
 

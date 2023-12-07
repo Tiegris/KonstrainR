@@ -34,7 +34,7 @@ This section breaks down the steps of the setup script and explains each step, b
 
 When the initial two microservices for the app were developed, the developers created a YAML file for each and defined the essential Kubernetes resources required for them:
 
-\begin{lstlisting}[caption={Create first deployment},language=bash,label=code:bash3]
+\begin{lstlisting}[caption={Create first deployment},language=mybash,label=code:bash3]
 # Initial creation of users app
 kubectl create ns users
 kubectl apply -n users -f $home/k8s/users.yaml
@@ -50,7 +50,7 @@ Note that the items.yaml (\ref{appendix:csr:items}) contains an unused \emph{Per
 
 The `items' app went through a long development. The setup script simulates the multiple redeployment of the app, as shown in the \ref{code:bash4} snippet.
 
-\begin{lstlisting}[caption={Simulate redeployment of the `items' app},language=bash,label=code:bash4]
+\begin{lstlisting}[caption={Simulate redeployment of the `items' app},language=mybash,label=code:bash4]
 # Simulate a history of changes
 for v in {1..14}; do
   yq eval 'select(.kind == "Deployment").spec.template.metadata.annotations.v = env(v)' $home/k8s/items.yaml -i
@@ -62,7 +62,7 @@ yq eval 'select(.kind == "Deployment").spec.template.metadata.annotations.v = "0
 
 The engineers in charge of the Kubernetes deployments set up test environments for experimentation and testing purposes, but they neglected to delete them. This is simulated by the \ref{code:bash5} code snippet.
 
-\begin{lstlisting}[caption={Simulate leftover resources},language=bash,label=code:bash5]
+\begin{lstlisting}[caption={Simulate leftover resources},language=mybash,label=code:bash5]
 # Simulate John Athan creating test namespace
 kubectl create ns jathan-test || true
 # Simulate Ida Red creating test namespace and leaving some leftover resources in it
@@ -72,7 +72,7 @@ kubectl apply -n ired-test -f $home/k8s/junk.yaml
 
 The developers decided that they want to use a NoSQL database. They searched the internet, and one of the first search results was this: \url{bitnami.com/stack/mongodb/helm}. This website shows a command that looks like it deploys a MongoDB. The engineers tested it, and it worked. They did not bother with reading the documentation or properly configuring the database; there was no time for that. The \ref{code:bash5b} snippet shows how they used the code from the website.
 
-\begin{lstlisting}[caption={Deploy MongoDB},language=bash,label=code:bash5b]
+\begin{lstlisting}[caption={Deploy MongoDB},language=mybash,label=code:bash5b]
 kubectl create ns mongo
 helm install -n mongo my-release \
   oci://registry-1.docker.io/bitnamicharts/mongodb
@@ -80,7 +80,7 @@ helm install -n mongo my-release \
 
 After deploying MongoDB, the engineers configured the `items' service to use it. They manually edited the items.yaml file and changed the code based on the first tutorial they could find. The image used by the `items' deployment already uses MongoDB; the commands in the \ref{code:bash7} code snippet only emulate this process.
 
-\begin{lstlisting}[caption={Configuring the `items' app to use MongoDB},language=bash,label=code:bash7]
+\begin{lstlisting}[caption={Configuring the `items' app to use MongoDB},language=mybash,label=code:bash7]
 export MONGODB_ROOT_PASSWORD=$(kubectl get secret --namespace mongo \
   my-release-mongodb -o jsonpath="{.data.mongodb-root-password}" \
   | base64 -d)
@@ -98,7 +98,7 @@ If you have followed along, make sure to test the deployment. First check the st
 
 You can also test the integration of the items app and the MongoDB by executing the commands in the \ref{code:bash8} snippet.
 
-\begin{lstlisting}[caption={Test the integration of the items app and MongoDB},language=bash,label=code:bash8]
+\begin{lstlisting}[caption={Test the integration of the items app and MongoDB},language=mybash,label=code:bash8]
 kubectl port-forward -n items service/items 8080:8080
 # In a separate terminal
 curl http://localhost:8080/items
@@ -107,7 +107,7 @@ curl http://localhost:8080/items
 
 If you wish to uninstall the demo and the Konstrainer application run the code in the \ref{code:bash9} snippet.
 
-\begin{lstlisting}[caption={Teardown},language=bash,label=code:bash9]
+\begin{lstlisting}[caption={Teardown},language=mybash,label=code:bash9]
 # Uninstall demo app
 helm uninstall my-release -n mongo
 kubectl delete ns users items jathan-test ired-test mongo
@@ -120,7 +120,7 @@ kubectl delete ns konstrainer-ns
 
 To follow along, you can install the Konstrainer application using a helm chart, as shown in the \ref{code:bashk1} code snippet.
 
-\begin{lstlisting}[caption={Install Konstrainer},language=bash,label=code:bashk1]
+\begin{lstlisting}[caption={Install Konstrainer},language=mybash,label=code:bashk1]
 cd ../charts
 kubectl create ns konstrainer-ns
 helm upgrade konstrainr-core konstrainr-core -n konstrainer-ns --install
@@ -193,7 +193,7 @@ To follow along, upload the \emph{basic enforce} script located in the same dire
 
 Let's deploy the new component of Apples Inc.'s application. First, let's create a namespace like showed in the \ref{code:basha1}
 
-\begin{lstlisting}[caption={Create namespace for the Accounting module},language=bash,label=code:basha1]
+\begin{lstlisting}[caption={Create namespace for the Accounting module},language=mybash,label=code:basha1]
 cd DemoApp
 kubectl apply -f - <<EOF
 apiVersion: v1
@@ -209,7 +209,7 @@ Note that the namespace has a label: `managed: "true"'. This is because my scrip
 
 Now if we deploy the new component, but we forget to switch to the newly created namespace (run code: \ref{code:basha2}) we get a warning: `Warning: You are working in the namespace: default`
 
-\begin{lstlisting}[caption={Deploy the Accounting module},language=bash,label=code:basha2]
+\begin{lstlisting}[caption={Deploy the Accounting module},language=mybash,label=code:basha2]
 # Make sure that you are in the default namespace
 kubectl config set-context --current --namespace=default
 kubectl apply -f k8s/accounting.yaml
@@ -217,7 +217,7 @@ kubectl apply -f k8s/accounting.yaml
 
 If you work in the default namespace that might be a mistake, so my Konstrainer script warns you. Let's revert with this command: \lstinline|kubectl delete deployment.apps/accounting| and use the correct namespace from now on.
 
-\begin{lstlisting}[caption={Delete Accounting module from the default namespace},language=bash,label=code:basha3]
+\begin{lstlisting}[caption={Delete Accounting module from the default namespace},language=mybash,label=code:basha3]
 kubectl delete deployment.apps/accounting
 
 \end{lstlisting}
@@ -228,7 +228,7 @@ It is generally a good practice to define some kind of logic on how to place our
 
 Let's fix this error with the help of the \ref{code:basha5} code snippet. Depending on your cluster chose a suitable node from the output of the get nodes command.
 
-\begin{lstlisting}[caption={Fix node affinity error},language=bash,label=code:basha5]
+\begin{lstlisting}[caption={Fix node affinity error},language=mybash,label=code:basha5]
 # This will list all nodes
 kubectl get nodes -A
 # chose one, eg.:
@@ -243,7 +243,7 @@ Setting resource limits and requests is a standard practice. In short, a cluster
 
 In a real-world scenario, to determine the correct resource settings, we should first make an estimate and refine it with measurements. Since this is just a demo, setting an estimate is fine. The \ref{code:basha7} shows how to set them.
 
-\begin{lstlisting}[caption={Setting resources and redeploy the Accounting module},language=bash,label=code:basha7]
+\begin{lstlisting}[caption={Setting resources and redeploy the Accounting module},language=mybash,label=code:basha7]
 yq eval 'select(.kind == "Deployment").spec.template.spec.containers[0].resources.limits.cpu = "500m"' k8s/accounting.yaml -i
 yq eval 'select(.kind == "Deployment").spec.template.spec.containers[0].resources.limits.memory = "128Mi"' k8s/accounting.yaml -i
 yq eval 'select(.kind == "Deployment").spec.template.spec.containers[0].resources.requests.cpu = "500m"' k8s/accounting.yaml -i

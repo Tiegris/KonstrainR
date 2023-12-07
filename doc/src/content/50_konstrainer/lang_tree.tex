@@ -1,85 +1,21 @@
 \begin{figure}[h]
-{\footnotesize
-\begin{forest}
-    for tree={
-        font=\ttfamily,
-        grow'=0,
-        child anchor=west,
-        parent anchor=south,
-        anchor=west,
-        calign=first,
-        edge path={
-        \noexpand\path [draw, \forestoption{edge}]
-        (!u.south west) +(7.5pt,0) |- node[fill,inner sep=1.25pt] {} (.child anchor)\forestoption{edge label};
-        },
-        before typesetting nodes={
-        if n=1
-            {insert before={[,phantom]}}
-            {}
-        },
-        fit=band,
-        inner ysep=0pt,
-        before computing xy={l=20pt},
-    }
-    [server
-        [clusterRole]
-        [ReadAny]
-        [report
-            [kubelist]
-            [kubectl]
-            [none]
-            [nonUserNss]
-            [systemNss]
-            [aggregation
-                [item]
-                [tag
-                    [item]
-                ]
-            ]
-        ]
-        [webhook
-            [operations]
-            [apiGroups]
-            [namespaceSelector]
-            [apiVersions]
-            [resources]
-            [scope]
-            [failurePolicy]
-            [logRequest]
-            [logResponse]
-            [behavior
-                [kubectl]
-                [request]
-                [currentObject]
-                [oldObject]
-                [podSpec]
-                [unmarshal]
-                [jqx]
-                [string]
-                [int]
-                [double]
-                [bool]
-                [JsonEmpty]
-                [allowed]
-                [patch
-                    [add]
-                    [remove]
-                    [replace]
-                    [copy]
-                    [move]
-                    [test]
-                ]
-                [warnings
-                    [warning]
-                ]
-                [status
-                    [code]
-                    [message]
-                ]
-            ]
-        ]
-    ]
-\end{forest}
-}
-\caption{Tree of keywords in the language}\label{tree:lang_tree}
+  \centering
+  \includegraphics[width=150mm, keepaspectratio]{tree_1.png}
+  \caption{Top level language tree}
+  \label{fig:fltree_1}
+\end{figure}
+
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=150mm, keepaspectratio]{tree_2.png}
+  \caption{Language tree of the `report' keyword}
+  \label{fig:fltree_2}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=150mm, keepaspectratio]{tree_3.png}
+  \caption{Language tree of the `webhook' keyword}
+  \label{fig:fltree_3}
 \end{figure}

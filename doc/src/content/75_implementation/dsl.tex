@@ -39,7 +39,7 @@ fun car(setup: CarBuilder.() -> Unit): CarModel {
 
 There are two kinds of blocks. The first kind simply describes a configuration or calculates a value, like the `namespaceSelector' or `webhookConfigBundle'. The other describes a complex behavior, which can only be evaluated at certain events, for example the `report', `kubectl' and `behavior' blocks. I refer to the first group as `startup-time' evaluated blocks because a model object can be built without an input. This typically occurs when the agent running the script starts up. I call the second group as `runtime-evaluated blocks' because an input is required to evaluate them, such as a webhook request, or a Kubernetes client.
 
-The pattern I'm using for the startup-time block has a name, it is the Type-safe builders\footnote{\url{https://kotlinlang.org/docs/type-safe-builders.html}} pattern. The \ref{code:lang3} code snippet highlights the most important elements of the pattern.
+The pattern I'm using for the startup-time block has a name, it is the Type-safe builders~\cite{TypeSafeBuilders} pattern. The \ref{code:lang3} code snippet highlights the most important elements of the pattern.
 
 \begin{lstlisting}[caption={Type-safe builders example},language=Kotlin,label=code:lang3]
 typealias CarBuilderFunction = CarBuilder.() -> Unit

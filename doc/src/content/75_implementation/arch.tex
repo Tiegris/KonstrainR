@@ -48,8 +48,6 @@ The Konstrainer DB is also just logically considered a separate component. For s
 
 \subsection{Agent}
 
-TODO note it implements webhooks
-
 The agent is a web server implemented using the Ktor framework. It dynamically loads compiled scripts at startup time using a custom class loader and uses them to implement admission webhooks and generate reports.
 
 Each DSL script is served by an individual agent. How an agent is spawned and configured is detailed in the \ref{sec:spawning} section.

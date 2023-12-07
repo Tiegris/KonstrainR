@@ -139,7 +139,7 @@ We can observe an error at the top of the report, but the rest of the report sti
 
 After resolving the error, we can proceed to test the new rule. By port-forwarding a pod of the users service and attempting to log in with invalid credentials, the pod will be included in the report (after refreshing the page), tagged with the label: `Leaks secret in logs.' The steps to perform these actions are outlined in the \ref{code:c2_6} code snippet.
 
-\begin{lstlisting}[caption={Invalid login atempt},language=bash,label=code:c2_6]
+\begin{lstlisting}[caption={Invalid login atempt},language=mybash,label=code:c2_6]
 kubectl port-forward -n users pod/<pod_name> 8078:8078
 # Start a new terminal
 curl http://localhost:8078/login -H "Content-Type: application/json" -d '{"user": "John A. Gold", "passwd": "appels"}'

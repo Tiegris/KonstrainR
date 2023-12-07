@@ -51,6 +51,15 @@ In case of an error, an error message is sent, and the following changes will ta
     \item The error message will be saved.
 \end{itemize}
 
+Error reports can be viewed on the Web UI, as demonstrated in the \ref{fig:err_Rep} picture. The error in the image occurred when the `report' block was mistakenly spelled as `raprot'. Informative error reports like this can be valuable for troubleshooting.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=150mm, keepaspectratio]{build_err.png}
+  \caption{Report of a compilation error}
+  \label{fig:err_Rep}
+\end{figure}
+
 \subsubsection{Builder job detailed implementation}
 
 The builder job is implemented as a well-written Bash script. How I managed to implement error handling in Bash is quite interesting, so in this subsection, I will delve into the details of the builder script.
@@ -61,7 +70,7 @@ The builder image also includes a prepared Gradle project with an empty script i
 
 The \ref{code:builder0} code snippet show the important parts of the builder script, however the entire script can be found in the appendix, referenced by: \ref{appendix:builder} \nameref{appendix:builder}. Some lesser important details are replaced by dots: `\dots'
 
-\begin{lstlisting}[caption={Builder script},language=bash,label=code:builder0]
+\begin{lstlisting}[caption={Builder script},language=mybash,label=code:builder0]
 cp "/app/tls-cert/rootCa.pem" /usr/local/share/ca-certificates/rootCa.crt
 update-ca-certificates
 
@@ -81,7 +90,6 @@ function try_compile() {
   # Upload compiled jar
   curl ... || { log "Upload failed" && error_report; }
 }
-
 function error_report() {
   log "=== END ERROR REPORT ==="
   # Send error report
@@ -101,8 +109,6 @@ Inside the `try\_compile' function, most commands are executed following the sam
 This pattern ensures that if the command succeeds, the fact of the success is logged. If the command returns a non-zero status code, it logs the failure, and invokes the `error\_report' function. The curly brackets are crucial because they do not create a new subshell. This means that the `exit 1' inside the `error\_report' will exit the entire scrip, instead of just exiting a subshell.
 
 The call of the Gradle build on line 14 is unique. The \lstinline*./gradlew jar >> $logsfile 2>&1* bash magic appends the standard output (stdout) and the standard error (stderr) to the logsfile.
-
-TODO: show screenshot of an error report
 
 \subsubsection{Builder job cleanup loop}
 
