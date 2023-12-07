@@ -10,11 +10,11 @@ This chapter will introduce my domain-specific language (DSL) created for enforc
 
 \section{Top level}
 
-The main top level keyword is the `server', which declares a new agent. An agent is essentially a web server capable of creating reports and implementing Kubernetes admission webhooks. It is called named, because a web server is generated from it. The server keyword takes one argument, its unique name, which must be in kebab-case\footnote{kebab-case: \url{developer.mozilla.org/en-US/docs/Glossary/Kebab_case}}, and opens a block. To be precise, it takes two arguments. The second argument is a lambda, but in this context, it is more convenient to refer to the last lambda argument of the `server' keyword as the `block of the server keyword' or the `server block.' I will use this terminology whenever referring to the last lambda argument of a function.
+The main top level keyword is the `server', which declares a new agent. An agent is essentially a web server capable of creating reports and implementing Kubernetes admission webhooks. It is called that, because a web server is generated from it. This keyword takes one argument, its unique name, which must be in kebab-case\footnote{kebab-case: \url{developer.mozilla.org/en-US/docs/Glossary/Kebab_case}}, and opens a block. To be precise, it takes two arguments. The second argument is a lambda, but in this context, it is more convenient to refer to the last lambda argument of the `server' keyword as the `block of the server keyword' or the `server block.' I will use this terminology whenever referring to the last lambda argument of a function.
 
 For the code to compile, we also need to import the DSL library, and define a package. The \ref{code:server_boilerplate} code snippet shows the basic template of an agent.
 
-\begin{lstlisting}[caption={Template of a DSL file},language=Kotlin,label=code:server_boilerplate]
+\begin{lstlisting}[caption={Template of a DSL script},language=Kotlin,label=code:server_boilerplate]
 package me.btieger
 
 import me.btieger.dsl.*

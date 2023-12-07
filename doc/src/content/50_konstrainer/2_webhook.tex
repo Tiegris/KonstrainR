@@ -141,7 +141,7 @@ All the unmarshalling methods return a nullable type. The reason for this is exc
 
 \subsubsection{Making a response}
 
-To make a response, we must first make a decision about the request. The decision can be one of these things:
+To make a response, we must first make a decision about the request. The decision can be one of these:
 
 \begin{itemize}
     \item Allow
@@ -177,6 +177,7 @@ JSON Patch is a standard used to describe small changes to a JSON document~\cite
 
 The \ref{code:json_patch_1} code snippet shows an example JSON Patch. A patch object always has an `op' field indicating the operation. In the DSL, I created function keywords for each supported operations. A patch object also has one or two other parameters, representing the arguments of the operation. In the DSL, these are represented as input parameters for the operation functions. The \ref{code:json_patch_2} code snippet demonstrates how to implement the same patch as the \ref{code:json_patch_1} example patch.
 
+\begin{minipage}{\linewidth}
 \begin{lstlisting}[caption={JSON Patch example},language=JSON,label=code:json_patch_1]
 [
   { "op": "replace", "path": "/lorem", "value": "ipsum" },
@@ -193,10 +194,11 @@ patch {
   })
 }
 \end{lstlisting}
+\end{minipage}
 
 The `add' and `replace' operations accept \emph{String}, \emph{Number} and \emph{JsonElement} as the second argument. For the rest of the operations it does not make sense to support anything else than \emph{String}s.
 
-The framework automatically assembles the standard compliant JSON Patch based on the instructions in the DSL script. The resulting patch is also added as an annotation to the patched resources in a base64 encoded format, so it is clear whether a resource got patched or not. To read the patch applied to a resource run the following command: `kubectl get <resurce> -o yaml | yq '.metadata.annotations.ksr-patch' | base64 --decode'
+The framework automatically assembles the standard compliant JSON Patch based on the instructions in the DSL script. The resulting patch is also added as an annotation to the patched resources in a base64 encoded format, so it is clear whether a resource got patched or not. To read the patch applied to a resource run the following command: \lstinline*kubectl get <resurce> -o yaml | yq '.metadata.annotations.ksr-patch' | base64 --decode*
 
 The last feature in the response is the warning. Use the `warning' keyword to open a new block where you can list your warnings. Within the scope of the `warning' block use the `warning' keyword to raise a warning. The `warning' keyword takes only one argument: the message of the warning. To make it conditional, use the build-in language features of Kotlin, such as the `if' statement. The \ref{code:warning} code snippet provides an example of how to use warnings.
 

@@ -88,7 +88,7 @@ With the second method, you can select a single namespace to work within.
 The last method demonstrates how to override the list of ignored namespaces. There are three built in lists: none, nonUserNss, and systemNss. The \ref{code:kubelist_lists_impls} code snippet shows which namespaces they include. Using \lstinline|kubelist(omittedNss = systemNss) { pods() }| is equivalent to \lstinline|kubelist { pods() }| since systemNss is the default for `kubelist'.
 
 \begin{minipage}{\linewidth}
-\begin{lstlisting}[caption={Usages of kubelist},language=Kotlin,label=code:kubelist_lists_impls]
+\begin{lstlisting}[caption={Namespace list constants},language=Kotlin,label=code:kubelist_lists_impls]
 val systemNss = listOf("kube-system", "kube-node-lease", "kube-public")
 val nonUserNss = listOf(
   "kube-system", "kube-node-lease", "kube-public", "default"
