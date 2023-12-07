@@ -29,9 +29,9 @@ A blog~\cite{K8sAdmissionBlog} on the topic, which I recommend reading, summariz
 
 `In a nutshell, Kubernetes admission controllers are plugins that govern and enforce how the cluster is used. They can be thought of as a gatekeeper that intercept (authenticated) API requests and may change the request object or deny the request altogether.' 
 
-For detailed information, I recommend reading the cited~\cite{K8sAdmissionBlog} source or referring to the official documentation~\cite{K8sAdmissionOfficial}.
+For more in-depth information, I recommend reading the referenced source~\cite{K8sAdmissionBlog} or referring to the official documentation~\cite{K8sAdmissionOfficial}. Alternatively, for a comprehensive yet concise tutorial, I suggest reading the guide on Baeldung~\cite{K8sBaeldung}.
 
-The \ref{fig:dynadm} figure visualizes how webhooks work. 
+The \ref{fig:dynadm} figure visualizes how webhooks work. I extensively utilized this Kubernetes feature to enforce constraints in my thesis work.
 
 \begin{figure}[h]
     \centering
@@ -39,13 +39,6 @@ The \ref{fig:dynadm} figure visualizes how webhooks work.
     \caption{Admission Controller Phases~\cite{K8sAdmissionBlog}}
     \label{fig:dynadm}
 \end{figure}
-
-In my thesis uses these 
-
-\url{https://www.baeldung.com/java-kubernetes-admission-controller}
-\url{https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/}
-
-
 
 \section{Kotlin}
 
@@ -101,3 +94,18 @@ Kotlin is a null-safe language, which means it has native support to address the
 Unfortunately, when calling libraries written in Java, the strict null-safety rules need to be relaxed, as Java does not ensure null safety. In such cases, it is the responsibility of the programmer to handle values as either nullable or null-safe. This presented a significant challenge during my work, requiring the development of strategies to manage unsafe calls in my DSL scripts.
 
 For more information on the relation of Kotlin null-safety and Java interoperability, I recommend reading the official documentation on the topic: \url{https://kotlinlang.org/docs/java-interop.html\#null-safety-and-platform-types}
+
+\section{Terminology}
+
+I named my platform Konstrainer, derived from the word `constraint' with the `er' suffix indicating its role in creating constraints. The choice of `K' as the first letter aligns with the trend seen in many Kotlin and Kubernetes projects.
+
+%Konstrainer, my innovative platform, comprises key components designed to seamlessly enforce constraints in Kubernetes environments.
+
+Konstrainer is a multi-component platform. Here is the explanation of the names of the components:
+
+\begin{itemize}
+  \item \textbf{(Konstrainer) Agent:} It's a web server implementing webhooks and report generators. In alignment with the official Kubernetes definition of admission controller webhooks, it acts as the `piece of code that intercepts requests to the Kubernetes API server'.
+  \item \textbf{(Konstrainer) Core component:} This is the overseeing component of my platform, responsible for supervising the Agents.
+  \item \textbf{Konstrainer DSL:} This is the software library that implements my Domain-Specific Language.
+  \item \textbf{(DSL) script:} A program file created using my DSL to describe the behavior and configuration of an Agent.
+\end{itemize}
