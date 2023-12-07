@@ -6,26 +6,45 @@
 \label{chap:summary}
 %----------------------------------------------------------------------------
 
-\section{Conclusion}
+The objective of my thesis was to develop a framework for effortlessly establishing constraints or policies within the Kubernetes platform. My solution can generate reports and admission controller webhooks, making it an ideal tool for enforcing policies. This solution contributes to enhancing the security, reliability, and maintainability of systems in Kubernetes.
 
 \section{Contribution}
 
-I examied the possibilities of contraint enforcements in Kubernetes, I found the webhooks and generating reports.
+I explored the possibilities of constraint enforcement in Kubernetes, focusing on webhooks and report generation.
 
-Investigated and assessed constraint enforcement options in Kubernetes, with special focus on the admission webhooks.
+I conducted a comprehensive investigation and assessment of constraint enforcement options in Kubernetes, with a particular emphasis on admission controllers.
 
-Designed and implemented a DSL for describing constraints in Kubernetes, by providing
-The DSL provides a structured and efficient means for expressing and managing constraints, contributing to overall system robustness.
+For the practical implementation of constraint descriptions in Kubernetes, I designed and implemented a DSL. This language offers an easy-to-use platform for creating reports and admission controller webhooks.
 
-I designed and implemented a domain specific language capable of describing constraints
+To facilitate the development and deployment of constraints, I designed and implemented a framework. This framework encompasses key functionalities such as the compilation of DSLs, TLS certificate handling, and overall management of agents.
 
-I designed and implemented a framework for developing and and deploying contraints.
-
-I demonstrated the final framework in a true to life case study
+I collected a set of best practices and implemented them in my DSL.
+The final framework was demonstrated through a true-to-live case study. This involved showcasing the motivation, application of basic best practices, and presenting the end result. Additionally, I illustrated how to write new scripts in my DSL.
 
 I evaluated my work and compared it to other solutions.
 
+\section{List of features}
+
+TODO summary feature lista, ezt meg azt tudja
+TODO ábra hogy bejön a request agent-webhook lekezeli kimenetelek
+TODO screenshots of error
+
 \section{Improvement possibilities}
 
+Throughout my thesis, I have highlighted instances where I deemed certain aspects to be underpolished and identified opportunities for improvement. The most significant ones are summarized here:
 
+\begin{itemize}
+\item \textbf{Production ready Helm chart:} While the project provides a Helm chart for application installation, it is not yet production-ready. For instance, some configuration options cannot be set from the values.yaml file.
 
+\item \textbf{Overall code quality improvements:} The evolution of the codebase is noticeable. Streamlining the naming of DSL classes and refactoring some lengthy functions would be beneficial.
+
+\item \textbf{Improve the `webhooks' language feature:} The `webhooks' language feature was developed in the early stages and could be improved to match the design of the `report' language feature.
+
+\item \textbf{Improving security:} While addressing security concerns, I have implemented only the essential measures. However, given that this application runs with high privileges, security could be improved indefinitely. 
+
+\item \textbf{CI/CD integration and versioning of scripts:} It would be nice if engineers could maintain their scripts in version control and automatically synchronize the version in the version control system (VCS) with the version running in the cluster.
+
+\item \textbf{Even faster builds:} A DSL script compilation currently takes about half a minute. With further optimization, I believe it could be reduced to a couple of seconds.
+
+\item \textbf{Multi script serving agents:} With the current implementation, there is a one-to-one relationship between agents and scripts. In the future, I can envision an agent serving multiple scripts. This could facilitate the creation of smaller, more maintainable scripts.
+\end{itemize}
