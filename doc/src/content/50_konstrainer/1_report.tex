@@ -32,7 +32,7 @@ for (ServicePodPairs pair : podsWithServices) {
 \end{lstlisting}
 \end{minipage}
 
-\subsection{Fetching data from k8s}
+\subsection{Fetching data from K8s}
 
 For fetching data, I've created two language features: the imperative `kubectl' and declarative `kubelist' commands. Both commands open a new block in which we can access the Kubernetes API. Inside the block of these commands, everything is executed on an instance of a KubernetesClient class from the fabric8\footnote{fabric8: github.com/fabric8io/kubernetes-client} library. This is an open-source third-party Kubernetes client for Java. In Kotlin terminology, we say that the receiver of the lambda function is the KubernetesClient class.
 

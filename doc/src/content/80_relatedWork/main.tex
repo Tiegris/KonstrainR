@@ -2,7 +2,7 @@
 \setlength{\parskip}{0.6em}
 
 %----------------------------------------------------------------------------
-\chapter{Related works}
+\chapter{Related work}
 \label{chap:relatedWorks}
 %----------------------------------------------------------------------------
 
@@ -10,9 +10,9 @@ This chapter will introduce some similar project and solutions to my work.
 
 \section{Open Policy Agent}
 
-I've heard about the existence of the Open Policy Agent when I was almost finished with the Konstrainer platform, but when I researched it for this chapter, I had to realize that OPA and Konstrainer are basically the same software. They provide the solution to the same problems, with a very similar approach. This section is a comparison between the two projects.
+The Open Policy Agent addresses a similar problem to my Konstrainer project, serving as a platform for describing Kubernetes policies with a similar approach. However, I opted to create my own platform for greater flexibility and automation. The following section provides a comparison between the two projects.
 
-Even dough OPA is an open source project started in 2015, with many active developers and around 400 contributors, there are features in my project that are better, but obviously OPA has more features, they could put more focus on security and over all OPA is more polished.
+Even dough OPA is an open source project started in 2015, with many active developers and around 400 contributors, there are features in my project that are slightly better, but obviously OPA has more features, it is more secure and over all it is more polished.
 
 OPA can declare and enforce policies not just for Kubernetes, but for a variety of platforms and tools, like Terraform and SQL. OPA is better in the sense that one tool can be used to manage everything from the infrastructure level, through the platform level, to the application level. On the other hand, being specific to one platform allows my DSL to be more suited for managing the one platform it is designed for.
 
@@ -26,7 +26,7 @@ Even dough it is easier to learn just a library, in my experience people rather 
 
 How you develop your policies or constraints with the two platform is also different. For OPA, there is a very nice online playground and VS Code extension. Both can be used to effectively develop and debug your scripts. My DSL requires a heavy-duty IDE, like IntelliJ IDEA. Debugging my DSL scripts without deploying the script to a live cluster is also harder. You need to wrap your script execution in a function which reads an input file from the disk, and call the proper function of the compiled server script object.
 
-Both OPA and Konstrainer uses the same concept for Kubernetes policy enforcement. On the language level OPA hides the k8s specific admission controllers a bit better, than my DSL, but under the hood both uses admission controller webhooks.
+Both OPA and Konstrainer uses the same concept for Kubernetes policy enforcement. On the language level OPA hides the K8s specific admission controllers a bit better, than my DSL, but under the hood both uses admission controller webhooks.
 
 The strongest advantage of my platform is the automation of deployment. In both cases, the policy platform can be easily deployed using a couple of commands and a helm chart, however how you deploy a policy is much different. In the Kubernetes tutorial of OPA~\cite{OPA} it is described how to deploy a policy. With OPA you have to manually manage the TLS related keys and certificates required for deploying admission webhooks. Furthermore, the Kubernetes resources like the \emph{Service}, \emph{ClusterRoleBinding}, \emph{ValidatingWebhookConfiguration} and the \emph{Deployment} of the agent must be created by hand. Konstrainer automates these steps, to the extent that deploying a script is just a drag \& drop on the UI. It is worth mentioning that OPA also offers a simplified deployment method using Gatekeeper\footnote{\url{github.com/open-policy-agent/gatekeeper}}. Gatekeeper introduces constraints as Kubernetes custom resources. With Gatekeeper, deploying a policy is just creating a Kubernetes resource which includes the OPA Rego script as a string.
 
@@ -34,14 +34,14 @@ OPA also has a reporting feature. What is much better in OPA's reporting feature
 
 Both OPA and Konstrainer have some built in policies which can be used out of the box. However, OPA has more since it is much larger project.
 
-In summary OPA is a much larger ecosystem, it supports more platforms, has more features, and it is more polished. On the other hand it is much easier to deploy and manage policies using Konstrainer.
+In summary OPA is a much larger ecosystem, it supports more platforms, has more features, and it is more polished. On the other hand it is easier to deploy and manage policies using Konstrainer.
 
 \section{Kyverno}
 
 Kyverno describes itself on their GitHub page like so:
 `Kyverno is a policy engine designed for Kubernetes. It can validate, mutate, and generate configurations using admission controls and background scans. Kyverno policies are Kubernetes resources and do not require learning a new language.'~\cite{Kyverno}
 
-Kyverno takes on interesting approach to the problem. Instead of creating a language, it uses custom Kubernetes resources to describe policies. However, to describe k8s resources, the best way is to create YAML files. These YAML files are specific to describing policies, so basically Kyverno uses a YAML based DSL.
+Kyverno takes on interesting approach to the problem. Instead of creating a language, it uses custom Kubernetes resources to describe policies. However, to describe K8s resources, the best way is to create YAML files. These YAML files are specific to describing policies, so basically Kyverno uses a YAML based DSL.
 
 Kyverno can essentially do the same as OPA and Konstrainer, but it has an additional feature. Kyverno can also be used to create or delete resources. Konstrainer can do that too, however I do not think that policy enforcer tools should automatically delete resources, so I advise against it. In the Kyverno quick start documentation~\cite{KyvernoQuick}, there is an example which shows how to create image pull secrets in all newly created namespaces. Konstrainer can also do this, but I didn't intend this to be a primary use-case.
 

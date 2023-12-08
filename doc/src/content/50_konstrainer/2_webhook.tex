@@ -171,7 +171,7 @@ behavior {
 }
 \end{lstlisting}
 
-The next optional part of the response is the patch. It is two fields in the \emph{AdmissionResponse} k8s object, but in the DSL it is encapsulated in a single keyword, as the patchType field is either empty or has the value `JSONPatch', so it is handled automatically by the framework. 
+The next optional part of the response is the patch. It is two fields in the \emph{AdmissionResponse} K8s object, but in the DSL it is encapsulated in a single keyword, as the patchType field is either empty or has the value `JSONPatch', so it is handled automatically by the framework. 
 
 JSON Patch is a standard used to describe small changes to a JSON document~\cite{JSONPatch}. A JSON Patch document is a JSON document containing a list of patch operations. The patch operations supported by the standard are “add”, “remove”, “replace”, “move”, “copy” and “test”.
 

@@ -22,7 +22,9 @@ While it is possible to automatically fix violating resources during a report, I
 
 \section{Domain specific languages}
 
-When designing a Domain Specific Language (DSL), several critical questions must be addressed early in the development process:
+A Domain-Specific Language (DSL) is a programming language with a higher level of abstraction optimized for a specific field~\cite{JetBrainsDSLs}. In my case, the specific field is policy definition, and the abstraction aims to conceal the complexity involved in policy enforcement.
+
+When designing a DSL, several critical questions must be addressed early in the development process:
 
 \begin{itemize}
     \item \textbf{Expression Scope:} What kind of concepts or entities should the language express? For this DSL, the scope extends to creating reports on Kubernetes resources and describing the configuration and behavior of Kubernetes admission webhooks. Deciding on the scope and purpose of the DSL helps define its boundaries.
