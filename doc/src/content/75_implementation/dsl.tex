@@ -7,6 +7,7 @@ This section explains how I created the Konstrainer DSL. I won't explain the det
 
 My DSL has three mayor concepts: blocks, properties, and setter functions. The code snippet \ref{code:lang1} explains what they are and provides an example for each.
 
+\begin{minipage}{\linewidth}
 \begin{lstlisting}[caption={Language concepts},language=Kotlin,label=code:lang1]
 // The car keyword opens a new block
 car { 
@@ -16,6 +17,7 @@ car {
   // The block of the car keyword ends here
 }
 \end{lstlisting}
+\end{minipage}
 
 Properties and setter functions usually can only be used within the context of a block. This is how it makes sense in the language, for example you can set the color of the car, but it does not make sense to set the color of the top level world. Additionally, the implementation of a block also restricts where other keywords can be used.
 
@@ -25,6 +27,7 @@ The \ref{code:lang1} example can be implemented similarly like in the \ref{code:
 
 Most blocks follow the same pattern. There is builder function: `car' in this case, whose last argument is an extension method on a builder class, in this case the `CarBuilder.' Newly accessible keywords in the `car' block are all member functions or properties of the builder class. Lastly, there is a model class, specifically the `CarModel' which holds all the necessary data for a car in this case. The builder function always has an internal build function, making it inaccessible to the DSL user, and it returns an instance of the model class.
 
+\begin{minipage}{\linewidth}
 \begin{lstlisting}[caption={Basic idea behind a block},language=Kotlin,label=code:lang2]
 class CarModel(val color: String)
 class CarBuilder {
@@ -36,11 +39,13 @@ fun car(setup: CarBuilder.() -> Unit): CarModel {
   ...
 }
 \end{lstlisting}
+\end{minipage}
 
 There are two kinds of blocks. The first kind simply describes a configuration or calculates a value, like the `namespaceSelector' or `webhookConfigBundle'. The other describes a complex behavior, which can only be evaluated at certain events, for example the `report', `kubectl' and `behavior' blocks. I refer to the first group as `startup-time' evaluated blocks because a model object can be built without an input. This typically occurs when the agent running the script starts up. I call the second group as `runtime-evaluated blocks' because an input is required to evaluate them, such as a webhook request, or a Kubernetes client.
 
 The pattern I'm using for the startup-time block has a name, it is the Type-safe builders~\cite{TypeSafeBuilders} pattern. The \ref{code:lang3} code snippet highlights the most important elements of the pattern.
 
+\begin{minipage}{\linewidth}
 \begin{lstlisting}[caption={Type-safe builders example},language=Kotlin,label=code:lang3]
 typealias CarBuilderFunction = CarBuilder.() -> Unit
 class CarModel(...)
@@ -60,9 +65,11 @@ fun car(setup: CarBuilderFunction): CarModel {
 // This is tha same, but shorter
 fun car(setup: CarBuilderFunction) = CarBuilder().apply(setup).build()
 \end{lstlisting}
+\end{minipage}
 
 Runtime-evaluated blocks are created differently. Their builder functions don't call the `build' function of the builder class, because the input required to create the model does not exist yet. I will use the `report' block to explain how they are implemented.
 
+\begin{minipage}{\linewidth}
 \begin{lstlisting}[caption={Builder function of the report block},language=Kotlin,label=code:runtimeblock0]
 class ServerModel(..., val _report: ReportProviderFunction?)
 class ServerBuilder {
@@ -73,9 +80,11 @@ class ServerBuilder {
   internal fun build() = Server(..., _report)
 }
 \end{lstlisting}
+\end{minipage}
 
 The \ref{code:runtimeblock0} snippet shows how the builder function of a runtime block, specifically the `report' block looks like. The `build' function is not called here; instead, the behavior lambda is stored in a variable of the parent block. The invocation of the `build' function is moved to the code of the agent. This isn't how it is actually implemented, but the \ref{code:runtimeblock1} gives the basic idea of how it could be implemented. Here, the input data is a Kubernetes client, and it is passed to the constructor of the builder class.
 
+\begin{minipage}{\linewidth}
 \begin{lstlisting}[caption={Build a report},language=Kotlin,label=code:runtimeblock1]
 fun generateReport(
     k8s: KubernetesClient, 
@@ -86,19 +95,20 @@ fun generateReport(
   return builder.build()
 }
 \end{lstlisting}
+\end{minipage}
 
 The \ref{code:runtimeblock2} snippet show the implementation of the builder class and the provider.
 
+\begin{minipage}{\linewidth}
 \begin{lstlisting}[caption={Report builder class and provider},language=Kotlin,label=code:runtimeblock2]
 typealias ReportProviderFunction = ReportBuilder.() -> Unit
 class ReportBuilder(private val k8s: KubernetesClient) {
   // All the child keywords of the report block
   ...
-  fun build(): Report {
-    ...
-  }
+  fun build(): Report { ... }
 }
 \end{lstlisting}
+\end{minipage}
 
 The actual implementations of the runtime-evaluated blocks vary in the codebase due to the evolution of the DSL. Still, this section explains the core idea. It could be a potential future improvement to streamline the implementation of each block.
 
@@ -106,6 +116,7 @@ The actual implementations of the runtime-evaluated blocks vary in the codebase 
 
 All properties can only be set once, or in the case of setter functions, invoked once. This is to avoid inadvertent overwrites and to enhance script readability. The enforcement of this language constraint is carried out through the `setExactlyOnce' and 7setMaxOnce' property delegates. Kotlin has unique a feature called property delegates, which enables to define a custom behavior to a set of properties. This custom behavior can be added to a library, eliminating the need to copy and paste the behavior into every getter and setter. Instead, you simply utilize the delegate. For detailed information, read the official Kotlin documentation on the topic: \url{https://kotlinlang.org/docs/delegated-properties.html}. Here, I will just show a small example and explain how my custom property delegates work.
 
+\begin{minipage}{\linewidth}
 \begin{lstlisting}[caption={Lazy getter in Java},language=Java,label=code:lazy0]
 class A {
   private String foo;
@@ -115,23 +126,24 @@ class A {
     return foo;
   }
 }
-\end{lstlisting}
-    
+\end{lstlisting}    
+\end{minipage}
+
+\begin{minipage}{\linewidth}
 \begin{lstlisting}[caption={Lazy property in Kotlin},language=Kotlin,label=code:lazy1]
 class A {
   val foo by lazy(::calculateFoo)
 }
 \end{lstlisting}
+\end{minipage}
 
 The \ref{code:lazy0} and \ref{code:lazy1} code snippets illustrates how the lazy\footnote{\url{https://en.wikipedia.org/wiki/Lazy_initialization}} behavior can be implemented in Java and in Kotlin. The lazy behavior involves delaying the calculation of a value until it is read, after which it is cached. The Java code snippet shows the issue. When implementing custom behavior for a getter, it must be written each time for every getter with the same behavior. In Kotlin, this behavior can be delegated, making the code not only less bloated but also less prone to copy and paste errors.
 
-\begin{minipage}{\linewidth}
 \begin{lstlisting}[caption={setExactlyOnce implementation},language=Kotlin,label=code:setonce]
 class setExactlyOnce<T : Any>() : ReadWriteProperty<Any, T> {
   constructor(default: T?) : this() {
     _value = default
   }
-
   private var _alreadySet = false
   private var _value: T? = null
 
@@ -140,7 +152,6 @@ class setExactlyOnce<T : Any>() : ReadWriteProperty<Any, T> {
       "Property ${property.name} not set."
     )
   }
-
   override fun setValue(thisRef: Any, property: KProperty<*>, value: T) {
     if (_alreadySet)
       throw MultipleSetException(
@@ -162,7 +173,6 @@ private var behavior: WebhookBehaviorProvider by setExactlyOnce()
 private var _operations: Array<out String>
     by setExactlyOnce(defaults.operations)
 \end{lstlisting}
-\end{minipage}
 
 The \ref{code:setonce} code snippet demonstrates how the `setExactlyOnce' property delegate is implemented. To fully understand why this seemingly complicated syntax was needed, read the official documentation which explains it in detail. What's important here is, that there is an optional default value which can be set when creating a property. The default value is stored in a private backing field: `\_value', which is null, in case there is no default value. 
 
@@ -180,6 +190,7 @@ The language has unique keywords for JSON parsing. They do not fall into the mai
 
 In Kotlin there are infix functions. You can add the `infix' modifier to an extension function to make it callable using the infix notation. See the \ref{code:infix} code snippet for an example or read the official documentation for more details: \url{https://kotlinlang.org/docs/functions.html#infix-notation}
 
+\begin{minipage}{\linewidth}
 \begin{lstlisting}[caption={Infix functions},language=Kotlin,label=code:infix]
 infix fun Int.plus(that: Int): Int {
   return this + that
@@ -188,9 +199,11 @@ infix fun Int.plus(that: Int): Int {
 val x = 5 plus 6  // Infix notation
 val y = 5.plus(6) // This does the same as above
 \end{lstlisting}
+\end{minipage}
 
 The second concept you must understand is treating objects as tokens. Objects can be utilized in various ways, but what's important for this section is their ability to create special tokens. You can define two functions with the same name but different arguments. If these arguments are of this kind of tokens, they can be used for pattern matching as shown in the \ref{code:patternobj} code snippet.
 
+\begin{minipage}{\linewidth}
 \begin{lstlisting}[caption={Pattern matching},language=Kotlin,label=code:patternobj]
 object Token1
 object Token2
@@ -206,9 +219,11 @@ val x = Token2
 foo(x)      // Runs the second foo function
 foo(Token1) // Runs the first foo function
 \end{lstlisting}
+\end{minipage}
 
 Combining these Kotlin language features can be used to create fluent, natural language-like constructs. The \ref{code:parseAs} code snippet demonstrates how these language concepts are employed to implement the JSON parsing aspects of the Konstrainer DSL.
 
+\begin{minipage}{\linewidth}
 \begin{lstlisting}[caption={JSON parsing implementation},language=Kotlin,label=code:parseAs]
 infix fun JsonElement.jqx(selector: String): JsonElement {
   ...
@@ -228,5 +243,6 @@ infix fun JsonElement.parseAs(type: string): String? = nullGuard { ... }
 // Usage:
 val x = jsonElement jqx "/foo/bar" parseAs string
 \end{lstlisting}
+\end{minipage}
 
 `jqx' is an infix function with a return type of JsonElement. `parseAs' is also an infix function with the type JsonElement as a receiver, so `jqx' and `parseAs' commands can be chained. There is a token created for every the primitive types that can occur in a JSON, and there is a corresponding `parseAs' function for each token. This setup facilitates the extraction of all types from a JSON structure. The `nullGuard' is a private function that return null if the conversion can not happen, for instance, due to a type mismatch or non-existing JSON field. Otherwise, it returns the converted value. The conversion function is defined in its block.
