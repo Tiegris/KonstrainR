@@ -181,7 +181,7 @@ The \ref{code:json_patch_1} code snippet shows an example JSON Patch. A patch ob
 \begin{lstlisting}[caption={JSON Patch example},language=JSON,label=code:json_patch_1]
 [
   { "op": "replace", "path": "/lorem", "value": "ipsum" },
-  { "op": "add", "path": "/dolor", "value": ["sit", "amet"] },
+  { "op": "add", "path": "/dolor", "value": ["sit", "amet"] }
 ]
 \end{lstlisting}
 
@@ -198,11 +198,11 @@ patch {
 
 The `add' and `replace' operations accept \emph{String}, \emph{Number} and \emph{JsonElement} as the second argument. For the rest of the operations it does not make sense to support anything else than \emph{String}s.
 
-The framework automatically assembles the standard compliant JSON Patch based on the instructions in the DSL script. The resulting patch is also added as an annotation to the patched resources in a base64 encoded format, so it is clear whether a resource got patched or not. To read the patch applied to a resource run the following command: \lstinline*kubectl get <resurce> -o yaml | yq '.metadata.annotations.ksr-patch' | base64 --decode*
+The framework automatically assembles the standard compliant JSON Patch based on the instructions in the DSL script. The resulting patch is also added as an annotation to the patched resources in a base64 encoded format, so it is clear whether a resource got patched or not. To read the patch applied to a resource run the following command: \lstinline*kubectl get <resource> -o yaml | yq '.metadata.annotations.ksr-patch' | base64 --decode*
 
-The last feature in the response is the warning. Use the `warning' keyword to open a new block where you can list your warnings. Within the scope of the `warning' block use the `warning' keyword to raise a warning. The `warning' keyword takes only one argument: the message of the warning. To make it conditional, use the build-in language features of Kotlin, such as the `if' statement. The \ref{code:warning} code snippet provides an example of how to use warnings.
+The last feature in the response is the warning. Use the `warning' keyword to open a new block where you can list your warnings. Within the scope of the `warning' block use the `warning' keyword to raise a warning. The `warning' keyword takes only one argument: the message of the warning. To make it conditional, use the built-in language features of Kotlin, such as the `if' statement. The \ref{code:warning} code snippet provides an example of how to use warnings.
 
-\begin{lstlisting}[caption={JSON Patch using DSL},language=Kotlin,label=code:warning]
+\begin{lstlisting}[caption={Usage of warnings},language=Kotlin,label=code:warning]
 behavior {
   val condition = /*Custom boolean expression*/
   warnings {
