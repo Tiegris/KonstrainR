@@ -207,9 +207,9 @@ foo(x)      // Runs the second foo function
 foo(Token1) // Runs the first foo function
 \end{lstlisting}
 
-Combining these Kotlin language features can be used to create fluent, natural language-like constructs. The \ref{code:jqx} code snippet demonstrates how these language concepts are employed to implement the JSON parsing aspects of the Konstrainer DSL.
+Combining these Kotlin language features can be used to create fluent, natural language-like constructs. The \ref{code:parseAs} code snippet demonstrates how these language concepts are employed to implement the JSON parsing aspects of the Konstrainer DSL.
 
-\begin{lstlisting}[caption={jqx implementation},language=Kotlin,label=code:jqx]
+\begin{lstlisting}[caption={JSON parsing implementation},language=Kotlin,label=code:parseAs]
 infix fun JsonElement.jqx(selector: String): JsonElement {
   ...
 }

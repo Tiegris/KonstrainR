@@ -25,7 +25,28 @@ I evaluated my work and compared it to other solutions.
 
 \section{List of features}
 
-TODO summary feature lista, ezt meg azt tudja
+The final product has numerous features, including a Domain-Specific Language and a complete framework for it. The language is capable of describing:
+
+\begin{itemize}
+    \item Custom reports in Kubernetes
+    \item Custom admission controllers in Kubernetes, which includes:
+    \subitem Rejecting requests based on custom logic
+    \subitem Creating custom warnings
+    \subitem Modifying a request
+\end{itemize}
+
+With these features, it becomes possible to articulate constraints and identify violations.
+
+The framework is equipped to:
+
+\begin{itemize}
+    \item Compiling the scripts written in the DSL
+    \item Execute scripts written in the DSL, involving:
+    \subitem Creation of custom reports in Kubernetes and presenting them in a summarized view
+    \subitem Creation and configuration of custom admission controllers
+    \subitem Management of all Kubernetes-related configurations for admission controllers
+    \subitem Handling all TLS-related configurations for admission controllers
+\end{itemize}
 
 \section{Improvement possibilities}
 

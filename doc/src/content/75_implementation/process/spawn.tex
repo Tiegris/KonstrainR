@@ -17,6 +17,7 @@ After a new certificate is created, the next step is to execute the compiled scr
 
 In the \ref{fig:start1} diagram, the steps of spawning an agent are not detailed; instead, these steps are abstracted by the `spawnAgent' function. The \ref{code:start2} pseudocode better summarizes the steps of the `spawnAgent' function than a sequence diagram.
 
+\begin{minipage}{\linewidth}
 \begin{lstlisting}[caption={Spawning of an agent},language=Kotlin,label=code:start2]
 val server = executeScript(compiledDsl)
 
@@ -35,6 +36,7 @@ k8s.create(dep)
 k8s.create(svc)
 ...
 \end{lstlisting}
+\end{minipage}
 
 First, a Kubernetes \emph{Secret} resource is created with the certificates and keys needed for the Agent. This will be mounted to the \emph{Deployment}.
 After that, a \emph{Deployment} and a \emph{Service} object are created locally using the configuration from the server object. If the server has the `clusterRole' keyword set, a \emph{ServiceAccount} and a \emph{ClusterRoleBinding} are created as well, and the previously created \emph{Deployment} is set to use the \emph{ServiceAccount}. After that, the \emph{Deployment} and the \emph{Service} are created on the cluster too.
@@ -43,6 +45,7 @@ The creation of the \emph{Deployment} does not imply that the agent is ready to 
 
 The \ref{code:start3} pseudocode shows how the startup of the agent is awaited, and what additional steps are done.
 
+\begin{minipage}{\linewidth}
 \begin{lstlisting}[caption={Spawning of an agent},language=Kotlin,label=code:start3]
 ...
 try {
@@ -60,6 +63,7 @@ if (success) {
   setDslStatus(id, "Error")
 }
 \end{lstlisting}
+\end{minipage}
 
 If the agent becomes available before the timeout, the \emph{MutatingWebhookConfiguration} is created too. Otherwise, a rollback is performed, deleting all the previously created resources.
 
