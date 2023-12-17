@@ -6,11 +6,11 @@
 \label{chap:konst_dsl}
 %----------------------------------------------------------------------------
 
-This chapter will introduce my domain-specific language (DSL) created for enforcing Kubernetes constraints. Every keyword and language feature will be discussed with examples. I'll explain how to use the language, and if needed, provide explanations on why to use it in a particular way. However, I will not delve deep into the implementation details. The ideas behind the implementation are detailed in Chapter \ref{sec:dsl}~\nameref{sec:dsl}.
+This chapter will introduce my domain-specific language (DSL) created for enforcing Kubernetes constraints. Every keyword and language feature will be discussed with examples. I will explain how to use the language, and if needed, provide explanations on why to use it in a particular way. However, I will not delve deep into the implementation details. The ideas behind the implementation are detailed in Chapter \ref{sec:dsl}~\nameref{sec:dsl}.
 
 \section{Top level}
 
-The main top level keyword is the `server', which declares a new agent. An agent is essentially a web server capable of creating reports and implementing Kubernetes admission webhooks. It is called that, because a web server is generated from it. This keyword takes one argument, its unique name, which must be in kebab-case\footnote{kebab-case: \url{developer.mozilla.org/en-US/docs/Glossary/Kebab_case}}, and opens a block. To be precise, it takes two arguments. The second argument is a lambda, but in this context, it is more convenient to refer to the last lambda argument of the `server' keyword as the `block of the server keyword' or the `server block.' I will use this terminology whenever referring to the last lambda argument of a function.
+The main top level keyword is the `server', which declares a new agent. An agent is essentially a web server capable of creating reports and implementing Kubernetes admission webhooks. It is called that, because a web server is generated from it. This keyword takes one argument, its unique name, which must be in kebab-case\footnote{kebab-case: \url{https://developer.mozilla.org/en-US/docs/Glossary/Kebab_case}}, and opens a block. To be precise, it takes two arguments. The second argument is a lambda, but in this context, it is more convenient to refer to the last lambda argument of the `server' keyword as the `block of the server keyword' or the `server block.' I will use this terminology whenever referring to the last lambda argument of a function.
 
 For the code to compile, we also need to import the DSL library, and define a package. The \ref{code:server_boilerplate} code snippet shows the basic template of an agent.
 

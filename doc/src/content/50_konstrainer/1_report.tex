@@ -34,7 +34,7 @@ for (ServicePodPairs pair : podsWithServices) {
 
 \subsection{Fetching data from K8s}
 
-For fetching data, I've created two language features: the imperative `kubectl' and declarative `kubelist' commands. Both commands open a new block in which we can access the Kubernetes API. Inside the block of these commands, everything is executed on an instance of a KubernetesClient class from the fabric8\footnote{fabric8: github.com/fabric8io/kubernetes-client} library. This is an open-source third-party Kubernetes client for Java. In Kotlin terminology, we say that the receiver of the lambda function is the KubernetesClient class.
+For fetching data, I've created two language features: the imperative `kubectl' and declarative `kubelist' commands. Both commands open a new block in which we can access the Kubernetes API. Inside the block of these commands, everything is executed on an instance of a KubernetesClient class from the fabric8\footnote{fabric8: https://github.com/fabric8io/kubernetes-client} library. This is an open-source third-party Kubernetes client for Java. In Kotlin terminology, we say that the receiver of the lambda function is the KubernetesClient class.
 
 Both commands are exception-safe, meaning if an error occurs inside their block or during the Kubernetes API call, they return a default value and include the error in the report instead of causing the entire report to fail. The default return value for `kubelist' is an empty list, for `kubectl' it is null. They are also null-safe. `kubelist' always returns a list of non-null values, and the list itself is never null. Although `kubectl' can return a null value, it is marked nullable, so the built-in null safety of Kotlin ensures that it is used only safely.
 
@@ -112,7 +112,7 @@ val serviceHasPods = podLabels.any { podLabel ->
 
 It is complex, and I admit it. However, this complexity is inherent at the mathematical level. Expressing the formula that determines whether a service has pods involves intricate mathematical precision, requiring first-order logic. This complexity can be challenging, especially in the context of the already intricate Kubernetes infrastructure.
 
-For data manipulation and resource associations, I didn't introduce anything new; instead, I relied on the extension methods of collections from the Kotlin standard library\footnote{\url{kotlinlang.org/docs/collection-transformations.html}}. These functions are excellent for data processing, and I extensively used them during the creation of the case study.
+For data manipulation and resource associations, I didn't introduce anything new; instead, I relied on the extension methods of collections from the Kotlin standard library\footnote{https://kotlinlang.org/docs/collection-transformations.html}}. These functions are excellent for data processing, and I extensively used them during the creation of the case study.
 
 \subsection{Aggregation groups}
 

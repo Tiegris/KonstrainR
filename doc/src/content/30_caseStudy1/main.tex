@@ -11,7 +11,7 @@ Their application is still a work in progress, with limited functionality - it s
 
 I have prepared the demo application of the fictional company, and made it publicly available on GitHub:
 \url{https://github.com/Tiegris/KonstrainR/tree/main/main/DemoApp}.
-Readers can download it, try it out, and follow along with this demonstration. If you do not wish to check out the repository, the referenced resource files can also be found in the appendix.
+Readers can download it, try it out, and follow along with this demonstration. If you do not wish to check out the repository, the referenced resource files can also be found in the \nameref{chap:appendix}.
 
 Requirements:
 
@@ -19,10 +19,10 @@ Requirements:
     \item Docker
     \item Playground Kubernetes cluster (Tested with version: v1.27.2)
     \item Helm
-    \item yq (Tested with version: (\url{github.com/mikefarah/yq/}) version 4.18.)
+    \item yq (Tested with version: (\url{https://github.com/mikefarah/yq/}) version 4.18.)
 \end{itemize}
 
-The demo was tested on Ubuntu 22 using bash.
+The demo was tested on Ubuntu 22 using Bash.
 
 If you follow along, make sure that you are in the \emph{main/DemoApp} folder of the repository.
 
@@ -72,7 +72,7 @@ kubectl apply -n ired-test -f $home/k8s/junk.yaml
 \end{lstlisting}
 \end{minipage}
 
-The developers decided that they want to use a NoSQL database. They searched the internet, and one of the first search results was this: \url{bitnami.com/stack/mongodb/helm}. This website shows a command that looks like it deploys a MongoDB. The engineers tested it, and it worked. They did not bother with reading the documentation or properly configuring the database; there was no time for that. The \ref{code:bash5b} snippet shows how they used the code from the website.
+The developers decided that they want to use a NoSQL database. They searched the internet, and one of the first search results was this: \url{https://bitnami.com/stack/mongodb/helm}. This website shows a command that looks like it deploys a MongoDB. The engineers tested it, and it worked. They did not bother with reading the documentation or properly configuring the database; there was no time for that. The \ref{code:bash5b} snippet shows how they used the code from the website.
 
 \begin{lstlisting}[caption={Deploy MongoDB},language=mybash,label=code:bash5b]
 kubectl create ns mongo
@@ -240,7 +240,7 @@ Now that we've addressed the node affinity problem, upon retrying, we encounter 
 
 Setting resource limits and requests is a standard practice. In short, a cluster can work just fine without them, but neglecting them can result in stability issues~\cite{ResourcesGood}. For a more in-depth explanation, I recommend reading the cited source.
 
-In a real-world scenario, to determine the correct resource settings, we should first make an estimate and refine it with measurements. Since this is just a demo, setting an estimate is fine. The \ref{code:basha7} shows how to set them.
+In a real-world scenario, to determine the correct resource settings, we should first make an estimate and refine it with measurements. Since this is just a demo, setting an estimate is fine. Code snippet \ref{code:basha7} shows how to set them.
 
 \begin{lstlisting}[caption={Setting resources and redeploy the Accounting module},language=mybash,label=code:basha7]
 yq eval 'select(.kind == "Deployment").spec.template.spec.containers[0].resources.limits.cpu = "500m"' k8s/accounting.yaml -i
@@ -264,4 +264,4 @@ Upon inspecting the newly created deployment, we can observe that the revisionHi
 
 In this chapter, I presented the motivation behind the Konstrainer project by highlighting some common and easily overlooked mistakes. Following that, I demonstrated the power of the Konstrainer platform and showcased the capabilities of my pre-made scripts for enforcing best practices. 
 
-The next chapter interrupts the case study to provide a detailed explanation of my DSL. Understanding the core concepts and language features is crucial for the upcoming sections of the case study, which will be continued in Chapter \ref{chap:case_study2}~\nameref{chap:case_study2}.
+The next chapter interrupts the case study to provide a detailed explanation of my DSL. Understanding the core concepts and language features is crucial for the upcoming sections of the case study, which will be continued in Chapter \ref{chap:case_study2},~\nameref{chap:case_study2}.

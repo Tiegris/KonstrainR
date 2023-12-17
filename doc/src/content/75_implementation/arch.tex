@@ -36,13 +36,11 @@ Let's talk about why the compiled script is stored in a database in JAR format.
 
 First of all, caching the compiled DSL scripts is crucial. Since scripts are compiled to JVM bytecode using Gradle, the compilation process can take some minutes. Compiling a DSL before each launch of an agent would significantly increase the startup time of the agent. A lengthy startup time would result in a relatively long outage when the \emph{Pod} of an already existing agent gets destroyed. To circumvent this, compiled scripts are cached.
 
-There are two reasons why the compiled scripts are stored in a database. Firstly, it was easier to implement. Secondly it has better performance, since compiled script JARs are very small. For example the BasicDiagnostics.kt script used in the case study compiles to an only 60 KiB big JAR.
-
 There are two reasons why the compiled scripts are stored in a database. Firstly, it was easier to implement. Secondly, it offers better performance since compiled script JARs are very small. For example, the BasicDiagnostics.kt script used in the case study compiles to a JAR that is only 60K in size. According to a~\cite{DbSmall} report from Microsoft, objects smaller than 256K are best stored in a database.
 
 \subsubsection{UI and persistence}
 
-The web UI is implemented within the Core component. While logically a separate component that can be turned off with configuration, it is not technically separated. I implemented it with the kotlinx.html library, which offers a type-safe DSL for creating HTML documents in Kotlin. How exactly I implemented it is not that interesting, so I will not delve into details. The specific implementation details are not emphasized here for brevity. For more information, you can refer to the official documentation: \url{https://kotlinlang.org/docs/typesafe-html-dsl.html} or explore the project repository to examine the code firsthand.
+The web UI is implemented within the Core component. While logically a separate component that can be turned off with configuration, it is not technically separated. I implemented it with the kotlinx.html library, which offers a type-safe DSL for creating HTML documents in Kotlin. The specific implementation details are not emphasized here for brevity. For more information, you can refer to the official documentation: \url{https://kotlinlang.org/docs/typesafe-html-dsl.html} or explore the project repository to examine the code firsthand.
 
 The Konstrainer DB is also just logically considered a separate component. For simplicity, I utilized a built-in database that stores data in a single file within the Core component's container. However, the data is saved onto a persistent volume, ensuring persistence between \emph{Pod} restarts.
 

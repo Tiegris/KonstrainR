@@ -114,7 +114,7 @@ The actual implementations of the runtime-evaluated blocks vary in the codebase 
 
 \subsection{`setExactlyOnce' and `setMaxOnce'}
 
-All properties can only be set once, or in the case of setter functions, invoked once. This is to avoid inadvertent overwrites and to enhance script readability. The enforcement of this language constraint is carried out through the `setExactlyOnce' and 7setMaxOnce' property delegates. Kotlin has unique a feature called property delegates, which enables to define a custom behavior to a set of properties. This custom behavior can be added to a library, eliminating the need to copy and paste the behavior into every getter and setter. Instead, you simply utilize the delegate. For detailed information, read the official Kotlin documentation on the topic: \url{https://kotlinlang.org/docs/delegated-properties.html}. Here, I will just show a small example and explain how my custom property delegates work.
+All properties can only be set once, or in the case of setter functions, invoked once. This is to avoid inadvertent overwrites and to enhance script readability. The enforcement of this language constraint is carried out through the `setExactlyOnce' and `setMaxOnce' property delegates. Kotlin has unique a feature called property delegates, which enables to define a custom behavior to a set of properties. This custom behavior can be added to a library, eliminating the need to copy and paste the behavior into every getter and setter. Instead, you simply utilize the delegate. For detailed information, read the official Kotlin documentation on the topic: \url{https://kotlinlang.org/docs/delegated-properties.html}. Here, I will just show a small example and explain how my custom property delegates work.
 
 \begin{minipage}{\linewidth}
 \begin{lstlisting}[caption={Lazy getter in Java},language=Java,label=code:lazy0]
@@ -174,7 +174,7 @@ private var _operations: Array<out String>
     by setExactlyOnce(defaults.operations)
 \end{lstlisting}
 
-The \ref{code:setonce} code snippet demonstrates how the `setExactlyOnce' property delegate is implemented. To fully understand why this seemingly complicated syntax was needed, read the official documentation which explains it in detail. What's important here is, that there is an optional default value which can be set when creating a property. The default value is stored in a private backing field: `\_value', which is null, in case there is no default value. 
+The \ref{code:setonce} code snippet demonstrates how the `setExactlyOnce' property delegate is implemented. To fully understand why this seemingly complicated syntax was needed, read the official documentation\footnote{\url{https://kotlinlang.org/docs/delegated-properties.html}} which explains it in detail. What's important here is, that there is an optional default value which can be set when creating a property. The default value is stored in a private backing field: `\_value', which is null, in case there is no default value. 
 
 When the value is set, the delegate checks the `\_alreadySet' flag. If it is true, an exception is raised; otherwise, it sets the value and the flag. The inclusion of the flag is necessary because a simple null check cannot differentiate between an already set value and a default value.
 
