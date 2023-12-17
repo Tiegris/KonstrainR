@@ -108,7 +108,7 @@ Inside the `try\_compile' function, most commands are executed following the sam
 
 This pattern ensures that if the command succeeds, the fact of the success is logged. If the command returns a non-zero status code, it logs the failure, and invokes the `error\_report' function. The curly brackets are crucial because they do not create a new subshell. This means that the `exit 1' inside the `error\_report' will exit the entire scrip, instead of just exiting a subshell.
 
-The call of the Gradle build on line 14 is unique. The \lstinline*./gradlew jar >> $logsfile 2>&1* bash magic appends the standard output (stdout) and the standard error (stderr) to the logsfile.
+The call of the Gradle build on line 14 is unique. The \lstinline*./gradlew jar >> $logsfile 2>&1* Bash magic appends the standard output (stdout) and the standard error (stderr) to the logsfile.
 
 \subsubsection{Builder job cleanup loop}
 
