@@ -1,5 +1,7 @@
 # AppleFruits inc. demo
 
+> NOTE: This file is outdated. The updated version of this demo can be found in the thesis.
+
 This is a demonstration on the capabilities of the Konstrainer application through the story of a fictional company: AppleFruits inc.
 
 ## Background tale
